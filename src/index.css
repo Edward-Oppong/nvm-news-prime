@@ -1,0 +1,361 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+
+@layer base {
+  :root {
+    /* NVM News - Modern & Clean Design System */
+    /* Neutral base with bold accent for clean editorial look */
+    --background: 0 0% 100%;
+    --foreground: 220 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    /* Bold teal accent - modern, trustworthy */
+    --primary: 172 66% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Deep navy secondary */
+    --secondary: 220 40% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Warm accent for engagement/CTAs */
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 220 10% 96%;
+    --muted-foreground: 220 10% 45%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 172 66% 35%;
+
+    --radius: 0.5rem;
+
+    /* Editorial tokens */
+    --headline: 220 20% 10%;
+    --subheadline: 220 15% 30%;
+    --meta: 220 10% 50%;
+    --divider: 220 15% 92%;
+    --surface-elevated: 0 0% 100%;
+
+    /* Category colors - vibrant but harmonious */
+    --category-politics: 215 85% 50%;
+    --category-business: 172 60% 38%;
+    --category-tech: 265 70% 55%;
+    --category-culture: 340 75% 55%;
+    --category-sports: 25 90% 52%;
+    --category-opinion: 220 20% 35%;
+
+    /* Breaking news - urgent orange/red */
+    --breaking: 15 95% 55%;
+    --breaking-foreground: 0 0% 100%;
+
+    /* Success/Live indicators */
+    --success: 145 65% 42%;
+    --live: 0 85% 55%;
+
+    /* Typography */
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+
+    /* Refined shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.12);
+    --shadow-card: 0 2px 8px -2px rgb(0 0 0 / 0.06);
+    --shadow-glow: 0 0 20px -4px hsl(172 66% 35% / 0.3);
+
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 220 15% 20%;
+    --sidebar-primary: 172 66% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 10% 96%;
+    --sidebar-accent-foreground: 220 15% 15%;
+    --sidebar-border: 220 15% 92%;
+    --sidebar-ring: 172 66% 40%;
+  }
+
+  .dark {
+    --background: 220 20% 8%;
+    --foreground: 220 10% 92%;
+
+    --card: 220 20% 10%;
+    --card-foreground: 220 10% 92%;
+
+    --popover: 220 20% 10%;
+    --popover-foreground: 220 10% 92%;
+
+    --primary: 172 60% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 30% 70%;
+    --secondary-foreground: 220 20% 10%;
+
+    --accent: 25 90% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 60%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 172 60% 45%;
+
+    --headline: 220 10% 95%;
+    --subheadline: 220 10% 75%;
+    --meta: 220 10% 55%;
+    --divider: 220 15% 20%;
+    --surface-elevated: 220 20% 12%;
+
+    --breaking: 15 90% 55%;
+    --success: 145 60% 50%;
+    --live: 0 80% 55%;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.4);
+    --shadow-card: 0 2px 8px -2px rgb(0 0 0 / 0.25);
+    --shadow-glow: 0 0 20px -4px hsl(172 60% 45% / 0.4);
+
+    --sidebar-background: 220 15% 10%;
+    --sidebar-foreground: 220 10% 95%;
+    --sidebar-primary: 172 60% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 220 10% 95%;
+    --sidebar-border: 220 15% 15%;
+    --sidebar-ring: 172 60% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    color: hsl(var(--headline));
+  }
+
+  p {
+    color: hsl(var(--foreground));
+    line-height: 1.7;
+  }
+}
+
+@layer components {
+  .headline-xl {
+    font-family: var(--font-serif);
+    @apply text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-tight;
+    color: hsl(var(--headline));
+  }
+
+  .headline-lg {
+    font-family: var(--font-serif);
+    @apply text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight;
+    color: hsl(var(--headline));
+  }
+
+  .headline-md {
+    font-family: var(--font-serif);
+    @apply text-xl md:text-2xl font-medium leading-snug;
+    color: hsl(var(--headline));
+  }
+
+  .headline-sm {
+    font-family: var(--font-serif);
+    @apply text-lg font-medium leading-snug;
+    color: hsl(var(--headline));
+  }
+
+  .subheadline {
+    @apply text-base md:text-lg text-muted-foreground leading-relaxed;
+    color: hsl(var(--subheadline));
+  }
+
+  .meta-text {
+    @apply text-xs md:text-sm font-medium uppercase tracking-wider;
+    color: hsl(var(--meta));
+  }
+
+  .body-text {
+    @apply text-base md:text-lg leading-relaxed;
+    font-family: var(--font-sans);
+  }
+
+  .category-badge {
+    @apply inline-block text-xs font-semibold uppercase tracking-wider px-2 py-1;
+  }
+
+  .category-politics {
+    background: hsl(var(--category-politics) / 0.1);
+    color: hsl(var(--category-politics));
+  }
+
+  .category-business {
+    background: hsl(var(--category-business) / 0.1);
+    color: hsl(var(--category-business));
+  }
+
+  .category-tech {
+    background: hsl(var(--category-tech) / 0.1);
+    color: hsl(var(--category-tech));
+  }
+
+  .category-culture {
+    background: hsl(var(--category-culture) / 0.1);
+    color: hsl(var(--category-culture));
+  }
+
+  .category-sports {
+    background: hsl(var(--category-sports) / 0.1);
+    color: hsl(var(--category-sports));
+  }
+
+  .category-opinion {
+    background: hsl(var(--category-opinion) / 0.1);
+    color: hsl(var(--category-opinion));
+  }
+
+  .divider {
+    @apply border-t;
+    border-color: hsl(var(--divider));
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300;
+  }
+
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+
+  .progress-bar {
+    @apply fixed top-0 left-0 h-[3px] bg-primary z-50;
+    transform-origin: left;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    @apply backdrop-blur-lg bg-background/80 border border-border/50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+
+  /* Focus visible ring */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Skeleton loading animation */
+  .skeleton-shimmer {
+    @apply relative overflow-hidden bg-muted;
+  }
+
+  .skeleton-shimmer::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(90deg, transparent, hsl(var(--background) / 0.5), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Touch-friendly tap target */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Safe area for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Smooth image loading */
+  .img-loading {
+    @apply bg-muted animate-pulse;
+  }
+
+  /* Enhanced hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg;
+  }
+
+  /* Glow effect on focus */
+  .glow-on-hover {
+    @apply transition-shadow duration-300;
+  }
+
+  .glow-on-hover:hover {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Better touch feedback for mobile */
+  .touch-feedback {
+    @apply active:scale-[0.98] active:opacity-90 transition-all duration-150;
+  }
+}
