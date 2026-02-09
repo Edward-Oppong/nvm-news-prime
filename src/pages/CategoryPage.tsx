@@ -4,7 +4,6 @@ import { ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
 import { ArticleCard } from '@/components/news/ArticleCard';
-import { NewsletterSection } from '@/components/news/NewsletterSection';
 import { MobileBottomNav } from '@/components/news/MobileBottomNav';
 import { useArticlesByCategory } from '@/hooks/useArticles';
 import { getArticlesByCategory as getMockArticles } from '@/data/mockArticles';
@@ -146,9 +145,6 @@ export default function CategoryPage() {
             )}
           </div>
         </section>
-
-        {/* Newsletter */}
-        <NewsletterSection />
       </main>
 
       <Footer />

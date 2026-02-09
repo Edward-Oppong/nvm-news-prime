@@ -1,65 +1,20 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Bookmark, Clock, ArrowUpRight, Eye } from 'lucide-react';
+import { Clock, ArrowUpRight } from 'lucide-react';
 import { Article } from '@/types/news';
 import { CategoryBadge } from './CategoryBadge';
-import { useSavedArticles } from '@/hooks/useSavedArticles';
-import { useReadingHistory } from '@/hooks/useReadingHistory';
 import { useState } from 'react';
 
 interface ArticleCardProps {
   article: Article;
   variant?: 'large' | 'medium' | 'small' | 'horizontal' | 'compact';
   index?: number;
-  showActions?: boolean;
 }
 
-export function ArticleCard({ article, variant = 'medium', index = 0, showActions = true }: ArticleCardProps) {
-  const { isSaved, toggleSave } = useSavedArticles();
-  const { wasRead } = useReadingHistory();
-  const saved = isSaved(article.id);
-  const read = wasRead(article.id);
+export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleCardProps) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleSave(article.id);
-  };
-
-  const SaveButton = () => (
-    <motion.button
-      onClick={handleSave}
-      className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all z-10 shadow-sm ${
-        saved 
-          ? 'bg-primary text-primary-foreground shadow-primary/25' 
-          : 'bg-background/90 text-foreground hover:bg-background hover:shadow-md'
-      }`}
-      aria-label={saved ? 'Remove from saved' : 'Save article'}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      <Bookmark className={`h-4 w-4 ${saved ? 'fill-current' : ''}`} />
-    </motion.button>
-  );
-
-  const ReadIndicator = () => read && (
-    <motion.div 
-      className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-success/95 text-white text-xs font-semibold backdrop-blur-sm z-10 shadow-sm"
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 }}
-    >
-      <Eye className="h-3 w-3" />
-      Read
-    </motion.div>
-  );
-
-  // Skeleton shimmer for image loading
   const ImageSkeleton = () => (
     <div className="absolute inset-0 bg-muted skeleton-shimmer" />
   );
@@ -91,18 +46,10 @@ export function ArticleCard({ article, variant = 'medium', index = 0, showAction
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <CategoryBadge category={article.category} className="mb-1.5" />
           <h3 className="font-serif text-base md:text-lg font-medium leading-snug line-clamp-2 mb-1 transition-colors group-hover:text-primary">
-            <Link to={`/article/${article.id}`}>
-              {article.title}
-            </Link>
+            <Link to={`/article/${article.id}`}>{article.title}</Link>
           </h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{article.date}</span>
-            {read && (
-              <>
-                <span>·</span>
-                <span className="text-success font-medium">Read</span>
-              </>
-            )}
           </div>
         </div>
         <motion.div 
@@ -140,9 +87,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0, showAction
           </div>
         </Link>
         <h3 className="font-serif text-sm md:text-base font-medium line-clamp-2 mb-1 transition-colors group-hover:text-primary leading-snug">
-          <Link to={`/article/${article.id}`}>
-            {article.title}
-          </Link>
+          <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h3>
         <p className="text-xs text-muted-foreground">{article.date}</p>
       </motion.article>
@@ -172,13 +117,10 @@ export function ArticleCard({ article, variant = 'medium', index = 0, showAction
               loading="lazy"
             />
           </div>
-          {showActions && <SaveButton />}
         </Link>
         <CategoryBadge category={article.category} className="mb-2" />
         <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-2 transition-colors group-hover:text-primary">
-          <Link to={`/article/${article.id}`}>
-            {article.title}
-          </Link>
+          <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h3>
         <p className="text-sm text-muted-foreground">{article.date}</p>
       </motion.article>
@@ -207,21 +149,16 @@ export function ArticleCard({ article, variant = 'medium', index = 0, showAction
               transition={{ duration: 0.7, ease: 'easeOut' }}
               loading="lazy"
             />
-            {/* Gradient overlay on hover */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
               animate={{ opacity: isHovered ? 1 : 0 }}
               transition={{ duration: 0.3 }}
             />
           </div>
-          {showActions && <SaveButton />}
-          <ReadIndicator />
         </Link>
         <CategoryBadge category={article.category} className="mb-3" />
         <h3 className="font-serif text-xl md:text-2xl lg:text-3xl font-semibold mb-3 transition-colors group-hover:text-primary leading-tight">
-          <Link to={`/article/${article.id}`}>
-            {article.title}
-          </Link>
+          <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h3>
         <p className="text-muted-foreground line-clamp-2 mb-4">{article.excerpt}</p>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -259,14 +196,10 @@ export function ArticleCard({ article, variant = 'medium', index = 0, showAction
             loading="lazy"
           />
         </div>
-        {showActions && <SaveButton />}
-        <ReadIndicator />
       </Link>
       <CategoryBadge category={article.category} className="mb-2" />
       <h3 className="font-serif text-lg md:text-xl font-medium line-clamp-2 mb-2 transition-colors group-hover:text-primary leading-snug">
-        <Link to={`/article/${article.id}`}>
-          {article.title}
-        </Link>
+        <Link to={`/article/${article.id}`}>{article.title}</Link>
       </h3>
       <p className="text-muted-foreground line-clamp-2 mb-3 text-sm">{article.excerpt}</p>
       <div className="flex items-center gap-3 text-sm text-muted-foreground">

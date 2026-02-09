@@ -9,11 +9,8 @@ import ArticlePage from "./pages/ArticlePage";
 import CategoryPage from "./pages/CategoryPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
-import StaticPage from "./pages/StaticPage";
 import NotFound from "./pages/NotFound";
-import SavedArticles from "./pages/SavedArticles";
 import SearchPage from "./pages/SearchPage";
-import ProfilePage from "./pages/ProfilePage";
 
 // Admin Pages
 import AdminAuth from "./pages/admin/AdminAuth";
@@ -65,10 +62,7 @@ function AnimatedRoutes() {
         <Route path="/category/:category" element={<PageWrapper><CategoryPage /></PageWrapper>} />
         <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
-        <Route path="/saved" element={<PageWrapper><SavedArticles /></PageWrapper>} />
         <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
-        <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
-        <Route path="/:page" element={<PageWrapper><StaticPage /></PageWrapper>} />
         
         {/* Admin Routes */}
         <Route path="/admin/auth" element={<AdminAuth />} />

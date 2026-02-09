@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Users, Award, Globe, Heart } from 'lucide-react';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
-import { NewsletterSection } from '@/components/news/NewsletterSection';
+
 
 const stats = [
   { label: 'Daily Readers', value: '2.5M+' },
@@ -133,8 +133,6 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-
-        <NewsletterSection />
       </main>
 
       <Footer />
