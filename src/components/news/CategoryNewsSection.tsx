@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Article } from '@/types/news';
 import { ArticleCard } from './ArticleCard';
 import { SectionHeader } from './SectionHeader';
-import { Newspaper } from 'lucide-react';
 
 interface CategoryNewsSectionProps {
   title: string;
@@ -17,31 +16,47 @@ export function CategoryNewsSection({
   accentColor = 'primary',
   linkHref 
 }: CategoryNewsSectionProps) {
-  const displayArticles = articles.slice(0, 4);
+  if (articles.length === 0) return null;
+
+  const [lead, ...rest] = articles;
+  const sideArticles = rest.slice(0, 3);
 
   return (
     <section className="py-10 md:py-14">
       <div className="container">
         <SectionHeader 
           title={title}
-          icon={Newspaper}
           accentColor={accentColor}
-          linkText="Read More"
+          linkText="See all"
           linkHref={linkHref}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {displayArticles.map((article, index) => (
-            <motion.div
-              key={article.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
-            >
-              <ArticleCard article={article} variant="compact" index={index} />
-            </motion.div>
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          {/* Lead article — larger */}
+          <motion.div
+            className="lg:col-span-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <ArticleCard article={lead} variant="large" index={0} />
+          </motion.div>
+
+          {/* Side articles — stacked list */}
+          <div className="lg:col-span-6 flex flex-col justify-between">
+            {sideArticles.map((article, index) => (
+              <motion.div
+                key={article.id}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08, duration: 0.4 }}
+              >
+                <ArticleCard article={article} variant="horizontal" index={index + 1} />
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

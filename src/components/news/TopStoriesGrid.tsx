@@ -12,45 +12,46 @@ export function TopStoriesGrid({ articles }: TopStoriesGridProps) {
   const [featured, ...rest] = articles;
   const gridArticles = rest.slice(0, 4);
 
+  if (!featured) return null;
+
   return (
-    <section className="py-14 md:py-20">
+    <section className="py-12 md:py-20 bg-muted/30">
       <div className="container">
         <SectionHeader 
           title="Top Stories"
-          icon={TrendingUp}
           accentColor="primary"
         />
 
-        {/* Grid with staggered animation */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Featured article */}
           <motion.div 
             className="lg:col-span-7"
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
             <ArticleCard article={featured} variant="large" index={0} />
           </motion.div>
 
           {/* Side articles */}
-          <motion.div 
-            className="lg:col-span-5 space-y-2"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
+          <div className="lg:col-span-5 flex flex-col justify-between">
             {gridArticles.map((article, index) => (
-              <ArticleCard
+              <motion.div
                 key={article.id}
-                article={article}
-                variant="horizontal"
-                index={index + 1}
-              />
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08, duration: 0.4 }}
+              >
+                <ArticleCard
+                  article={article}
+                  variant="horizontal"
+                  index={index + 1}
+                />
+              </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

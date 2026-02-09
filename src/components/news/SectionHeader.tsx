@@ -22,58 +22,39 @@ const colorMap = {
   'category-opinion': 'bg-category-opinion',
 };
 
-const iconBgMap = {
-  'primary': 'bg-primary/10 text-primary',
-  'accent': 'bg-accent/10 text-accent',
-  'breaking': 'bg-breaking/10 text-breaking',
-  'category-politics': 'bg-category-politics/10 text-category-politics',
-  'category-business': 'bg-category-business/10 text-category-business',
-  'category-tech': 'bg-category-tech/10 text-category-tech',
-  'category-culture': 'bg-category-culture/10 text-category-culture',
-  'category-sports': 'bg-category-sports/10 text-category-sports',
-  'category-opinion': 'bg-category-opinion/10 text-category-opinion',
-};
-
 export function SectionHeader({ 
   title, 
-  icon: Icon, 
   accentColor = 'primary',
   linkText,
   linkHref 
 }: SectionHeaderProps) {
   return (
     <motion.div 
-      className="flex items-center justify-between mb-8"
-      initial={{ opacity: 0, y: 20 }}
+      className="flex items-center gap-4 mb-8"
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.4 }}
     >
-      <div className="flex items-center gap-3">
-        {/* Colored accent bar */}
-        <div className={`w-1 h-8 rounded-full ${colorMap[accentColor]}`} />
-        
-        {/* Icon if provided */}
-        {Icon && (
-          <div className={`p-2 rounded-lg ${iconBgMap[accentColor]}`}>
-            <Icon className="h-5 w-5" />
-          </div>
-        )}
-        
-        {/* Title */}
-        <h2 className="font-serif text-2xl md:text-3xl font-semibold text-headline">
-          {title}
-        </h2>
-      </div>
+      {/* Accent bar */}
+      <div className={`w-1 h-7 rounded-full ${colorMap[accentColor]}`} />
 
-      {/* Optional Read More link */}
+      {/* Title */}
+      <h2 className="font-serif text-2xl md:text-3xl font-bold text-headline tracking-tight">
+        {title}
+      </h2>
+
+      {/* Divider line */}
+      <div className="flex-1 h-px bg-divider" />
+
+      {/* Optional link */}
       {linkText && linkHref && (
         <Link 
           to={linkHref}
-          className="group flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          className="group flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
         >
           {linkText}
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       )}
     </motion.div>
