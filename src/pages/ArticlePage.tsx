@@ -1,33 +1,23 @@
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Bookmark, BookmarkCheck, Twitter, Facebook, Linkedin, Clock, User, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Share2, Twitter, Facebook, Linkedin, Clock, User, Copy, Check } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
 import { CategoryBadge } from '@/components/news/CategoryBadge';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { VideoPlayer } from '@/components/news/VideoPlayer';
-import { MobileBottomNav } from '@/components/news/MobileBottomNav';
-import { ArticleActions } from '@/components/news/ArticleActions';
 import { useArticle, useRelatedArticles } from '@/hooks/useArticles';
-import { useReadingHistory } from '@/hooks/useReadingHistory';
-import { useSavedArticles } from '@/hooks/useSavedArticles';
 import { mockArticles } from '@/data/mockArticles';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 export default function ArticlePage() {
   const { id } = useParams();
-  const location = useLocation();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [copied, setCopied] = useState(false);
-  const { addToHistory } = useReadingHistory();
-  const { isSaved, toggleSave } = useSavedArticles();
-  const saved = isSaved(id || '');
   
-  // Check if this is a mock article ID (not a UUID)
   const isMockId = id && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   
   const { data: dbArticle, isLoading } = useArticle(isMockId ? '' : (id || ''));
@@ -36,7 +26,6 @@ export default function ArticlePage() {
     dbArticle?.category || 'politics'
   );
   
-  // Fall back to mock data
   const mockArticle = mockArticles.find((a) => a.id === id) || mockArticles[0];
   const article = isMockId ? mockArticle : (dbArticle || mockArticle);
   
@@ -44,17 +33,6 @@ export default function ArticlePage() {
     .filter((a) => a.category === article.category && a.id !== article.id)
     .slice(0, 3);
   const relatedArticles = dbRelated && dbRelated.length > 0 ? dbRelated : mockRelated;
-
-  // Track reading progress and add to history
-  useEffect(() => {
-    if (id && article) {
-      // Add to reading history after a short delay (user actually viewing)
-      const timer = setTimeout(() => {
-        addToHistory(id, article.category, parseInt(article.readTime) || 5);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [id, article, addToHistory]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,12 +46,8 @@ export default function ArticlePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Get current article URL for sharing
-  const getArticleUrl = useCallback(() => {
-    return window.location.href;
-  }, []);
+  const getArticleUrl = useCallback(() => window.location.href, []);
 
-  // Social sharing functions
   const shareOnTwitter = () => {
     const url = encodeURIComponent(getArticleUrl());
     const text = encodeURIComponent(article.title);
@@ -101,13 +75,6 @@ export default function ArticlePage() {
     }
   };
 
-  const handleToggleSave = () => {
-    if (!id) return;
-    const wasSaved = toggleSave(id);
-    toast.success(wasSaved ? 'Article saved!' : 'Article removed from saved');
-  };
-
-  // Use article content from database or generate placeholder
   const rawContent = article.content || `
     <p class="text-xl leading-relaxed mb-6 text-subheadline">
       ${article.excerpt}
@@ -151,7 +118,6 @@ export default function ArticlePage() {
     </p>
   `;
 
-  // Sanitize HTML content to prevent XSS attacks
   const articleContent = useMemo(() => {
     return DOMPurify.sanitize(rawContent, {
       ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'blockquote', 'cite', 'img', 'br', 'hr', 'span', 'div', 'figure', 'figcaption', 'pre', 'code'],
@@ -196,7 +162,6 @@ export default function ArticlePage() {
         {/* Hero Media */}
         <section className="relative">
           {article.videoUrl ? (
-            /* Video Player */
             <div className="container max-w-5xl pt-4">
               <VideoPlayer 
                 src={article.videoUrl}
@@ -205,7 +170,6 @@ export default function ArticlePage() {
               />
             </div>
           ) : (
-            /* Image Hero */
             <div className="aspect-[21/9] md:aspect-[3/1] w-full overflow-hidden">
               <img
                 src={article.image}
@@ -224,7 +188,6 @@ export default function ArticlePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Back link */}
             <Link 
               to="/" 
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-headline transition-colors mb-8"
@@ -233,13 +196,9 @@ export default function ArticlePage() {
               Back to Home
             </Link>
 
-            {/* Category */}
             <CategoryBadge category={article.category} className="mb-4" />
 
-            {/* Title */}
-            <h1 className="headline-xl mb-6">
-              {article.title}
-            </h1>
+            <h1 className="headline-xl mb-6">{article.title}</h1>
 
             {/* Meta */}
             <div className="flex flex-wrap items-center gap-4 pb-8 border-b border-divider">
@@ -259,7 +218,7 @@ export default function ArticlePage() {
             </div>
 
             {/* Share buttons */}
-            <div className="flex items-center justify-between py-4 mb-8 border-b border-divider">
+            <div className="flex items-center py-4 mb-8 border-b border-divider">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground mr-2">Share:</span>
                 <button 
@@ -291,24 +250,6 @@ export default function ArticlePage() {
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </button>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-                onClick={handleToggleSave}
-              >
-                {saved ? (
-                  <>
-                    <BookmarkCheck className="h-4 w-4 text-primary" />
-                    Saved
-                  </>
-                ) : (
-                  <>
-                    <Bookmark className="h-4 w-4" />
-                    Save
-                  </>
-                )}
-              </Button>
             </div>
 
             {/* Article body */}
@@ -351,7 +292,6 @@ export default function ArticlePage() {
       </main>
 
       <Footer />
-      <MobileBottomNav />
     </div>
   );
 }

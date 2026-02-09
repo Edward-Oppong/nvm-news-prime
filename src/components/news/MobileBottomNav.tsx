@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Bookmark, User, Search } from 'lucide-react';
+import { Home, Compass, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -7,8 +7,6 @@ const navItems = [
   { icon: Home, label: 'Home', href: '/' },
   { icon: Compass, label: 'Explore', href: '/category/politics' },
   { icon: Search, label: 'Search', href: '/search' },
-  { icon: Bookmark, label: 'Saved', href: '/saved' },
-  { icon: User, label: 'Profile', href: '/profile' },
 ];
 
 export function MobileBottomNav() {
@@ -16,7 +14,6 @@ export function MobileBottomNav() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Hide on scroll down, show on scroll up
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -57,21 +54,10 @@ export function MobileBottomNav() {
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
-              <motion.div
-                whileTap={{ scale: 0.85 }}
-                className="relative z-10"
-              >
-                <item.icon 
-                  className={`h-5 w-5 transition-colors ${
-                    isActive ? 'text-primary' : 'text-muted-foreground'
-                  }`} 
-                />
+              <motion.div whileTap={{ scale: 0.85 }} className="relative z-10">
+                <item.icon className={`h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
               </motion.div>
-              <span 
-                className={`text-[10px] font-medium transition-colors relative z-10 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
+              <span className={`text-[10px] font-medium transition-colors relative z-10 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                 {item.label}
               </span>
             </Link>

@@ -1,15 +1,7 @@
 import { Header } from '@/components/news/Header';
-import { HeroSection } from '@/components/news/HeroSection';
 import { TopStoriesGrid } from '@/components/news/TopStoriesGrid';
 import { LatestNews } from '@/components/news/LatestNews';
-import { VideoSection } from '@/components/news/VideoSection';
-import { NewsletterSection } from '@/components/news/NewsletterSection';
 import { Footer } from '@/components/news/Footer';
-import { BreakingNewsTicker } from '@/components/news/BreakingNewsTicker';
-import { PersonalizedFeed } from '@/components/news/PersonalizedFeed';
-import { MobileBottomNav } from '@/components/news/MobileBottomNav';
-import { LiveRadioBar } from '@/components/news/LiveRadioBar';
-import { QuickLinksBar } from '@/components/news/QuickLinksBar';
 import { FeaturedGrid } from '@/components/news/FeaturedGrid';
 import { CategoryNewsSection } from '@/components/news/CategoryNewsSection';
 import { useArticles, useFeaturedArticle, useTrendingArticles } from '@/hooks/useArticles';
@@ -91,31 +83,19 @@ const Index = () => {
   const sportsArticles = displayArticles.filter(a => a.category.toLowerCase() === 'sports');
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
-      {/* Breaking News Ticker */}
-      <BreakingNewsTicker articles={displayArticles} />
-      
+    <div className="min-h-screen bg-background animate-fade-in">
       <Header />
-
-      {/* Quick Links Bar with Hot News */}
-      <QuickLinksBar articles={displayArticles} />
-
-      {/* Live Radio Bar */}
-      <LiveRadioBar />
       
-      {/* Featured Grid - asymmetric layout like Radio Univers */}
+      {/* Featured Grid */}
       <FeaturedGrid articles={displayArticles} />
       
-      {/* Category News Sections with accent bars */}
+      {/* Category News Sections */}
       <CategoryNewsSection 
         title="Politics" 
         articles={politicsArticles} 
         accentColor="category-politics"
         linkHref="/category/politics"
       />
-      
-      {/* Personalized Feed */}
-      <PersonalizedFeed articles={displayArticles} />
       
       {/* Top Stories Grid */}
       <TopStoriesGrid articles={displayArticles.slice(1)} />
@@ -127,19 +107,14 @@ const Index = () => {
         accentColor="category-tech"
         linkHref="/category/tech"
       />
-      
-      {/* Video Section */}
-      <VideoSection articles={displayArticles} />
 
       {/* Culture Section */}
-      <div className="bg-muted/20">
-        <CategoryNewsSection 
-          title="Culture" 
-          articles={cultureArticles} 
-          accentColor="category-culture"
-          linkHref="/category/culture"
-        />
-      </div>
+      <CategoryNewsSection 
+        title="Culture" 
+        articles={cultureArticles} 
+        accentColor="category-culture"
+        linkHref="/category/culture"
+      />
       
       {/* Latest News with Trending Sidebar */}
       <LatestNews articles={displayLatest} trending={displayTrending} />
@@ -152,14 +127,8 @@ const Index = () => {
         linkHref="/category/sports"
       />
       
-      {/* Newsletter Signup */}
-      <NewsletterSection />
-      
       {/* Footer */}
       <Footer />
-      
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
     </div>
   );
 };
