@@ -18,36 +18,33 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
 
   const handleLoadMore = () => {
     setIsLoading(true);
-    // Simulate loading delay for smooth UX
     setTimeout(() => {
       setVisibleCount((prev) => Math.min(prev + 6, articles.length));
       setIsLoading(false);
-    }, 500);
+    }, 400);
   };
 
   const hasMore = visibleCount < articles.length;
 
   return (
-    <section className="py-14 md:py-20 bg-muted/30">
+    <section className="py-12 md:py-20">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
           {/* Main content */}
           <div className="lg:col-span-8">
             <SectionHeader 
               title="Latest News"
-              icon={Clock}
               accentColor="accent"
             />
 
-            {/* Articles grid with stagger */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {articles.slice(0, visibleCount).map((article, index) => (
                 <motion.div
                   key={article.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: (index % 6) * 0.1, duration: 0.5 }}
+                  transition={{ delay: (index % 6) * 0.06, duration: 0.4 }}
                 >
                   <ArticleCard
                     article={article}
@@ -58,7 +55,6 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
               ))}
             </div>
 
-            {/* Load more with animation */}
             {hasMore && (
               <motion.div 
                 className="mt-12 text-center"
@@ -71,7 +67,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
                   size="lg"
                   onClick={handleLoadMore}
                   disabled={isLoading}
-                  className="group min-w-[200px] border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300"
+                  className="group min-w-[200px] border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 rounded-full"
                 >
                   {isLoading ? (
                     <>
@@ -80,7 +76,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
                     </>
                   ) : (
                     <>
-                      Load More Stories
+                      Load More
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
