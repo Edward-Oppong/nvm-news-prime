@@ -31,7 +31,7 @@ function transformArticle(dbArticle: DBArticle): Article {
     title: dbArticle.title,
     excerpt: dbArticle.excerpt || '',
     content: dbArticle.content || undefined,
-    category: (dbArticle.categories?.slug || 'politics') as Category,
+    category: (dbArticle.categories?.slug || 'general') as Category,
     author: dbArticle.authors_public?.name || 'Unknown Author',
     date: format(new Date(publishDate), 'MMMM d, yyyy'),
     readTime: dbArticle.read_time || '5 min read',

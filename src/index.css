@@ -14,7 +14,6 @@
 @layer base {
   :root {
     /* NVM News - Modern & Clean Design System */
-    /* Neutral base with bold accent for clean editorial look */
     --background: 0 0% 100%;
     --foreground: 220 15% 15%;
 
@@ -24,15 +23,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 15%;
 
-    /* Bold teal accent - modern, trustworthy */
     --primary: 172 66% 35%;
     --primary-foreground: 0 0% 100%;
 
-    /* Deep navy secondary */
     --secondary: 220 40% 20%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Warm accent for engagement/CTAs */
     --accent: 25 95% 55%;
     --accent-foreground: 0 0% 100%;
 
@@ -55,15 +51,14 @@
     --divider: 220 15% 92%;
     --surface-elevated: 0 0% 100%;
 
-    /* Category colors - vibrant but harmonious */
+    /* Category colors — updated for new categories */
+    --category-general: 210 70% 48%;
+    --category-entertainment: 340 75% 55%;
     --category-politics: 215 85% 50%;
-    --category-business: 172 60% 38%;
-    --category-tech: 265 70% 55%;
-    --category-culture: 340 75% 55%;
     --category-sports: 25 90% 52%;
-    --category-opinion: 220 20% 35%;
+    --category-business: 172 60% 38%;
 
-    /* Breaking news - urgent orange/red */
+    /* Breaking news */
     --breaking: 15 95% 55%;
     --breaking-foreground: 0 0% 100%;
 
@@ -217,24 +212,19 @@
     @apply inline-flex items-center text-[11px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md;
   }
 
+  .category-general {
+    background: hsl(var(--category-general) / 0.1);
+    color: hsl(var(--category-general));
+  }
+
+  .category-entertainment {
+    background: hsl(var(--category-entertainment) / 0.1);
+    color: hsl(var(--category-entertainment));
+  }
+
   .category-politics {
     background: hsl(var(--category-politics) / 0.1);
     color: hsl(var(--category-politics));
-  }
-
-  .category-business {
-    background: hsl(var(--category-business) / 0.1);
-    color: hsl(var(--category-business));
-  }
-
-  .category-tech {
-    background: hsl(var(--category-tech) / 0.1);
-    color: hsl(var(--category-tech));
-  }
-
-  .category-culture {
-    background: hsl(var(--category-culture) / 0.1);
-    color: hsl(var(--category-culture));
   }
 
   .category-sports {
@@ -242,9 +232,9 @@
     color: hsl(var(--category-sports));
   }
 
-  .category-opinion {
-    background: hsl(var(--category-opinion) / 0.1);
-    color: hsl(var(--category-opinion));
+  .category-business {
+    background: hsl(var(--category-business) / 0.1);
+    color: hsl(var(--category-business));
   }
 
   .divider {
@@ -294,22 +284,18 @@
     display: none;
   }
 
-  /* Glassmorphism */
   .glass {
     @apply backdrop-blur-lg bg-background/80 border border-border/50;
   }
 
-  /* Gradient text */
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
 
-  /* Focus visible ring */
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 
-  /* Skeleton loading animation */
   .skeleton-shimmer {
     @apply relative overflow-hidden bg-muted;
   }
@@ -321,12 +307,10 @@
     animation: shimmer 1.5s infinite;
   }
 
-  /* Touch-friendly tap target */
   .tap-target {
     @apply min-h-[44px] min-w-[44px];
   }
 
-  /* Safe area for mobile */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -335,17 +319,14 @@
     padding-top: env(safe-area-inset-top);
   }
 
-  /* Smooth image loading */
   .img-loading {
     @apply bg-muted animate-pulse;
   }
 
-  /* Enhanced hover lift effect */
   .hover-lift {
     @apply transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg;
   }
 
-  /* Glow effect on focus */
   .glow-on-hover {
     @apply transition-shadow duration-300;
   }
@@ -354,7 +335,6 @@
     box-shadow: var(--shadow-glow);
   }
 
-  /* Better touch feedback for mobile */
   .touch-feedback {
     @apply active:scale-[0.98] active:opacity-90 transition-all duration-150;
   }

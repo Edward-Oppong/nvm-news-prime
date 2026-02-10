@@ -77,12 +77,11 @@ export default {
         success: "hsl(var(--success))",
         live: "hsl(var(--live))",
         category: {
+          general: "hsl(var(--category-general))",
+          entertainment: "hsl(var(--category-entertainment))",
           politics: "hsl(var(--category-politics))",
-          business: "hsl(var(--category-business))",
-          tech: "hsl(var(--category-tech))",
-          culture: "hsl(var(--category-culture))",
           sports: "hsl(var(--category-sports))",
-          opinion: "hsl(var(--category-opinion))",
+          business: "hsl(var(--category-business))",
         },
       },
       borderRadius: {

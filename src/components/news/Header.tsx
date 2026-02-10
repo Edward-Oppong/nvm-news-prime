@@ -6,12 +6,11 @@ import { SearchOverlay } from './SearchOverlay';
 import nvmLogo from '@/assets/nvm-logo.png';
 
 const categories = [
+  { name: 'General', href: '/category/general', color: 'category-general' },
+  { name: 'Entertainment', href: '/category/entertainment', color: 'category-entertainment' },
   { name: 'Politics', href: '/category/politics', color: 'category-politics' },
-  { name: 'Business', href: '/category/business', color: 'category-business' },
-  { name: 'Tech', href: '/category/tech', color: 'category-tech' },
-  { name: 'Culture', href: '/category/culture', color: 'category-culture' },
   { name: 'Sports', href: '/category/sports', color: 'category-sports' },
-  { name: 'Opinion', href: '/category/opinion', color: 'category-opinion' },
+  { name: 'Business', href: '/category/business', color: 'category-business' },
 ];
 
 export function Header() {
