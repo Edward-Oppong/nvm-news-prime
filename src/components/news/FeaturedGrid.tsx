@@ -15,9 +15,9 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
   if (!main) return null;
 
   return (
-    <section className="pt-6 pb-10 md:pt-8 md:pb-16">
+    <section className="pt-4 pb-8 md:pt-6 md:pb-12">
       <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
           {/* Main featured article */}
           <motion.div 
             className="lg:col-span-7 lg:row-span-2"
@@ -27,7 +27,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
           >
             <Link 
               to={`/article/${main.id}`}
-              className="group block relative overflow-hidden rounded-2xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] lg:min-h-[520px]"
+              className="group block relative overflow-hidden rounded-2xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[350px] lg:min-h-[460px]"
             >
               <img 
                 src={main.image} 
@@ -74,7 +74,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
             >
               <Link 
                 to={`/article/${article.id}`}
-                className="group flex gap-4 items-center p-3 rounded-xl hover:bg-muted/60 transition-all duration-300"
+                className="group flex gap-3 items-center p-2.5 rounded-xl hover:bg-muted/60 transition-all duration-300"
               >
                 <div className="relative flex-shrink-0 w-28 h-20 md:w-32 md:h-24 rounded-lg overflow-hidden">
                   <img 

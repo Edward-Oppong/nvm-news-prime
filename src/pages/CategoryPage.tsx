@@ -87,7 +87,7 @@ export default function CategoryPage() {
         </section>
 
         {/* Articles Grid */}
-        <section className="py-12 md:py-16">
+        <section className="py-8 md:py-12">
           <div className="container">
             {/* Article count */}
             <div className="flex items-center justify-between mb-8">
@@ -98,7 +98,7 @@ export default function CategoryPage() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <Skeleton key={i} className="h-64 rounded-lg" />
                 ))}
@@ -113,7 +113,7 @@ export default function CategoryPage() {
                 )}
 
                 {/* Rest of articles */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {articles.slice(1).map((article, index) => (
                     <ArticleCard
                       key={article.id}
