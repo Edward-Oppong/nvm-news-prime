@@ -6,7 +6,7 @@ import { SectionHeader } from './SectionHeader';
 interface CategoryNewsSectionProps {
   title: string;
   articles: Article[];
-  accentColor?: 'primary' | 'accent' | 'breaking' | 'category-politics' | 'category-business' | 'category-tech' | 'category-culture' | 'category-sports' | 'category-opinion';
+  accentColor?: 'primary' | 'accent' | 'breaking' | 'category-general' | 'category-entertainment' | 'category-politics' | 'category-sports' | 'category-business';
   linkHref?: string;
 }
 

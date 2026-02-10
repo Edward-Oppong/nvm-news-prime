@@ -5,7 +5,7 @@ import { LucideIcon, ArrowRight } from 'lucide-react';
 interface SectionHeaderProps {
   title: string;
   icon?: LucideIcon;
-  accentColor?: 'primary' | 'accent' | 'breaking' | 'category-politics' | 'category-business' | 'category-tech' | 'category-culture' | 'category-sports' | 'category-opinion';
+  accentColor?: 'primary' | 'accent' | 'breaking' | 'category-general' | 'category-entertainment' | 'category-politics' | 'category-sports' | 'category-business';
   linkText?: string;
   linkHref?: string;
 }
@@ -14,12 +14,11 @@ const colorMap = {
   'primary': 'bg-primary',
   'accent': 'bg-accent',
   'breaking': 'bg-breaking',
+  'category-general': 'bg-category-general',
+  'category-entertainment': 'bg-category-entertainment',
   'category-politics': 'bg-category-politics',
-  'category-business': 'bg-category-business',
-  'category-tech': 'bg-category-tech',
-  'category-culture': 'bg-category-culture',
   'category-sports': 'bg-category-sports',
-  'category-opinion': 'bg-category-opinion',
+  'category-business': 'bg-category-business',
 };
 
 export function SectionHeader({ 

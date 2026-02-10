@@ -1,21 +1,20 @@
 import { Article } from '@/types/news';
+import heroGeneral from '@/assets/hero-general.jpg';
+import heroEntertainment from '@/assets/hero-entertainment.jpg';
 import heroPolitics from '@/assets/hero-politics.jpg';
-import heroBusiness from '@/assets/hero-business.jpg';
-import heroTech from '@/assets/hero-tech.jpg';
-import heroCulture from '@/assets/hero-culture.jpg';
 import heroSports from '@/assets/hero-sports.jpg';
-import heroOpinion from '@/assets/hero-opinion.jpg';
+import heroBusiness from '@/assets/hero-business.jpg';
 
 export const mockArticles: Article[] = [
   {
     id: '1',
     title: 'Historic Climate Agreement Reached as World Leaders Commit to Net-Zero by 2040',
     excerpt: 'In an unprecedented move, over 190 nations have pledged to accelerate their climate commitments, setting the stage for the most ambitious environmental policy shift in human history.',
-    category: 'politics',
+    category: 'general',
     author: 'Sarah Mitchell',
     date: 'January 20, 2026',
     readTime: '8 min read',
-    image: heroPolitics,
+    image: heroGeneral,
     featured: true,
     breaking: true,
   },
@@ -31,23 +30,23 @@ export const mockArticles: Article[] = [
   },
   {
     id: '3',
-    title: 'Revolutionary AI Model Achieves Human-Level Reasoning in Scientific Discovery',
-    excerpt: 'The breakthrough represents a paradigm shift in how machines can contribute to solving humanity\'s most pressing challenges.',
-    category: 'tech',
+    title: 'Blockbuster Sequel Breaks Opening Weekend Box Office Records Worldwide',
+    excerpt: 'The highly anticipated sequel shattered expectations, earning over $500 million globally in its first three days.',
+    category: 'entertainment',
     author: 'Dr. Emily Watson',
     date: 'January 19, 2026',
     readTime: '12 min read',
-    image: heroTech,
+    image: heroEntertainment,
   },
   {
     id: '4',
     title: 'Sundance Film Festival Opens with Groundbreaking Documentary on Digital Identity',
     excerpt: 'This year\'s lineup promises to challenge audiences with bold narratives exploring the intersection of humanity and technology.',
-    category: 'culture',
+    category: 'entertainment',
     author: 'James Rodriguez',
     date: 'January 19, 2026',
     readTime: '6 min read',
-    image: heroCulture,
+    image: heroEntertainment,
   },
   {
     id: '5',
@@ -61,13 +60,13 @@ export const mockArticles: Article[] = [
   },
   {
     id: '6',
-    title: 'The Case for Radical Optimism in an Age of Uncertainty',
-    excerpt: 'Despite mounting challenges, there are compelling reasons to believe we\'re on the cusp of unprecedented human flourishing.',
-    category: 'opinion',
+    title: 'Major Earthquake Strikes Southeast Asia, International Aid Mobilized',
+    excerpt: 'A 7.2-magnitude earthquake has prompted emergency responses from dozens of nations as rescue operations continue.',
+    category: 'general',
     author: 'Prof. David Klein',
     date: 'January 18, 2026',
     readTime: '10 min read',
-    image: heroOpinion,
+    image: heroGeneral,
   },
   {
     id: '7',
@@ -81,13 +80,13 @@ export const mockArticles: Article[] = [
   },
   {
     id: '8',
-    title: 'Quantum Computing Breakthrough Promises New Era of Drug Discovery',
-    excerpt: 'Researchers demonstrate practical applications that could revolutionize pharmaceutical development within the decade.',
-    category: 'tech',
+    title: 'Grammy Awards 2026: Surprise Wins and Unforgettable Performances',
+    excerpt: 'This year\'s ceremony delivered iconic moments, unexpected upsets, and a powerful tribute to music legends.',
+    category: 'entertainment',
     author: 'Dr. Robert Kim',
     date: 'January 17, 2026',
     readTime: '9 min read',
-    image: heroTech,
+    image: heroEntertainment,
   },
   {
     id: '9',
@@ -103,13 +102,12 @@ export const mockArticles: Article[] = [
     id: '10',
     title: 'Music Industry Embraces AI Collaboration Tools',
     excerpt: 'Major labels and independent artists alike are exploring new creative possibilities through machine learning partnerships.',
-    category: 'culture',
+    category: 'entertainment',
     author: 'Marcus Webb',
     date: 'January 16, 2026',
     readTime: '5 min read',
-    image: heroCulture,
+    image: heroEntertainment,
   },
-  // Additional articles for more category coverage
   {
     id: '11',
     title: 'International Summit Addresses Rising Geopolitical Tensions',
@@ -132,23 +130,23 @@ export const mockArticles: Article[] = [
   },
   {
     id: '13',
-    title: 'SpaceX Successfully Tests Next-Generation Rocket Engine',
-    excerpt: 'The Raptor 3 engine brings humanity one step closer to sustainable Mars colonization.',
-    category: 'tech',
+    title: 'UN Report Warns of Accelerating Climate Change Impact on Food Supply',
+    excerpt: 'The comprehensive study calls for urgent action as global food systems face unprecedented challenges from rising temperatures.',
+    category: 'general',
     author: 'Jennifer Liu',
     date: 'January 15, 2026',
     readTime: '7 min read',
-    image: heroTech,
+    image: heroGeneral,
   },
   {
     id: '14',
     title: 'Broadway Season Opens with Diverse Slate of New Productions',
     excerpt: 'Theater district buzzes with anticipation as fresh voices take center stage in this season\'s most anticipated shows.',
-    category: 'culture',
+    category: 'entertainment',
     author: 'Christopher Bell',
     date: 'January 14, 2026',
     readTime: '5 min read',
-    image: heroCulture,
+    image: heroEntertainment,
   },
   {
     id: '15',
@@ -162,13 +160,13 @@ export const mockArticles: Article[] = [
   },
   {
     id: '16',
-    title: 'Why Remote Work Is Here to Stay: A Defense of Flexibility',
-    excerpt: 'The data is clear: hybrid arrangements benefit both employees and employers, despite executive skepticism.',
-    category: 'opinion',
+    title: 'Massive Wildfire in Western States Forces Thousands to Evacuate',
+    excerpt: 'Emergency services are working around the clock as extreme heat and drought conditions fuel the devastating blaze.',
+    category: 'general',
     author: 'Dr. Sarah Chen',
     date: 'January 13, 2026',
     readTime: '8 min read',
-    image: heroOpinion,
+    image: heroGeneral,
   },
   {
     id: '17',
@@ -192,23 +190,23 @@ export const mockArticles: Article[] = [
   },
   {
     id: '19',
-    title: 'The Myth of Bipartisanship: What History Really Tells Us',
-    excerpt: 'A closer look at American political history reveals that productive governance rarely required consensus.',
-    category: 'opinion',
+    title: 'Election Season Heats Up as Key Primaries Approach',
+    excerpt: 'Candidates from both parties intensify campaigns as voters prepare for pivotal primary elections next month.',
+    category: 'politics',
     author: 'Prof. Eleanor Hayes',
     date: 'January 12, 2026',
     readTime: '12 min read',
-    image: heroOpinion,
+    image: heroPolitics,
   },
   {
     id: '20',
-    title: 'Neural Interface Technology Shows Promise for Paralysis Patients',
-    excerpt: 'Clinical trials demonstrate unprecedented success in restoring mobility through brain-computer connections.',
-    category: 'tech',
+    title: 'Global Health Organization Declares End to Major Pandemic Threat',
+    excerpt: 'After years of international cooperation, the WHO officially downgrades the health emergency status.',
+    category: 'general',
     author: 'Dr. Maya Patel',
     date: 'January 11, 2026',
     readTime: '9 min read',
-    image: heroTech,
+    image: heroGeneral,
   },
 ];
 

@@ -1,4 +1,4 @@
-export type Category = 'politics' | 'business' | 'tech' | 'culture' | 'sports' | 'opinion';
+export type Category = 'general' | 'entertainment' | 'politics' | 'sports' | 'business';
 
 export interface Article {
   id: string;

@@ -56,10 +56,11 @@ const Index = () => {
     return <LoadingSkeleton />;
   }
 
+  const generalArticles = displayArticles.filter(a => a.category.toLowerCase() === 'general');
+  const entertainmentArticles = displayArticles.filter(a => a.category.toLowerCase() === 'entertainment');
   const politicsArticles = displayArticles.filter(a => a.category.toLowerCase() === 'politics');
-  const techArticles = displayArticles.filter(a => a.category.toLowerCase() === 'tech');
-  const cultureArticles = displayArticles.filter(a => a.category.toLowerCase() === 'culture');
   const sportsArticles = displayArticles.filter(a => a.category.toLowerCase() === 'sports');
+  const businessArticles = displayArticles.filter(a => a.category.toLowerCase() === 'business');
 
   return (
     <div className="min-h-screen bg-background animate-fade-in pb-16 md:pb-0">
@@ -71,34 +72,34 @@ const Index = () => {
       {/* Divider */}
       <div className="container"><div className="h-px bg-divider" /></div>
       
+      {/* General News */}
+      <CategoryNewsSection 
+        title="General News" 
+        articles={generalArticles} 
+        accentColor="category-general"
+        linkHref="/category/general"
+      />
+      
+      {/* Top Stories — alternating background */}
+      <TopStoriesGrid articles={displayArticles.slice(1)} />
+
+      {/* Entertainment */}
+      <CategoryNewsSection 
+        title="Entertainment" 
+        articles={entertainmentArticles} 
+        accentColor="category-entertainment"
+        linkHref="/category/entertainment"
+      />
+
+      {/* Divider */}
+      <div className="container"><div className="h-px bg-divider" /></div>
+
       {/* Politics */}
       <CategoryNewsSection 
         title="Politics" 
         articles={politicsArticles} 
         accentColor="category-politics"
         linkHref="/category/politics"
-      />
-      
-      {/* Top Stories — alternating background */}
-      <TopStoriesGrid articles={displayArticles.slice(1)} />
-
-      {/* Tech */}
-      <CategoryNewsSection 
-        title="Technology" 
-        articles={techArticles} 
-        accentColor="category-tech"
-        linkHref="/category/tech"
-      />
-
-      {/* Divider */}
-      <div className="container"><div className="h-px bg-divider" /></div>
-
-      {/* Culture */}
-      <CategoryNewsSection 
-        title="Culture" 
-        articles={cultureArticles} 
-        accentColor="category-culture"
-        linkHref="/category/culture"
       />
       
       {/* Latest News with Trending Sidebar */}
@@ -112,6 +113,14 @@ const Index = () => {
         articles={sportsArticles} 
         accentColor="category-sports"
         linkHref="/category/sports"
+      />
+
+      {/* Business */}
+      <CategoryNewsSection 
+        title="Business" 
+        articles={businessArticles} 
+        accentColor="category-business"
+        linkHref="/category/business"
       />
       
       <Footer />
