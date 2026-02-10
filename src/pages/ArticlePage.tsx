@@ -268,16 +268,16 @@ export default function ArticlePage() {
         </article>
 
         {/* Related articles */}
-        <section className="py-12 md:py-16 bg-muted/30">
+        <section className="py-8 md:py-12 bg-muted/30">
           <div className="container">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
               <h2 className="font-serif text-2xl md:text-3xl font-semibold text-headline">
                 Related Stories
               </h2>
               <div className="h-px flex-1 bg-divider ml-6" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedArticles.map((relatedArticle, index) => (
                 <ArticleCard
                   key={relatedArticle.id}
