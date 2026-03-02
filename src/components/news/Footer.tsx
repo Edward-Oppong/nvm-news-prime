@@ -39,8 +39,8 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="bg-headline text-white/70">
-      <div className="container py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-10">
+      <div className="container py-8 md:py-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8">
           {/* Brand column */}
           <motion.div 
             className="col-span-2 md:col-span-4 lg:col-span-1"
@@ -154,7 +154,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <motion.div 
-          className="mt-10 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4"
+          className="mt-6 pt-4 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

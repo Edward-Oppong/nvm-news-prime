@@ -22,7 +22,7 @@ export function CategoryNewsSection({
   const sideArticles = rest.slice(0, 3);
 
   return (
-    <section className="py-8 md:py-10">
+    <section className="py-5 md:py-6">
       <div className="container">
         <SectionHeader 
           title={title}
@@ -31,7 +31,7 @@ export function CategoryNewsSection({
           linkHref={linkHref}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
           {/* Lead article — larger */}
           <motion.div
             className="lg:col-span-6"
