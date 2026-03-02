@@ -15,14 +15,14 @@ export function TopStoriesGrid({ articles }: TopStoriesGridProps) {
   if (!featured) return null;
 
   return (
-    <section className="py-8 md:py-12 bg-muted/30">
+    <section className="py-5 md:py-8 bg-muted/30">
       <div className="container">
         <SectionHeader 
           title="Top Stories"
           accentColor="primary"
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
           {/* Featured article */}
           <motion.div 
             className="lg:col-span-7"

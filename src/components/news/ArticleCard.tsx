@@ -138,7 +138,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseLeave={() => setIsHovered(false)}
       >
         <Link to={`/article/${article.id}`} className="relative block overflow-hidden">
-          <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-5 shadow-card group-hover:shadow-lg transition-all duration-500">
+          <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-3 shadow-card group-hover:shadow-lg transition-all duration-500">
             {!isImageLoaded && <ImageSkeleton />}
             <motion.img
               src={article.image}
@@ -156,11 +156,11 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
             />
           </div>
         </Link>
-        <CategoryBadge category={article.category} className="mb-3" />
-        <h3 className="font-serif text-xl md:text-2xl lg:text-3xl font-semibold mb-3 transition-colors group-hover:text-primary leading-tight">
+        <CategoryBadge category={article.category} className="mb-2" />
+        <h3 className="font-serif text-xl md:text-2xl font-semibold mb-2 transition-colors group-hover:text-primary leading-tight">
           <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h3>
-        <p className="text-muted-foreground line-clamp-2 mb-4">{article.excerpt}</p>
+        <p className="text-muted-foreground line-clamp-2 mb-3 text-sm">{article.excerpt}</p>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">{article.author}</span>
           <span>·</span>
@@ -184,7 +184,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/article/${article.id}`} className="relative block overflow-hidden">
-        <div className="aspect-[16/10] rounded-xl overflow-hidden mb-4 shadow-card group-hover:shadow-lg transition-all duration-400">
+        <div className="aspect-[16/10] rounded-xl overflow-hidden mb-3 shadow-card group-hover:shadow-lg transition-all duration-400">
           {!isImageLoaded && <ImageSkeleton />}
           <motion.img
             src={article.image}
@@ -197,11 +197,11 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           />
         </div>
       </Link>
-      <CategoryBadge category={article.category} className="mb-2" />
-      <h3 className="font-serif text-lg md:text-xl font-medium line-clamp-2 mb-2 transition-colors group-hover:text-primary leading-snug">
+      <CategoryBadge category={article.category} className="mb-1.5" />
+      <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-1.5 transition-colors group-hover:text-primary leading-snug">
         <Link to={`/article/${article.id}`}>{article.title}</Link>
       </h3>
-      <p className="text-muted-foreground line-clamp-2 mb-3 text-sm">{article.excerpt}</p>
+      <p className="text-muted-foreground line-clamp-2 mb-2 text-sm">{article.excerpt}</p>
       <div className="flex items-center gap-3 text-sm text-muted-foreground">
         <span className="font-medium text-foreground">{article.author}</span>
         <span>·</span>

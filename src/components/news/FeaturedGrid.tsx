@@ -15,9 +15,9 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
   if (!main) return null;
 
   return (
-    <section className="pt-4 pb-8 md:pt-6 md:pb-12">
+    <section className="pt-3 pb-4 md:pt-4 md:pb-6">
       <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-3">
           {/* Main featured article */}
           <motion.div 
             className="lg:col-span-7 lg:row-span-2"
@@ -27,7 +27,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
           >
             <Link 
               to={`/article/${main.id}`}
-              className="group block relative overflow-hidden rounded-2xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[350px] lg:min-h-[460px]"
+              className="group block relative overflow-hidden rounded-2xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[300px] lg:min-h-[380px]"
             >
               <img 
                 src={main.image} 
@@ -36,12 +36,12 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
               
-              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-10">
-                <CategoryBadge category={main.category} className="mb-4" />
-                <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-[1.15] mb-3 tracking-tight">
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 lg:p-8">
+                <CategoryBadge category={main.category} className="mb-2" />
+                <h2 className="font-serif text-xl md:text-2xl lg:text-3xl font-bold text-white leading-[1.15] mb-2 tracking-tight">
                   {main.title}
                 </h2>
-                <p className="text-white/70 text-sm md:text-base line-clamp-2 mb-4 max-w-xl">
+                <p className="text-white/70 text-sm line-clamp-2 mb-3 max-w-xl">
                   {main.excerpt}
                 </p>
                 <div className="flex items-center gap-3 text-white/50 text-sm">
@@ -74,7 +74,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
             >
               <Link 
                 to={`/article/${article.id}`}
-                className="group flex gap-3 items-center p-2.5 rounded-xl hover:bg-muted/60 transition-all duration-300"
+                className="group flex gap-3 items-center p-2 rounded-xl hover:bg-muted/60 transition-all duration-300"
               >
                 <div className="relative flex-shrink-0 w-28 h-20 md:w-32 md:h-24 rounded-lg overflow-hidden">
                   <img 

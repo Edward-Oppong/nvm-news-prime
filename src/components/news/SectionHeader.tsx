@@ -29,7 +29,7 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <motion.div 
-      className="flex items-center gap-4 mb-8"
+      className="flex items-center gap-3 mb-5"
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
