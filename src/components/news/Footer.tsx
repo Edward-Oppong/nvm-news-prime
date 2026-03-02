@@ -5,12 +5,11 @@ import nvmLogo from '@/assets/nvm-logo.png';
 
 const footerLinks = {
   news: [
+    { name: 'General', href: '/category/general' },
+    { name: 'Entertainment', href: '/category/entertainment' },
     { name: 'Politics', href: '/category/politics' },
-    { name: 'Business', href: '/category/business' },
-    { name: 'Technology', href: '/category/tech' },
-    { name: 'Culture', href: '/category/culture' },
     { name: 'Sports', href: '/category/sports' },
-    { name: 'Opinion', href: '/category/opinion' },
+    { name: 'Business', href: '/category/business' },
   ],
   company: [
     { name: 'About Us', href: '/about' },
