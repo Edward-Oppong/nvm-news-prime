@@ -12,7 +12,7 @@ function LoadingSkeleton() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container pt-6 pb-12">
+      <div className="container pt-4 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
           <Skeleton className="lg:col-span-7 aspect-[4/3] lg:aspect-auto lg:min-h-[380px] rounded-2xl" />
           <div className="lg:col-span-5 space-y-3">

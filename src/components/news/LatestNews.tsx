@@ -27,9 +27,9 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
   const hasMore = visibleCount < articles.length;
 
   return (
-    <section className="py-5 md:py-8">
+    <section className="py-3 md:py-4">
       <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
           {/* Main content */}
           <div className="lg:col-span-8">
             <SectionHeader 
@@ -37,7 +37,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
               accentColor="accent"
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {articles.slice(0, visibleCount).map((article, index) => (
                 <motion.div
                   key={article.id}
@@ -57,7 +57,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
 
             {hasMore && (
               <motion.div 
-                className="mt-8 text-center"
+                className="mt-5 text-center"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}

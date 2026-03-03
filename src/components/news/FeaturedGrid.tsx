@@ -15,7 +15,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
   if (!main) return null;
 
   return (
-    <section className="pt-3 pb-4 md:pt-4 md:pb-6">
+    <section className="pt-2 pb-2 md:pt-3 md:pb-3">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-3">
           {/* Main featured article */}
