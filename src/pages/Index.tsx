@@ -2,7 +2,7 @@ import { Header } from '@/components/news/Header';
 import { LatestNews } from '@/components/news/LatestNews';
 import { Footer } from '@/components/news/Footer';
 import { FeaturedGrid } from '@/components/news/FeaturedGrid';
-import { CategoryNewsSection } from '@/components/news/CategoryNewsSection';
+
 import { MobileBottomNav } from '@/components/news/MobileBottomNav';
 import { useArticles, useFeaturedArticle, useTrendingArticles } from '@/hooks/useArticles';
 import { mockArticles, featuredArticle as mockFeatured, trendingArticles as mockTrending } from '@/data/mockArticles';
@@ -53,11 +53,6 @@ const Index = () => {
     return <LoadingSkeleton />;
   }
 
-  const generalArticles = allArticles.filter(a => a.category.toLowerCase() === 'general');
-  const entertainmentArticles = allArticles.filter(a => a.category.toLowerCase() === 'entertainment');
-  const politicsArticles = allArticles.filter(a => a.category.toLowerCase() === 'politics');
-  const sportsArticles = allArticles.filter(a => a.category.toLowerCase() === 'sports');
-  const businessArticles = allArticles.filter(a => a.category.toLowerCase() === 'business');
 
   return (
     <div className="min-h-screen bg-background animate-fade-in pb-16 md:pb-0">
@@ -66,54 +61,8 @@ const Index = () => {
       {/* Hero Featured Grid */}
       <FeaturedGrid articles={allArticles} />
 
-      {/* General News */}
-      <CategoryNewsSection 
-        title="General News" 
-        articles={generalArticles} 
-        accentColor="category-general"
-        linkHref="/category/general"
-      />
-
-      {/* Entertainment */}
-      <div className="bg-muted/30">
-        <CategoryNewsSection 
-          title="Entertainment" 
-          articles={entertainmentArticles} 
-          accentColor="category-entertainment"
-          linkHref="/category/entertainment"
-        />
-      </div>
-
-      {/* Politics */}
-      <CategoryNewsSection 
-        title="Politics" 
-        articles={politicsArticles} 
-        accentColor="category-politics"
-        linkHref="/category/politics"
-      />
-
-      {/* Sports */}
-      <div className="bg-muted/30">
-        <CategoryNewsSection 
-          title="Sports" 
-          articles={sportsArticles} 
-          accentColor="category-sports"
-          linkHref="/category/sports"
-        />
-      </div>
-
-      {/* Business */}
-      <CategoryNewsSection 
-        title="Business" 
-        articles={businessArticles} 
-        accentColor="category-business"
-        linkHref="/category/business"
-      />
-
       {/* Latest News with Trending Sidebar */}
-      <div className="bg-muted/30">
-        <LatestNews articles={allArticles.slice(1)} trending={displayTrending} />
-      </div>
+      <LatestNews articles={allArticles.slice(1)} trending={displayTrending} />
       
       <Footer />
       <MobileBottomNav />
