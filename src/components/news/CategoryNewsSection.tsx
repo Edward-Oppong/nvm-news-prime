@@ -22,7 +22,7 @@ export function CategoryNewsSection({
   const sideArticles = rest.slice(0, 3);
 
   return (
-    <section className="py-5 md:py-6">
+    <section className="py-4 md:py-5">
       <div className="container">
         <SectionHeader 
           title={title}
@@ -31,27 +31,27 @@ export function CategoryNewsSection({
           linkHref={linkHref}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
-          {/* Lead article — larger */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          {/* Lead article */}
           <motion.div
-            className="lg:col-span-6"
-            initial={{ opacity: 0, y: 20 }}
+            className="lg:col-span-5"
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
           >
             <ArticleCard article={lead} variant="large" index={0} />
           </motion.div>
 
-          {/* Side articles — stacked list */}
-          <div className="lg:col-span-6 flex flex-col justify-between">
+          {/* Side articles — stacked */}
+          <div className="lg:col-span-7 flex flex-col justify-between divide-y divide-divider">
             {sideArticles.map((article, index) => (
               <motion.div
                 key={article.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.08, duration: 0.4 }}
+                transition={{ delay: index * 0.06, duration: 0.35 }}
               >
                 <ArticleCard article={article} variant="horizontal" index={index + 1} />
               </motion.div>
