@@ -63,6 +63,9 @@ const Index = () => {
       {/* Hero Section — top stories */}
       <HeroSection articles={allArticles} />
 
+      {/* Latest News + Trending Sidebar */}
+      <LatestNews articles={allArticles.slice(6)} trending={displayTrending} />
+
       {/* Category Rows */}
       <CategoryNewsSection 
         title="Politics" 
@@ -101,9 +104,6 @@ const Index = () => {
 
       {/* Newsletter Signup */}
       <NewsletterSignup />
-
-      {/* Latest News + Trending Sidebar */}
-      <LatestNews articles={allArticles.slice(6)} trending={displayTrending} />
       
       <Footer />
       <MobileBottomNav />
