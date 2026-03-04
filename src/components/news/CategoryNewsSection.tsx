@@ -44,7 +44,7 @@ export function CategoryNewsSection({
           </motion.div>
 
           {/* Side articles — stacked */}
-          <div className="lg:col-span-7 flex flex-col justify-between divide-y divide-divider">
+          <div className="lg:col-span-7 flex flex-col divide-y divide-divider">
             {sideArticles.map((article, index) => (
               <motion.div
                 key={article.id}
