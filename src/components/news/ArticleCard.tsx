@@ -25,7 +25,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.08, duration: 0.4 }}
-        className="group flex gap-4 py-3 border-b border-divider last:border-0 hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors touch-feedback"
+        className="group flex gap-4 py-4 border-b border-divider last:border-0 hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors touch-feedback"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
