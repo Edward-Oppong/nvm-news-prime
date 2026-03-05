@@ -62,13 +62,13 @@ const Index = () => {
       <HeroSection articles={allArticles} />
 
       {/* Divider */}
-      <div className="container"><div className="h-px bg-divider" /></div>
+      <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
 
       {/* Latest News + Trending Sidebar */}
       <LatestNews articles={allArticles.slice(3)} trending={displayTrending} />
 
       {/* Divider */}
-      <div className="container"><div className="h-px bg-divider" /></div>
+      <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
 
       {/* Category Rows */}
       <CategoryNewsSection 
