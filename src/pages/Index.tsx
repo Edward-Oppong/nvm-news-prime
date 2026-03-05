@@ -61,8 +61,14 @@ const Index = () => {
       {/* Hero Section — top stories */}
       <HeroSection articles={allArticles} />
 
+      {/* Divider */}
+      <div className="container"><div className="h-px bg-divider" /></div>
+
       {/* Latest News + Trending Sidebar */}
       <LatestNews articles={allArticles.slice(6)} trending={displayTrending} />
+
+      {/* Divider */}
+      <div className="container"><div className="h-px bg-divider" /></div>
 
       {/* Category Rows */}
       <CategoryNewsSection 
@@ -72,14 +78,12 @@ const Index = () => {
         linkHref="/category/politics"
       />
 
-      <div className="bg-muted/30">
-        <CategoryNewsSection 
-          title="Sports" 
-          articles={sportsArticles} 
-          accentColor="category-sports"
-          linkHref="/category/sports"
-        />
-      </div>
+      <CategoryNewsSection 
+        title="Sports" 
+        articles={sportsArticles} 
+        accentColor="category-sports"
+        linkHref="/category/sports"
+      />
 
       <CategoryNewsSection 
         title="Entertainment" 
@@ -88,16 +92,13 @@ const Index = () => {
         linkHref="/category/entertainment"
       />
 
-      <div className="bg-muted/30">
-        <CategoryNewsSection 
-          title="Business" 
-          articles={businessArticles} 
-          accentColor="category-business"
-          linkHref="/category/business"
-        />
-      </div>
+      <CategoryNewsSection 
+        title="Business" 
+        articles={businessArticles} 
+        accentColor="category-business"
+        linkHref="/category/business"
+      />
 
-      
       <Footer />
       <MobileBottomNav />
     </div>

@@ -16,7 +16,7 @@ export function HeroSection({ articles }: HeroSectionProps) {
   if (!hero) return null;
 
   return (
-    <section className="py-3 md:py-4">
+    <section className="py-6 md:py-8">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
           {/* Hero main story */}
@@ -109,7 +109,7 @@ export function HeroSection({ articles }: HeroSectionProps) {
 
         {/* Tertiary strip — 4 small cards */}
         {tertiary.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-divider">
             {tertiary.map((article, i) => (
               <motion.div
                 key={article.id}
