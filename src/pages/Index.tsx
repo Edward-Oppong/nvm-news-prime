@@ -65,7 +65,7 @@ const Index = () => {
       <div className="container"><div className="h-px bg-divider" /></div>
 
       {/* Latest News + Trending Sidebar */}
-      <LatestNews articles={allArticles.slice(6)} trending={displayTrending} />
+      <LatestNews articles={allArticles.slice(3)} trending={displayTrending} />
 
       {/* Divider */}
       <div className="container"><div className="h-px bg-divider" /></div>

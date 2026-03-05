@@ -11,7 +11,6 @@ interface HeroSectionProps {
 export function HeroSection({ articles }: HeroSectionProps) {
   const [hero, ...rest] = articles;
   const secondary = rest.slice(0, 2);
-  const tertiary = rest.slice(2, 6);
 
   if (!hero) return null;
 
@@ -107,39 +106,6 @@ export function HeroSection({ articles }: HeroSectionProps) {
           </div>
         </div>
 
-        {/* Tertiary strip — 4 small cards */}
-        {tertiary.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-divider">
-            {tertiary.map((article, i) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + i * 0.06, duration: 0.4 }}
-              >
-                <Link
-                  to={`/article/${article.id}`}
-                  className="group flex gap-3 items-start p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-shrink-0 w-20 h-14 rounded-md overflow-hidden">
-                    <img
-                      src={article.image}
-                      alt={article.title}
-                      className="w-full h-full object-cover transition-transform duration-400 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <CategoryBadge category={article.category} className="mb-1 !text-[9px] !px-1.5 !py-0.5" />
-                    <h3 className="font-serif text-xs md:text-sm font-semibold leading-snug line-clamp-2 text-headline group-hover:text-primary transition-colors">
-                      {article.title}
-                    </h3>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );
