@@ -15,9 +15,9 @@ export function HeroSection({ articles }: HeroSectionProps) {
   if (!hero) return null;
 
   return (
-    <section className="py-6 md:py-8">
-      <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+    <section className="py-4 md:py-8">
+      <div className="container px-3 md:px-4 lg:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 md:gap-3">
           {/* Hero main story */}
           <motion.div
             className="lg:col-span-7"
@@ -35,8 +35,8 @@ export function HeroSection({ articles }: HeroSectionProps) {
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6">
+                <div className="flex items-center gap-2 mb-1.5 md:mb-2">
                   <CategoryBadge category={hero.category} />
                   {hero.breaking && (
                     <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-breaking text-breaking-foreground">
@@ -44,13 +44,13 @@ export function HeroSection({ articles }: HeroSectionProps) {
                     </span>
                   )}
                 </div>
-                <h1 className="font-serif text-xl md:text-2xl lg:text-3xl font-bold text-white leading-tight mb-2 tracking-tight">
+                <h1 className="font-serif text-lg md:text-2xl lg:text-3xl font-bold text-white leading-tight mb-1 md:mb-2 tracking-tight">
                   {hero.title}
                 </h1>
-                <p className="text-white/70 text-sm line-clamp-2 mb-2 max-w-lg">
+                <p className="text-white/70 text-xs md:text-sm line-clamp-2 mb-1.5 md:mb-2 max-w-lg hidden sm:block">
                   {hero.excerpt}
                 </p>
-                <div className="flex items-center gap-3 text-white/50 text-xs">
+                <div className="flex items-center gap-2 md:gap-3 text-white/50 text-[10px] md:text-xs">
                   <span className="font-medium text-white/75">{hero.author}</span>
                   <span className="w-1 h-1 rounded-full bg-white/40" />
                   <span className="flex items-center gap-1">
@@ -70,7 +70,7 @@ export function HeroSection({ articles }: HeroSectionProps) {
           </motion.div>
 
           {/* Secondary stories — right column */}
-          <div className="lg:col-span-5 flex flex-col gap-3">
+          <div className="lg:col-span-5 grid grid-cols-2 lg:grid-cols-1 gap-2 md:gap-3">
             {secondary.map((article, i) => (
               <motion.div
                 key={article.id}

@@ -27,8 +27,8 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
   const hasMore = visibleCount < articles.length;
 
   return (
-    <section className="py-6 md:py-8">
-      <div className="container">
+    <section className="py-4 md:py-8">
+      <div className="container px-3 md:px-4 lg:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           {/* Main content */}
           <div className="lg:col-span-8">

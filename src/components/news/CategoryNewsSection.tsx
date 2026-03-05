@@ -22,8 +22,8 @@ export function CategoryNewsSection({
   const sideArticles = rest.slice(0, 3);
 
   return (
-    <section className="py-6 md:py-8">
-      <div className="container">
+    <section className="py-4 md:py-8">
+      <div className="container px-3 md:px-4 lg:px-6">
         <SectionHeader 
           title={title}
           accentColor={accentColor}
