@@ -4,8 +4,6 @@ import { Footer } from '@/components/news/Footer';
 import { HeroSection } from '@/components/news/HeroSection';
 import { BreakingTicker } from '@/components/news/BreakingTicker';
 import { CategoryNewsSection } from '@/components/news/CategoryNewsSection';
-import { OpinionSection } from '@/components/news/OpinionSection';
-import { NewsletterSignup } from '@/components/news/NewsletterSignup';
 import { MobileBottomNav } from '@/components/news/MobileBottomNav';
 import { useArticles, useFeaturedArticle, useTrendingArticles } from '@/hooks/useArticles';
 import { mockArticles, featuredArticle as mockFeatured, trendingArticles as mockTrending } from '@/data/mockArticles';
@@ -99,11 +97,6 @@ const Index = () => {
         />
       </div>
 
-      {/* Opinion / Editorial */}
-      <OpinionSection articles={allArticles} />
-
-      {/* Newsletter Signup */}
-      <NewsletterSignup />
       
       <Footer />
       <MobileBottomNav />
