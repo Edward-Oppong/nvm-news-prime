@@ -4,6 +4,7 @@ import { Footer } from '@/components/news/Footer';
 import { HeroSection } from '@/components/news/HeroSection';
 import { BreakingTicker } from '@/components/news/BreakingTicker';
 import { CategoryNewsSection } from '@/components/news/CategoryNewsSection';
+import { VideoNewsSection } from '@/components/news/VideoNewsSection';
 import { MobileBottomNav } from '@/components/news/MobileBottomNav';
 import { useArticles, useFeaturedArticle, useTrendingArticles } from '@/hooks/useArticles';
 import { mockArticles, featuredArticle as mockFeatured, trendingArticles as mockTrending } from '@/data/mockArticles';
@@ -66,6 +67,12 @@ const Index = () => {
 
       {/* Latest News + Trending Sidebar */}
       <LatestNews articles={allArticles.slice(3)} trending={displayTrending} />
+
+      {/* Divider */}
+      <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
+
+      {/* Video News Section */}
+      <VideoNewsSection articles={allArticles} />
 
       {/* Divider */}
       <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
