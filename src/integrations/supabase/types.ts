@@ -46,6 +46,44 @@ export type Database = {
           },
         ]
       }
+      article_videos: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          id: string
+          sort_order: number
+          title: string | null
+          video_type: string
+          video_url: string
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          sort_order?: number
+          title?: string | null
+          video_type?: string
+          video_url: string
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          sort_order?: number
+          title?: string | null
+          video_type?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_videos_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       articles: {
         Row: {
           author_id: string | null
