@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MediaUpload } from '@/components/admin/MediaUpload';
+import { MediaUpload, type VideoItem } from '@/components/admin/MediaUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -41,6 +41,7 @@ export default function ArticleEditor() {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
+  const [videos, setVideos] = useState<VideoItem[]>([]);
 
   const [form, setForm] = useState({
     title: '',
@@ -97,11 +98,29 @@ export default function ArticleEditor() {
       author_id: data.author_id || '',
       image_url: data.image_url || '',
       video_url: data.video_url || '',
-      featured: data.featured,
-      breaking: data.breaking,
-      published: data.published,
+      featured: data.featured ?? false,
+      breaking: data.breaking ?? false,
+      published: data.published ?? false,
       read_time: data.read_time || '5 min read',
     });
+
+    // Fetch associated videos
+    const { data: videoData } = await supabase
+      .from('article_videos')
+      .select('*')
+      .eq('article_id', id)
+      .order('sort_order');
+
+    if (videoData) {
+      setVideos(videoData.map(v => ({
+        id: v.id,
+        video_url: v.video_url,
+        video_type: v.video_type as 'upload' | 'embed',
+        title: v.title || '',
+        sort_order: v.sort_order,
+      })));
+    }
+
     setLoading(false);
   };
 
@@ -121,6 +140,26 @@ export default function ArticleEditor() {
     }));
   };
 
+  const saveVideos = async (articleId: string) => {
+    // Delete existing videos for this article
+    await supabase.from('article_videos').delete().eq('article_id', articleId);
+
+    if (videos.length === 0) return;
+
+    const videoRows = videos.map((v, i) => ({
+      article_id: articleId,
+      video_url: v.video_url,
+      video_type: v.video_type,
+      title: v.title || null,
+      sort_order: i,
+    }));
+
+    const { error } = await supabase.from('article_videos').insert(videoRows);
+    if (error) {
+      console.error('Failed to save videos:', error);
+      toast.error('Failed to save some videos');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +201,7 @@ export default function ArticleEditor() {
       if (error) {
         toast.error(error.message);
       } else {
-        // Invalidate all article queries to refresh the frontend
+        await saveVideos(id!);
         await queryClient.invalidateQueries({ queryKey: ['articles'] });
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
@@ -170,9 +209,11 @@ export default function ArticleEditor() {
         navigate('/admin/articles');
       }
     } else {
-      const { error } = await supabase
+      const { data: inserted, error } = await supabase
         .from('articles')
-        .insert(articleData);
+        .insert(articleData)
+        .select('id')
+        .single();
 
       if (error) {
         if (error.code === '23505') {
@@ -180,8 +221,8 @@ export default function ArticleEditor() {
         } else {
           toast.error(error.message);
         }
-      } else {
-        // Invalidate all article queries to refresh the frontend
+      } else if (inserted) {
+        await saveVideos(inserted.id);
         await queryClient.invalidateQueries({ queryKey: ['articles'] });
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
@@ -225,8 +266,10 @@ export default function ArticleEditor() {
         <MediaUpload
           imageUrl={form.image_url}
           videoUrl={form.video_url}
+          videos={videos}
           onImageChange={(url) => setForm(prev => ({ ...prev, image_url: url }))}
           onVideoChange={(url) => setForm(prev => ({ ...prev, video_url: url }))}
+          onVideosChange={setVideos}
         />
 
         {/* Title & Slug */}
