@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Search } from 'lucide-react';
+import { Home, Compass, Search, Video } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
 const navItems = [
   { icon: Home, label: 'Home', href: '/' },
+  { icon: Video, label: 'Videos', href: '/videos' },
   { icon: Compass, label: 'Explore', href: '/category/general' },
   { icon: Search, label: 'Search', href: '/search' },
 ];

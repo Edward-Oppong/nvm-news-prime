@@ -11,6 +11,7 @@ const categories = [
   { name: 'Politics', href: '/category/politics', color: 'category-politics' },
   { name: 'Sports', href: '/category/sports', color: 'category-sports' },
   { name: 'Business', href: '/category/business', color: 'category-business' },
+  { name: 'Videos', href: '/videos', color: 'category-general' },
 ];
 
 export function Header() {

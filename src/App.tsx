@@ -11,6 +11,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import SearchPage from "./pages/SearchPage";
+import VideosPage from "./pages/VideosPage";
 
 // Admin Pages
 import AdminAuth from "./pages/admin/AdminAuth";
@@ -63,6 +64,7 @@ function AnimatedRoutes() {
         <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
         <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
+        <Route path="/videos" element={<PageWrapper><VideosPage /></PageWrapper>} />
         
         {/* Admin Routes */}
         <Route path="/admin/auth" element={<AdminAuth />} />

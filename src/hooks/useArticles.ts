@@ -239,6 +239,40 @@ export function useRelatedArticles(articleId: string, category: Category) {
   });
 }
 
+// Fetch video articles (articles with video_url)
+export function useVideoArticles() {
+  return useQuery({
+    queryKey: ['video-articles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select(`
+          id,
+          slug,
+          title,
+          excerpt,
+          content,
+          image_url,
+          video_url,
+          read_time,
+          featured,
+          breaking,
+          published,
+          published_at,
+          created_at,
+          categories (slug, name),
+          authors_public (name, avatar_url)
+        `)
+        .eq('published', true)
+        .not('video_url', 'is', null)
+        .order('published_at', { ascending: false, nullsFirst: false });
+
+      if (error) throw error;
+      return (data as DBArticle[]).map(transformArticle);
+    },
+  });
+}
+
 // Fetch trending articles (most recent from various categories)
 export function useTrendingArticles(limit = 5) {
   return useQuery({
