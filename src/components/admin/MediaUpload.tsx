@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Loader2, X, Image as ImageIcon, Video, Play, Upload, Link as LinkIcon } from 'lucide-react';
+import { Loader2, X, Image as ImageIcon, Video, Play, Upload, Link as LinkIcon, Plus, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,18 +7,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+export interface VideoItem {
+  id?: string;
+  video_url: string;
+  video_type: 'upload' | 'embed';
+  title: string;
+  sort_order: number;
+}
+
 interface MediaUploadProps {
   imageUrl: string;
   videoUrl: string;
+  videos: VideoItem[];
   onImageChange: (url: string) => void;
   onVideoChange: (url: string) => void;
+  onVideosChange: (videos: VideoItem[]) => void;
 }
 
 function isEmbedUrl(url: string) {
   return /youtube\.com|youtu\.be|vimeo\.com/i.test(url);
 }
 
-export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }: MediaUploadProps) {
+export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideoChange, onVideosChange }: MediaUploadProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -26,6 +36,8 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
   const [embedUrl, setEmbedUrl] = useState('');
+  const [newVideoTitle, setNewVideoTitle] = useState('');
+  const [embedTitle, setEmbedTitle] = useState('');
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,7 +76,7 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
   const cancelImagePreview = () => { setImagePreview(null); setSelectedImageFile(null); if (imageInputRef.current) imageInputRef.current.value = ''; };
   const removeImage = () => { onImageChange(''); setImagePreview(null); setSelectedImageFile(null); };
 
-  // --- Video file handlers ---
+  // --- Video file upload (adds to videos list) ---
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -72,6 +84,7 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
     if (file.size > 100 * 1024 * 1024) { toast.error('Video must be less than 100MB'); return; }
     setSelectedVideoFile(file);
     setVideoPreview(URL.createObjectURL(file));
+    setNewVideoTitle(file.name.replace(/\.[^/.]+$/, ''));
   };
 
   const uploadVideo = async () => {
@@ -86,26 +99,71 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
       const { error } = await supabase.storage.from('article-videos').upload(filePath, selectedVideoFile, { cacheControl: '3600', upsert: false });
       if (error) { toast.error(error.message || 'Failed to upload video'); return; }
       const { data: { publicUrl } } = supabase.storage.from('article-videos').getPublicUrl(filePath);
-      onVideoChange(publicUrl);
+      
+      // Also set the legacy video_url to the first video
+      if (!videoUrl && videos.length === 0) {
+        onVideoChange(publicUrl);
+      }
+
+      const newVideo: VideoItem = {
+        video_url: publicUrl,
+        video_type: 'upload',
+        title: newVideoTitle || 'Untitled Video',
+        sort_order: videos.length,
+      };
+      onVideosChange([...videos, newVideo]);
+
       setVideoPreview(null);
       setSelectedVideoFile(null);
+      setNewVideoTitle('');
       toast.success('Video uploaded');
       if (videoInputRef.current) videoInputRef.current.value = '';
     } catch { toast.error('An unexpected error occurred'); } finally { setUploadingVideo(false); }
   };
 
-  const cancelVideoPreview = () => { if (videoPreview) URL.revokeObjectURL(videoPreview); setVideoPreview(null); setSelectedVideoFile(null); if (videoInputRef.current) videoInputRef.current.value = ''; };
-  const removeVideo = () => { onVideoChange(''); setVideoPreview(null); setSelectedVideoFile(null); setEmbedUrl(''); };
+  const cancelVideoPreview = () => {
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+    setVideoPreview(null);
+    setSelectedVideoFile(null);
+    setNewVideoTitle('');
+    if (videoInputRef.current) videoInputRef.current.value = '';
+  };
 
-  // --- Embed handler ---
+  // --- Embed handler (adds to videos list) ---
   const handleEmbedSubmit = () => {
     if (!embedUrl.trim()) { toast.error('Please enter a URL'); return; }
     if (!isEmbedUrl(embedUrl)) { toast.error('Please enter a valid YouTube or Vimeo URL'); return; }
-    onVideoChange(embedUrl.trim());
+    
+    if (!videoUrl && videos.length === 0) {
+      onVideoChange(embedUrl.trim());
+    }
+
+    const newVideo: VideoItem = {
+      video_url: embedUrl.trim(),
+      video_type: 'embed',
+      title: embedTitle || 'Embedded Video',
+      sort_order: videos.length,
+    };
+    onVideosChange([...videos, newVideo]);
+    setEmbedUrl('');
+    setEmbedTitle('');
     toast.success('Video embed added');
   };
 
-  const currentVideoIsEmbed = videoUrl && isEmbedUrl(videoUrl);
+  // --- Remove a video from list ---
+  const removeVideoItem = (index: number) => {
+    const updated = videos.filter((_, i) => i !== index);
+    // Re-index sort_order
+    const reordered = updated.map((v, i) => ({ ...v, sort_order: i }));
+    onVideosChange(reordered);
+
+    // Update legacy video_url
+    if (reordered.length > 0) {
+      onVideoChange(reordered[0].video_url);
+    } else {
+      onVideoChange('');
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -162,16 +220,18 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
         {/* Video Upload Tab */}
         <TabsContent value="video-upload" className="mt-4">
           <div className="border-2 border-dashed border-divider rounded-xl p-6 bg-muted/30">
-            {videoUrl && !videoPreview && !currentVideoIsEmbed ? (
-              <div className="relative">
-                <video src={videoUrl} className="w-full h-64 object-cover rounded-lg bg-black" controls />
-                <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={removeVideo}><X className="h-4 w-4" /></Button>
-              </div>
-            ) : videoPreview ? (
+            {videoPreview ? (
               <div className="space-y-4">
                 <div className="relative">
                   <video src={videoPreview} className="w-full h-64 object-cover rounded-lg bg-black border-2 border-primary/50" controls />
                   <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium flex items-center gap-1"><Play className="h-3 w-3" />Preview</div>
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    value={newVideoTitle}
+                    onChange={(e) => setNewVideoTitle(e.target.value)}
+                    placeholder="Video title (optional)"
+                  />
                 </div>
                 <div className="flex items-center justify-center gap-3">
                   <Button type="button" variant="outline" onClick={cancelVideoPreview} disabled={uploadingVideo}>Cancel</Button>
@@ -194,28 +254,17 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
         {/* Video Embed Tab */}
         <TabsContent value="video-embed" className="mt-4">
           <div className="border-2 border-dashed border-divider rounded-xl p-6 bg-muted/30">
-            {currentVideoIsEmbed ? (
-              <div className="space-y-4">
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
-                  <iframe
-                    src={getEmbedSrc(videoUrl)}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
+            <div className="space-y-4">
+              <div className="flex flex-col items-center justify-center py-4">
+                <LinkIcon className="h-10 w-10 text-muted-foreground mb-4" />
+                <span className="text-muted-foreground font-medium mb-4">Paste a YouTube or Vimeo URL</span>
+                <div className="w-full max-w-lg space-y-2">
+                  <Input
+                    value={embedTitle}
+                    onChange={(e) => setEmbedTitle(e.target.value)}
+                    placeholder="Video title (optional)"
                   />
-                </div>
-                <div className="flex items-center justify-center">
-                  <Button type="button" variant="destructive" size="sm" onClick={removeVideo}>
-                    <X className="h-4 w-4 mr-2" />Remove Embed
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center py-8">
-                  <LinkIcon className="h-10 w-10 text-muted-foreground mb-4" />
-                  <span className="text-muted-foreground font-medium mb-4">Paste a YouTube or Vimeo URL</span>
-                  <div className="flex gap-2 w-full max-w-lg">
+                  <div className="flex gap-2">
                     <Input
                       value={embedUrl}
                       onChange={(e) => setEmbedUrl(e.target.value)}
@@ -223,15 +272,54 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
                       className="flex-1"
                     />
                     <Button type="button" onClick={handleEmbedSubmit}>
-                      Add Video
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
                     </Button>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Videos list */}
+      {videos.length > 0 && (
+        <div className="space-y-2">
+          <Label>Videos ({videos.length})</Label>
+          <div className="space-y-2">
+            {videos.map((video, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/20"
+              >
+                <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {video.video_type === 'embed' ? (
+                    <LinkIcon className="h-4 w-4 text-blue-500" />
+                  ) : (
+                    <Video className="h-4 w-4 text-green-500" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{video.title || 'Untitled'}</p>
+                  <p className="text-xs text-muted-foreground truncate">{video.video_url}</p>
+                </div>
+                <span className="text-xs text-muted-foreground flex-shrink-0 capitalize">{video.video_type}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeVideoItem(index)}
+                  className="flex-shrink-0 text-destructive hover:text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Status indicators */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -241,10 +329,10 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
             Image attached
           </span>
         )}
-        {videoUrl && (
+        {videos.length > 0 && (
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500" />
-            {currentVideoIsEmbed ? 'Video embed' : 'Video file'} attached
+            {videos.length} video{videos.length !== 1 ? 's' : ''} attached
           </span>
         )}
       </div>
@@ -254,13 +342,9 @@ export function MediaUpload({ imageUrl, videoUrl, onImageChange, onVideoChange }
 
 // Convert YouTube/Vimeo URLs to embeddable format
 export function getEmbedSrc(url: string): string {
-  // YouTube
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  
-  // Vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-  
   return url;
 }
