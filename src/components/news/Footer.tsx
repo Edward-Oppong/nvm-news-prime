@@ -37,7 +37,9 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-headline text-white/70">
+    // Fix: replaced `bg-headline` (a CSS variable that shifts with the theme) with a
+    // fixed dark color so the footer always stays dark regardless of light/dark mode toggle.
+    <footer className="bg-gray-950 text-white/70">
       <div className="container px-3 md:px-4 lg:px-6 py-8 md:py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8">
           {/* Brand column */}

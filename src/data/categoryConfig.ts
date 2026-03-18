@@ -1,9 +1,9 @@
-import { Category } from '@/types/news';
-import bannerGeneral from '@/assets/banner-general.jpg';
-import bannerEntertainment from '@/assets/banner-entertainment.jpg';
-import bannerPolitics from '@/assets/banner-politics.jpg';
-import bannerSports from '@/assets/banner-sports.jpg';
-import bannerBusiness from '@/assets/banner-business.jpg';
+import { Category } from "@/types/news";
+import bannerGeneral from "@/assets/hero-general.jpg";
+import bannerEntertainment from "@/assets/hero-entertainment.jpg";
+import bannerPolitics from "@/assets/hero-politics.jpg";
+import bannerSports from "@/assets/hero-sports.jpg";
+import bannerBusiness from "@/assets/hero-business.jpg";
 
 export interface CategoryConfig {
   slug: Category;
@@ -15,38 +15,43 @@ export interface CategoryConfig {
 
 export const categoryConfigs: Record<Category, CategoryConfig> = {
   general: {
-    slug: 'general',
-    name: 'General News',
-    description: 'Breaking stories, world events, and the headlines shaping our daily lives.',
+    slug: "general",
+    name: "General News",
+    description:
+      "Breaking stories, world events, and the headlines shaping our daily lives.",
     banner: bannerGeneral,
-    color: 'category-general',
+    color: "category-general",
   },
   entertainment: {
-    slug: 'entertainment',
-    name: 'Entertainment',
-    description: 'Movies, music, celebrity news, and the cultural moments everyone is talking about.',
+    slug: "entertainment",
+    name: "Entertainment",
+    description:
+      "Movies, music, celebrity news, and the cultural moments everyone is talking about.",
     banner: bannerEntertainment,
-    color: 'category-entertainment',
+    color: "category-entertainment",
   },
   politics: {
-    slug: 'politics',
-    name: 'Politics',
-    description: 'In-depth coverage of government, policy, and the people shaping our political landscape.',
+    slug: "politics",
+    name: "Politics",
+    description:
+      "In-depth coverage of government, policy, and the people shaping our political landscape.",
     banner: bannerPolitics,
-    color: 'category-politics',
+    color: "category-politics",
   },
   sports: {
-    slug: 'sports',
-    name: 'Sports',
-    description: 'Comprehensive coverage of athletics, from breaking scores to in-depth analysis.',
+    slug: "sports",
+    name: "Sports",
+    description:
+      "Comprehensive coverage of athletics, from breaking scores to in-depth analysis.",
     banner: bannerSports,
-    color: 'category-sports',
+    color: "category-sports",
   },
   business: {
-    slug: 'business',
-    name: 'Business',
-    description: 'Market insights, economic analysis, and the latest from the world of finance and commerce.',
+    slug: "business",
+    name: "Business",
+    description:
+      "Market insights, economic analysis, and the latest from the world of finance and commerce.",
     banner: bannerBusiness,
-    color: 'category-business',
+    color: "category-business",
   },
 };

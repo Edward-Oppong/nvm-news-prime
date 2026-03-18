@@ -1,4 +1,5 @@
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { BubbleMenu } from "@tiptap/react/menus"
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
@@ -354,7 +355,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
 
       {/* Bubble Menu for quick formatting */}
       {editor && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
+        <BubbleMenu editor={editor}>
           <div className="flex items-center gap-1 bg-background border border-input rounded-lg shadow-lg p-1">
             <Toggle
               size="sm"

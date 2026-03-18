@@ -78,7 +78,7 @@ export function Header() {
             <motion.img 
               src={nvmLogo} 
               alt="NVM News - Nhyiraba Viglio Media" 
-              className="h-10 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
+              className="h-15 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             />
