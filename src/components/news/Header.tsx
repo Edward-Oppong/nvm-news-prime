@@ -74,7 +74,7 @@ export function Header() {
           </motion.button>
 
           {/* Logo */}
-          <Link to="/" className="flex-shrink-0 group">
+          <Link to="/" className="hidden sm:flex-shrink-0 group">
             <motion.img 
               src={nvmLogo} 
               alt="NVM News - Nhyiraba Viglio Media" 
