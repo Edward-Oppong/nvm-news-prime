@@ -40,19 +40,35 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          // Keep loading=true while we fetch the admin role
-          setAuthState(prev => ({
-            ...prev,
-            session,
-            user: session.user,
-            isAdmin: false,
-            loading: true,
-          }));
-          // Use setTimeout to avoid Supabase deadlock when calling DB inside onAuthStateChange
-          setTimeout(() => {
-            checkAdminStatus(session.user.id);
-          }, 0);
+          if (event === 'TOKEN_REFRESHED') {
+            // Silently update session & user without re-checking the role or
+            // showing the loading spinner — this prevents the "refresh loop"
+            // that appears every time Supabase auto-refreshes the JWT.
+            setAuthState(prev => ({
+              ...prev,
+              session,
+              user: session.user,
+              // loading stays false; isAdmin is preserved
+            }));
+          } else {
+            // INITIAL_SESSION or SIGNED_IN — need to (re-)verify the role.
+            // Keep loading=true to block protected routes until we know.
+            setAuthState(prev => ({
+              ...prev,
+              session,
+              user: session.user,
+              // Preserve isAdmin for the SAME user (avoids flicker on re-mount)
+              isAdmin: prev.user?.id === session.user.id ? prev.isAdmin : false,
+              loading: true,
+            }));
+            // setTimeout avoids a Supabase deadlock when querying the DB
+            // from inside the onAuthStateChange callback.
+            setTimeout(() => {
+              checkAdminStatus(session.user.id);
+            }, 0);
+          }
         } else {
+          // SIGNED_OUT — clear everything immediately
           setAuthState({
             user: null,
             session: null,
