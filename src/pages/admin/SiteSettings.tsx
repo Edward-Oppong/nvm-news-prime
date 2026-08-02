@@ -93,9 +93,9 @@ export default function SiteSettings() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-serif font-bold text-headline">Site Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">Site Settings</h1>
         <p className="text-muted-foreground mt-1 text-sm">
           Edit legal page content that displays publicly on the website.
         </p>

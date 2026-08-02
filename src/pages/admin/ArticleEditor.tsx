@@ -243,14 +243,14 @@ export default function ArticleEditor() {
   }
 
   return (
-    <div className="p-8 max-w-4xl">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl">
+      <div className="flex items-center gap-4 mb-6 sm:mb-8">
         <Button variant="ghost" size="sm" onClick={() => navigate('/admin/articles')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-serif font-bold text-headline">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">
             {isEditing ? 'Edit Article' : 'New Article'}
           </h1>
         </div>

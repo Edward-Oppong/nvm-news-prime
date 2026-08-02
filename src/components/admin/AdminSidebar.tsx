@@ -8,14 +8,19 @@ import {
   Users, 
   Settings,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  onClose?: () => void;
+}
+
+export function AdminSidebar({ onClose }: AdminSidebarProps) {
   const location = useLocation();
   const { signOut, user } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
@@ -53,13 +58,24 @@ export function AdminSidebar() {
   return (
     <aside className="w-64 bg-surface-elevated border-r border-divider min-h-screen flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-divider">
-        <Link to="/admin" className="block">
+      <div className="p-6 border-b border-divider flex items-center justify-between">
+        <Link to="/admin" className="block" onClick={onClose}>
           <h1 className="font-serif text-xl font-bold text-headline">
             NVM<span className="text-primary">News</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">Admin Dashboard</p>
         </Link>
+
+        {/* Close button — only shown on mobile when rendered as a drawer */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            aria-label="Close navigation"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -72,6 +88,7 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               to={item.href}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
                 isActive
@@ -79,7 +96,7 @@ export function AdminSidebar() {
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 shrink-0" />
               <span className="flex-1">{item.label}</span>
               {!!item.badge && item.badge > 0 && (
                 <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-accent text-accent-foreground">
@@ -96,9 +113,10 @@ export function AdminSidebar() {
         <Link
           to="/"
           target="_blank"
+          onClick={onClose}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
-          <ExternalLink className="h-5 w-5" />
+          <ExternalLink className="h-5 w-5 shrink-0" />
           View Site
         </Link>
         
@@ -111,7 +129,7 @@ export function AdminSidebar() {
           onClick={handleSignOut}
           className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-5 w-5 shrink-0" />
           Sign Out
         </Button>
       </div>

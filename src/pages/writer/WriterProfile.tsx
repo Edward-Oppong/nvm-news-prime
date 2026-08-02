@@ -117,12 +117,12 @@ export default function WriterProfile() {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
       <div className="mb-8">
         <span className="text-xs font-bold uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
           Journalist Identity &amp; CMS Profile
         </span>
-        <h1 className="font-serif text-3xl font-bold text-headline mt-2">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-headline mt-2">
           My Journalist Profile
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -130,7 +130,7 @@ export default function WriterProfile() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-surface-elevated rounded-2xl border border-divider p-8 space-y-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="bg-surface-elevated rounded-2xl border border-divider p-4 sm:p-6 lg:p-8 space-y-6 shadow-sm">
         {/* Profile Avatar Upload (Main Option) */}
         <div className="space-y-3 pb-6 border-b border-divider">
           <Label className="text-base font-semibold">Profile Avatar Photo</Label>

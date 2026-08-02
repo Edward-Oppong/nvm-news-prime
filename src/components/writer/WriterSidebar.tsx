@@ -5,7 +5,8 @@ import {
   User,
   LogOut,
   ExternalLink,
-  PenTool
+  PenTool,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,7 +18,11 @@ const navItems = [
   { label: 'My Profile', href: '/writer/profile', icon: User },
 ];
 
-export function WriterSidebar() {
+interface WriterSidebarProps {
+  onClose?: () => void;
+}
+
+export function WriterSidebar({ onClose }: WriterSidebarProps) {
   const location = useLocation();
   const { signOut, user } = useAuth();
 
@@ -29,8 +34,8 @@ export function WriterSidebar() {
   return (
     <aside className="w-64 bg-surface-elevated border-r border-divider min-h-screen flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-divider">
-        <Link to="/writer" className="block">
+      <div className="p-6 border-b border-divider flex items-center justify-between">
+        <Link to="/writer" className="block" onClick={onClose}>
           <div className="flex items-center gap-2">
             <PenTool className="h-5 w-5 text-primary" />
             <h1 className="font-serif text-xl font-bold text-headline">
@@ -39,6 +44,17 @@ export function WriterSidebar() {
           </div>
           <p className="text-xs text-muted-foreground mt-1">Writer Portal</p>
         </Link>
+
+        {/* Close button — only shown on mobile when rendered as a drawer */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            aria-label="Close navigation"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -51,6 +67,7 @@ export function WriterSidebar() {
             <Link
               key={item.href}
               to={item.href}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
                 isActive
@@ -58,7 +75,7 @@ export function WriterSidebar() {
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 shrink-0" />
               {item.label}
             </Link>
           );
@@ -70,9 +87,10 @@ export function WriterSidebar() {
         <Link
           to="/"
           target="_blank"
+          onClick={onClose}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
-          <ExternalLink className="h-5 w-5" />
+          <ExternalLink className="h-5 w-5 shrink-0" />
           View Site
         </Link>
         
@@ -86,7 +104,7 @@ export function WriterSidebar() {
           onClick={handleSignOut}
           className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-5 w-5 shrink-0" />
           Sign Out
         </Button>
       </div>

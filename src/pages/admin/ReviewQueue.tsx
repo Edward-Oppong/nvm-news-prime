@@ -159,12 +159,12 @@ export default function ReviewQueue() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-serif font-bold text-headline">Editorial Review Queue</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">Editorial Review Queue</h1>
             <span className="px-2.5 py-1 text-xs font-bold bg-accent/20 text-accent-foreground rounded-full">
               {articles.length} Pending
             </span>

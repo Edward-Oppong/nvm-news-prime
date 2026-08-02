@@ -100,14 +100,14 @@ export default function ArticlesList() {
   );
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-headline">Articles</h1>
-          <p className="text-muted-foreground mt-1">{articles.length} total articles</p>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">Articles</h1>
+          <p className="text-muted-foreground mt-1 text-sm">{articles.length} total articles</p>
         </div>
         <Link to="/admin/articles/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             New Article
           </Button>
@@ -136,7 +136,8 @@ export default function ArticlesList() {
             <p className="text-muted-foreground">No articles found</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
             <thead className="bg-muted/50 border-b border-divider">
               <tr>
                 <th className="text-left p-4 font-medium text-muted-foreground">Title</th>
@@ -216,6 +217,7 @@ export default function ArticlesList() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
