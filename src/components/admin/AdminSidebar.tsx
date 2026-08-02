@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   FolderOpen, 
   Users, 
+  Settings,
   LogOut,
   ExternalLink
 } from 'lucide-react';
@@ -41,6 +42,7 @@ export function AdminSidebar() {
     { label: 'Articles', href: '/admin/articles', icon: FileText },
     { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
     { label: 'Authors', href: '/admin/authors', icon: Users },
+    { label: 'Site Settings', href: '/admin/settings', icon: Settings },
   ];
 
   const handleSignOut = async () => {

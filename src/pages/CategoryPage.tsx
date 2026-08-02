@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/news/Header';
@@ -9,15 +10,36 @@ import { useArticlesByCategory } from '@/hooks/useArticles';
 import { categoryConfigs } from '@/data/categoryConfig';
 import { Category } from '@/types/news';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
-  
   const categoryKey = category as Category;
   const config = categoryConfigs[categoryKey];
-  
+
   const { data: dbArticles, isLoading } = useArticlesByCategory(categoryKey);
   const articles = dbArticles ?? [];
+
+  // Fetch DB-managed hero image & description
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [categoryDescription, setCategoryDescription] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!categoryKey) return;
+    supabase
+      .from('categories')
+      .select('hero_image_url, description')
+      .eq('slug', categoryKey)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.hero_image_url) setHeroImageUrl(data.hero_image_url);
+        if (data?.description) setCategoryDescription(data.description);
+      });
+  }, [categoryKey]);
+
+  // DB value takes priority; local bundled asset is the fallback
+  const bannerSrc = heroImageUrl || config?.banner;
+  const description = categoryDescription || config?.description;
 
   if (!config) {
     return (
@@ -26,9 +48,7 @@ export default function CategoryPage() {
         <main className="container py-20 text-center">
           <h1 className="headline-xl mb-4">Category Not Found</h1>
           <p className="text-muted-foreground mb-8">The category you're looking for doesn't exist.</p>
-          <Link to="/" className="text-primary hover:underline">
-            ← Back to Home
-          </Link>
+          <Link to="/" className="text-primary hover:underline">← Back to Home</Link>
         </main>
         <Footer />
       </div>
@@ -44,7 +64,7 @@ export default function CategoryPage() {
         <section className="relative h-[40vh] md:h-[50vh] flex items-end overflow-hidden">
           <div className="absolute inset-0">
             <img
-              src={config.banner}
+              src={bannerSrc}
               alt={config.name}
               className="w-full h-full object-cover"
             />
@@ -57,23 +77,20 @@ export default function CategoryPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              {/* Breadcrumb */}
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors mb-4"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Link>
 
-              {/* Category name */}
               <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
                 {config.name}
               </h1>
 
-              {/* Description */}
               <p className="text-lg md:text-xl text-white/80 max-w-2xl">
-                {config.description}
+                {description}
               </p>
             </motion.div>
           </div>
@@ -82,7 +99,6 @@ export default function CategoryPage() {
         {/* Articles Grid */}
         <section className="py-8 md:py-12">
           <div className="container">
-            {/* Article count */}
             <div className="flex items-center justify-between mb-8">
               <p className="text-muted-foreground">
                 <span className="font-semibold text-foreground">{articles.length}</span> articles
@@ -98,14 +114,12 @@ export default function CategoryPage() {
               </div>
             ) : articles.length > 0 ? (
               <>
-                {/* Featured article */}
                 {articles[0] && (
                   <div className="mb-12">
                     <ArticleCard article={articles[0]} variant="large" index={0} />
                   </div>
                 )}
 
-                {/* Rest of articles */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {articles.slice(1).map((article, index) => (
                     <ArticleCard
@@ -117,7 +131,6 @@ export default function CategoryPage() {
                   ))}
                 </div>
 
-                {/* Load more button */}
                 {articles.length > 6 && (
                   <div className="mt-12 text-center">
                     <button className="inline-flex items-center px-8 py-3 border border-foreground text-foreground font-medium rounded-lg hover:bg-foreground hover:text-background transition-colors">
@@ -128,12 +141,8 @@ export default function CategoryPage() {
               </>
             ) : (
               <div className="text-center py-16">
-                <p className="text-xl text-muted-foreground mb-4">
-                  No articles in this category yet.
-                </p>
-                <Link to="/" className="text-primary hover:underline">
-                  ← Browse all stories
-                </Link>
+                <p className="text-xl text-muted-foreground mb-4">No articles in this category yet.</p>
+                <Link to="/" className="text-primary hover:underline">← Browse all stories</Link>
               </div>
             )}
           </div>

@@ -14,9 +14,8 @@ const footerLinks = {
     { name: 'About Us', href: '/about' },
     { name: 'Contact', href: '/contact' },
     { name: 'Careers', href: '/admin/authors' },
-    { name: 'Advertise', href: '/admin' },
-    { name: 'Press', href: '/admin' },
-    { name: 'Writer CMS', href: '/admin/auth' },
+    { name: 'Writer CMS', href: '/writer/auth' },
+    { name: 'Admin Portal', href: '/admin/auth' },
   ],
   legal: [
     { name: 'Terms of Service', href: '/terms' },

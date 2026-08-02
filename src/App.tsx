@@ -25,12 +25,14 @@ import ArticleEditor from "./pages/admin/ArticleEditor";
 import CategoriesList from "./pages/admin/CategoriesList";
 import AuthorsList from "./pages/admin/AuthorsList";
 import ReviewQueue from "./pages/admin/ReviewQueue";
+import SiteSettings from "./pages/admin/SiteSettings";
 
 // Writer Pages
 import WriterAuth from "./pages/writer/WriterAuth";
 import { WriterLayout } from "./components/writer/WriterLayout";
 import WriterPortal from "./pages/writer/WriterPortal";
 import WriterArticleEditor from "./pages/writer/WriterArticleEditor";
+import WriterProfile from "./pages/writer/WriterProfile";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +98,7 @@ function AnimatedRoutes() {
           <Route index element={<WriterPortal />} />
           <Route path="articles/new" element={<WriterArticleEditor />} />
           <Route path="articles/:id" element={<WriterArticleEditor />} />
+          <Route path="profile" element={<WriterProfile />} />
         </Route>
 
         {/* Admin Routes */}
@@ -108,6 +111,7 @@ function AnimatedRoutes() {
           <Route path="articles/:id" element={<ArticleEditor />} />
           <Route path="categories" element={<CategoriesList />} />
           <Route path="authors" element={<AuthorsList />} />
+          <Route path="settings" element={<SiteSettings />} />
         </Route>
         
         {/* Catch-all */}

@@ -1,73 +1,339 @@
-# Welcome to your Lovable project
+# 📰 NhyiraBa Viglo News
 
-## Project info
+**Official Website:** https://nvmnews.com
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+NhyiraBa Viglo News is a modern digital news platform built to deliver accurate, timely, and engaging news content across multiple categories. The platform provides readers with a fast, responsive, and secure experience while enabling editors and administrators to efficiently publish and manage news articles.
 
-## How can I edit this code?
+The application is built using **React**, **TypeScript**, and **Vite**, providing excellent performance, fast development, and an optimized production build.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 🌐 Live Website
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+https://nvmnews.com
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+# 📖 Table of Contents
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Overview
+- Features
+- Technology Stack
+- Project Structure
+- Getting Started
+- Installation
+- Running the Project
+- Building for Production
+- Environment Variables
+- Deployment
+- Performance
+- Security
+- Browser Compatibility
+- Future Improvements
+- Contributing
+- License
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+# 🚀 Overview
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+NhyiraBa Viglo News is designed to provide a seamless digital news reading experience. The platform focuses on speed, usability, and accessibility while supporting scalable content delivery.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+The application leverages Vite's lightning-fast development server and React's component architecture to create a responsive user interface that works across desktops, tablets, and mobile devices.
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# ✨ Features
+
+## News Management
+
+- Latest news articles
+- Featured news
+- Breaking news
+- Category-based browsing
+- Article detail pages
+- Responsive article layouts
+
+## User Experience
+
+- Fully responsive design
+- Fast page loading
+- Modern user interface
+- Smooth navigation
+- Mobile-first design
+
+## Performance
+
+- Vite optimized builds
+- Lazy loading
+- Code splitting
+- Optimized assets
+- Fast refresh during development
+
+## Security
+
+- HTTPS enabled
+- SSL certificate
+- Secure deployment on Vercel
+- Secure routing
+
+---
+
+# 🛠 Technology Stack
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- HTML5
+- CSS3
+
+## Package Manager
+
+- npm
+
+## Deployment
+
+- Vercel
+
+## Domain Provider
+
+- Namecheap
+
+---
+
+# 📂 Project Structure
+
+```
+NhyiraBa-Viglo-News/
+│
+├── public/
+│
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── pages/
+│   ├── layouts/
+│   ├── hooks/
+│   ├── services/
+│   ├── utils/
+│   ├── styles/
+│   ├── types/
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
+```
+
+---
+
+# ⚙️ Getting Started
+
+## Prerequisites
+
+Install the following software:
+
+- Node.js (18+ recommended)
+- npm
+
+Verify installation
+
+```bash
+node -v
+npm -v
+```
+
+---
+
+# 📦 Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/Edward-Oppong/nvm-news-prime.git
+```
+
+Navigate into the project
+
+```bash
+cd nvm-news-prime
+```
+
+Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+# ▶ Running the Development Server
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+http://localhost:5173
+```
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# 🏗 Building for Production
 
-## What technologies are used for this project?
+```bash
+npm run build
+```
 
-This project is built with:
+Preview the production build
 
-- Vite
-- TypeScript
+```bash
+npm run preview
+```
+
+---
+
+# 🌍 Environment Variables
+
+Create a `.env` file if required.
+
+Example:
+
+```env
+VITE_SUPABASE_PROJECT_ID=YOUR_SUPABASE_PROJECT_ID
+VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
+VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+```
+
+---
+
+# 🚀 Deployment
+
+The application is deployed using **Vercel**.
+
+Deployment process:
+
+1. Push code to GitHub.
+2. Import repository into Vercel.
+3. Configure environment variables.
+4. Connect the custom domain.
+5. Deploy.
+
+Live Domain
+
+```
+https://nvmnews.com
+```
+
+---
+
+# ⚡ Performance Optimizations
+
+- React component architecture
+- TypeScript static typing
+- Vite hot module replacement
+- Production code splitting
+- Asset optimization
+- Tree shaking
+- Lazy loading
+
+---
+
+# 🔒 Security
+
+- HTTPS enabled
+- SSL certificate
+- Secure custom domain
+- Secure routing
+- Dependency management
+- Production build optimization
+
+---
+
+# 🌐 Browser Support
+
+Supported browsers include:
+
+- Google Chrome
+- Microsoft Edge
+- Mozilla Firefox
+- Brave
+- Safari
+
+---
+
+# 📱 Responsive Design
+
+Optimized for
+
+- Desktop
+- Laptop
+- Tablet
+- Mobile devices
+
+---
+
+# 📈 Future Improvements
+
+- User authentication
+- User profiles
+- Comments system
+- Newsletter subscriptions
+- Search functionality
+- Dark mode
+- Push notifications
+- Bookmarking articles
+- Admin dashboard
+- Analytics dashboard
+- Progressive Web App (PWA)
+- Multi-language support
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+1. Fork the repository.
+2. Create a new feature branch.
+3. Commit your changes.
+4. Push your branch.
+5. Open a Pull Request.
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+# 👨‍💻 Developed By
+
+**NhyiraBa Viglo News Development Team**
+
+Website:
+https://nvmnews.com
+
+---
+
+## ⭐ Acknowledgements
+
+This project was built using:
+
 - React
-- shadcn-ui
-- Tailwind CSS
+- TypeScript
+- Vite
+- Vercel
+- Namecheap
+- npm
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+> © 2026 NhyiraBa Viglo News. All Rights Reserved.

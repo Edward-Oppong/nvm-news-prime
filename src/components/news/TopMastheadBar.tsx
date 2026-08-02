@@ -57,7 +57,7 @@ export function TopMastheadBar() {
           </div>
         </div>
 
-        {/* Right: Pledge & Writer CMS link */}
+        {/* Right: Writer CMS & Admin Portal links */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-1 text-[11px] text-accent font-medium">
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -65,10 +65,17 @@ export function TopMastheadBar() {
           </div>
 
           <Link
-            to="/admin"
-            className="text-[10px] uppercase font-bold tracking-wider text-background/60 hover:text-accent transition-colors underline underline-offset-2"
+            to="/writer/auth"
+            className="text-[10px] uppercase font-bold tracking-wider text-background/80 hover:text-accent transition-colors underline underline-offset-2"
           >
             Writer CMS
+          </Link>
+          <span className="text-background/30">•</span>
+          <Link
+            to="/admin/auth"
+            className="text-[10px] uppercase font-bold tracking-wider text-background/60 hover:text-accent transition-colors"
+          >
+            Admin
           </Link>
         </div>
       </div>

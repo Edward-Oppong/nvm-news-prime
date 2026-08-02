@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   FileText, 
   PlusCircle, 
+  User,
   LogOut,
   ExternalLink,
   PenTool
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { label: 'My Stories', href: '/writer', icon: FileText },
   { label: 'New Article', href: '/writer/articles/new', icon: PlusCircle },
+  { label: 'My Profile', href: '/writer/profile', icon: User },
 ];
 
 export function WriterSidebar() {

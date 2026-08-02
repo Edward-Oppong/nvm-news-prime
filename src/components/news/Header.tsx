@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, Sun, Moon } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, Sun, Moon, PenTool } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { SearchOverlay } from './SearchOverlay';
 import { TopMastheadBar } from './TopMastheadBar';
@@ -136,6 +136,14 @@ export function Header() {
             >
               <Search className="h-5 w-5" />
             </motion.button>
+
+            <Link
+              to="/writer/auth"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-headline bg-muted hover:bg-muted/80 rounded-full transition-colors border border-border"
+            >
+              <PenTool className="h-3.5 w-3.5 text-accent" />
+              <span>Writer CMS</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -172,6 +180,23 @@ export function Header() {
                   </Link>
                 </motion.div>
               ))}
+
+              <div className="pt-3 border-t border-divider flex items-center gap-2 px-4">
+                <Link
+                  to="/writer/auth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex-1 text-center py-2.5 text-xs font-bold bg-headline text-background rounded-lg"
+                >
+                  Writer CMS
+                </Link>
+                <Link
+                  to="/admin/auth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex-1 text-center py-2.5 text-xs font-bold border border-border text-foreground rounded-lg"
+                >
+                  Admin Portal
+                </Link>
+              </div>
             </nav>
           </motion.div>
         )}

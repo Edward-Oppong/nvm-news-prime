@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MediaUpload, type VideoItem } from '@/components/admin/MediaUpload';
+import { ImageUploader } from '@/components/common/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -72,8 +73,22 @@ export default function WriterArticleEditor() {
   };
 
   const fetchAuthors = async () => {
-    const { data } = await supabase.from('authors').select('id, name').order('name');
-    setAuthors(data || []);
+    const { data } = await supabase.from('authors').select('id, name, email, user_id').order('name');
+    
+    // Only show the logged-in writer's author profile
+    const myAuthors = (data || []).filter((a: any) => a.user_id === user?.id || a.email === user?.email);
+    
+    if (myAuthors.length > 0) {
+      setAuthors(myAuthors);
+      if (!isEditing) {
+        setForm((prev) => ({ ...prev, author_id: myAuthors[0].id }));
+      }
+    } else {
+      // Fallback if profile not created in table yet
+      const fallbackName = user?.email ? user.email.split('@')[0] : 'Writer';
+      const fallbackAuthor = { id: '', name: fallbackName, email: user?.email || null, user_id: user?.id || null };
+      setAuthors([fallbackAuthor]);
+    }
   };
 
   const fetchArticle = async () => {
@@ -337,21 +352,20 @@ export default function WriterArticleEditor() {
 
           <div className="space-y-2">
             <Label htmlFor="author">Author Profile</Label>
-            <Select
-              value={form.author_id}
-              onValueChange={(value) => setForm((prev) => ({ ...prev, author_id: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select author profile" />
-              </SelectTrigger>
-              <SelectContent>
-                {authors.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    {a.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Input
+                id="author"
+                value={authors[0]?.name || user?.email?.split('@')[0] || 'Writer'}
+                disabled
+                className="bg-muted font-semibold text-headline"
+              />
+              <Link to="/writer/profile" className="text-xs font-semibold text-primary whitespace-nowrap hover:underline">
+                Edit Bio
+              </Link>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Automatically locked to your logged-in writer identity.
+            </p>
           </div>
         </div>
 
@@ -380,18 +394,15 @@ export default function WriterArticleEditor() {
           <h3 className="font-serif text-xl font-bold text-headline">Featured Media &amp; Attachments</h3>
 
           <div className="space-y-2">
-            <Label htmlFor="image_url">Cover Image URL</Label>
-            <Input
-              id="image_url"
+            <Label>Featured Cover Image</Label>
+            <ImageUploader
               value={form.image_url}
-              onChange={(e) => setForm((prev) => ({ ...prev, image_url: e.target.value }))}
-              placeholder="https://images.unsplash.com/..."
+              onChange={(url) => setForm((prev) => ({ ...prev, image_url: url }))}
+              bucket="article-images"
+              folder="articles"
+              label="Cover Image"
+              aspect="cover"
             />
-            {form.image_url && (
-              <div className="mt-2 aspect-[21/9] rounded-xl overflow-hidden max-h-48 border border-divider">
-                <img src={form.image_url} alt="Cover preview" className="w-full h-full object-cover" />
-              </div>
-            )}
           </div>
 
           <div className="space-y-2">
