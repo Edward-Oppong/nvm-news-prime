@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Loader2, FileText, Lock, Cookie, Accessibility, Info } from 'lucide-react';
+import { Save, Loader2, FileText, Lock, Cookie, Accessibility, Info, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,7 +11,14 @@ import { toast } from 'sonner';
 const POLICY_KEYS = ['terms', 'privacy', 'cookies', 'accessibility'] as const;
 type PolicyKey = typeof POLICY_KEYS[number];
 
-const tabConfig: { id: PolicyKey; label: string; icon: any; placeholder: string }[] = [
+interface TabItem {
+  id: PolicyKey;
+  label: string;
+  icon: LucideIcon;
+  placeholder: string;
+}
+
+const tabConfig: TabItem[] = [
   {
     id: 'terms',
     label: 'Terms of Service',
@@ -55,16 +62,15 @@ export default function SiteSettings() {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase
-        .from('site_settings')
+      const { data } = await (supabase.from('site_settings' as any) as any)
         .select('key, value')
-        .in('key', POLICY_KEYS as unknown as string[]);
+        .in('key', POLICY_KEYS as any);
 
       if (data) {
-        const mapped: any = { ...content };
-        data.forEach((row: any) => {
-          if (POLICY_KEYS.includes(row.key)) {
-            mapped[row.key] = row.value || '';
+        const mapped: Record<PolicyKey, string> = { ...content };
+        data.forEach((row: { key: string; value: string | null }) => {
+          if ((POLICY_KEYS as readonly string[]).includes(row.key)) {
+            mapped[row.key as PolicyKey] = row.value || '';
           }
         });
         setContent(mapped);
@@ -79,14 +85,17 @@ export default function SiteSettings() {
   const savePolicy = async (key: PolicyKey) => {
     setSaving(key);
     try {
-      const { error } = await supabase
-        .from('site_settings')
-        .upsert({ key, value: content[key], updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      const { error } = await (supabase.from('site_settings' as any) as any)
+        .upsert(
+          { key, value: content[key], updated_at: new Date().toISOString() }, 
+          { onConflict: 'key' }
+        );
 
       if (error) throw error;
-      toast.success(`${tabConfig.find(t => t.id === key)?.label} saved!`);
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save');
+      toast.success(`${tabConfig.find((t) => t.id === key)?.label} saved!`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save';
+      toast.error(errorMessage);
     } finally {
       setSaving(null);
     }
@@ -159,7 +168,7 @@ export default function SiteSettings() {
                   </Label>
                   <Textarea
                     value={content[tab.id]}
-                    onChange={(e) => setContent(prev => ({ ...prev, [tab.id]: e.target.value }))}
+                    onChange={(e) => setContent((prev) => ({ ...prev, [tab.id]: e.target.value }))}
                     placeholder={tab.placeholder}
                     className="h-[500px] font-mono text-sm leading-relaxed resize-none"
                   />

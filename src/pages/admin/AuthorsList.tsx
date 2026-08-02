@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ImageUploader } from '@/components/common/ImageUploader';
 import { toast } from 'sonner';
 
 interface Author {
@@ -253,12 +254,14 @@ export default function AuthorsList() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="avatar_url">Avatar URL</Label>
-              <Input
-                id="avatar_url"
+              <Label>Author Profile Photo / Avatar</Label>
+              <ImageUploader
                 value={form.avatar_url}
-                onChange={(e) => setForm(prev => ({ ...prev, avatar_url: e.target.value }))}
-                placeholder="https://..."
+                onChange={(url) => setForm(prev => ({ ...prev, avatar_url: url }))}
+                bucket="avatars"
+                folder="authors"
+                label="Author Avatar"
+                aspect="square"
               />
             </div>
             <div className="flex justify-end gap-3 pt-4">
