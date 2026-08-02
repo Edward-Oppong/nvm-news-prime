@@ -1,5 +1,5 @@
 import { useEditor, EditorContent } from '@tiptap/react';
-import { BubbleMenu } from "@tiptap/react/menus"
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
@@ -25,13 +25,45 @@ import {
   Minus,
   Loader2,
   Upload,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Maximize2,
+  Video as VideoIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+
+// Custom TipTap Image Extension with alignment attribute & class mapping
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      align: {
+        default: 'center',
+        parseHTML: (element) => element.getAttribute('data-align') || 'center',
+        renderHTML: (attributes) => {
+          let alignClass = 'mx-auto block max-w-full my-4 rounded-xl shadow-md';
+          if (attributes.align === 'left') {
+            alignClass = 'float-left mr-6 mb-4 max-w-[50%] rounded-xl shadow-md';
+          } else if (attributes.align === 'right') {
+            alignClass = 'float-right ml-6 mb-4 max-w-[50%] rounded-xl shadow-md';
+          } else if (attributes.align === 'full') {
+            alignClass = 'w-full my-6 rounded-xl shadow-md block';
+          }
+
+          return {
+            'data-align': attributes.align,
+            class: alignClass,
+          };
+        },
+      },
+    };
+  },
+});
 
 interface RichTextEditorProps {
   content: string;
@@ -39,9 +71,11 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-export function RichTextEditor({ content, onChange, placeholder = 'Start writing...' }: RichTextEditorProps) {
+export function RichTextEditor({ content, onChange, placeholder = 'Start writing your story...' }: RichTextEditorProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -56,17 +90,13 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-primary underline',
+          class: 'text-primary underline font-medium',
         },
       }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto my-4',
-        },
-      }),
+      CustomImage,
       Youtube.configure({
         HTMLAttributes: {
-          class: 'w-full aspect-video rounded-lg my-4',
+          class: 'w-full aspect-video rounded-xl my-6 shadow-md',
         },
       }),
     ],
@@ -76,18 +106,15 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[300px] px-4 py-3',
+        class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[350px] px-4 py-4',
       },
     },
   });
 
-  // Only update content when it changes externally (e.g., loading article)
-  // Use a ref to track if this is the initial mount
   const initialContentRef = useRef(content);
-  
+
   useEffect(() => {
     if (editor && content !== initialContentRef.current) {
-      // Only update if content changed from what was initially passed
       const currentHtml = editor.getHTML();
       if (content !== currentHtml) {
         editor.commands.setContent(content, { emitUpdate: false });
@@ -96,6 +123,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     }
   }, [content, editor]);
 
+  // Handle uploading image to article-images bucket
   const handleImageFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -106,61 +134,111 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Image must be less than 10MB');
+      toast.error('Image must be under 10MB');
       return;
     }
 
     setUploadingImage(true);
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `content/${fileName}`;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `inline/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('article-images')
-      .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage
+        .from('article-images')
+        .upload(filePath, file);
 
-    if (uploadError) {
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(filePath);
+
+      // Insert image with default center alignment
+      editor.chain().focus().setImage({ src: publicUrl, align: 'center' } as any).run();
+      toast.success('Image inserted into article!');
+    } catch {
       toast.error('Failed to upload image');
+    } finally {
       setUploadingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
+  // Handle uploading video to article-videos bucket
+  const handleVideoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+
+    if (!file.type.startsWith('video/')) {
+      toast.error('Please select a valid video file (MP4, WebM)');
       return;
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('article-images')
-      .getPublicUrl(filePath);
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('Video must be under 100MB');
+      return;
+    }
 
-    editor.chain().focus().setImage({ src: publicUrl }).run();
-    toast.success('Image uploaded and inserted');
-    setUploadingImage(false);
+    setUploadingVideo(true);
 
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `inline/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('article-videos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-videos')
+        .getPublicUrl(filePath);
+
+      // Insert video tag directly into editor content
+      const videoHtml = `<video controls playsinline class="w-full aspect-video rounded-xl my-6 shadow-md" src="${publicUrl}"></video><p></p>`;
+      editor.chain().focus().insertContent(videoHtml).run();
+      toast.success('Video inserted into article!');
+    } catch {
+      toast.error('Failed to upload video');
+    } finally {
+      setUploadingVideo(false);
+      if (videoInputRef.current) videoInputRef.current.value = '';
     }
   };
 
   const addImageFromUrl = useCallback(() => {
     const url = window.prompt('Enter image URL:');
     if (url && editor) {
-      editor.chain().focus().setImage({ src: url }).run();
+      editor.chain().focus().setImage({ src: url, align: 'center' } as any).run();
     }
   }, [editor]);
 
   const addYoutube = useCallback(() => {
-    const url = window.prompt('Enter YouTube URL:');
+    const url = window.prompt('Enter YouTube URL (e.g. https://www.youtube.com/watch?v=...):');
     if (url && editor) {
       editor.chain().focus().setYoutubeVideo({ src: url }).run();
     }
   }, [editor]);
 
+  const setImageAlignment = useCallback((align: 'left' | 'center' | 'right' | 'full') => {
+    if (!editor) return;
+    if (editor.isActive('image')) {
+      editor.chain().focus().updateAttributes('image', { align }).run();
+    } else {
+      toast.info('Click or select an image in the editor first to change its position');
+    }
+  }, [editor]);
+
   const setLink = useCallback(() => {
     if (!editor) return;
-    
     const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter URL:', previousUrl);
+    const url = window.prompt('Enter link URL:', previousUrl);
 
     if (url === null) return;
-
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
@@ -174,9 +252,9 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
   }
 
   return (
-    <div className="border border-input rounded-lg overflow-hidden bg-background">
+    <div className="border border-input rounded-xl overflow-hidden bg-background shadow-sm">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-input bg-muted/30">
+      <div className="flex flex-wrap items-center gap-1 p-2 border-b border-input bg-muted/40">
         <Toggle
           size="sm"
           pressed={editor.isActive('bold')}
@@ -274,7 +352,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         >
           <LinkIcon className="h-4 w-4" />
         </Toggle>
-        {/* Hidden file input for image uploads */}
+
+        {/* Hidden inputs for Image and Video upload */}
         <input
           ref={imageInputRef}
           type="file"
@@ -282,52 +361,108 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
           onChange={handleImageFileSelect}
           className="hidden"
         />
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/*"
+          onChange={handleVideoFileSelect}
+          className="hidden"
+        />
+
+        {/* Upload Inline Image */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => imageInputRef.current?.click()}
           disabled={uploadingImage}
-          className="h-8 w-8 p-0"
-          title="Upload image"
+          className="h-8 px-2 gap-1 text-xs"
+          title="Upload inline image into article body"
         >
           {uploadingImage ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Upload className="h-4 w-4" />
+            <Upload className="h-4 w-4 text-primary" />
           )}
+          <span className="hidden sm:inline">Image</span>
         </Button>
+
+        {/* Upload Inline Video File */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          onClick={addImageFromUrl}
-          className="h-8 w-8 p-0"
-          title="Insert image from URL"
+          onClick={() => videoInputRef.current?.click()}
+          disabled={uploadingVideo}
+          className="h-8 px-2 gap-1 text-xs"
+          title="Upload inline video into article body"
         >
-          <ImageIcon className="h-4 w-4" />
+          {uploadingVideo ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <VideoIcon className="h-4 w-4 text-purple-600" />
+          )}
+          <span className="hidden sm:inline">Video File</span>
         </Button>
+
+        {/* YouTube Embed */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={addYoutube}
-          className="h-8 w-8 p-0"
+          className="h-8 px-2 gap-1 text-xs"
+          title="Embed YouTube video"
         >
-          <YoutubeIcon className="h-4 w-4" />
+          <YoutubeIcon className="h-4 w-4 text-red-600" />
+          <span className="hidden sm:inline">YouTube</span>
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          className="h-8 w-8 p-0"
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
+        {/* IMAGE POSITIONING TOOLBAR BUTTONS */}
+        <div className="flex items-center gap-0.5 bg-muted/60 p-0.5 rounded-lg border border-border/50">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setImageAlignment('left')}
+            className="h-7 w-7 p-0"
+            title="Align Image Left (Text wraps around right)"
+          >
+            <AlignLeft className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setImageAlignment('center')}
+            className="h-7 w-7 p-0"
+            title="Align Image Center"
+          >
+            <AlignCenter className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setImageAlignment('right')}
+            className="h-7 w-7 p-0"
+            title="Align Image Right (Text wraps around left)"
+          >
+            <AlignRight className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setImageAlignment('full')}
+            className="h-7 w-7 p-0"
+            title="Full Width Image"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
 
         <div className="flex-1" />
 
@@ -353,36 +488,77 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         </Button>
       </div>
 
-      {/* Bubble Menu for quick formatting */}
+      {/* Bubble Menu when selecting text or image */}
       {editor && (
         <BubbleMenu editor={editor}>
-          <div className="flex items-center gap-1 bg-background border border-input rounded-lg shadow-lg p-1">
+          <div className="flex items-center gap-1 bg-background border border-input rounded-lg shadow-xl p-1">
             <Toggle
               size="sm"
               pressed={editor.isActive('bold')}
               onPressedChange={() => editor.chain().focus().toggleBold().run()}
             >
-              <Bold className="h-3 w-3" />
+              <Bold className="h-3.5 w-3.5" />
             </Toggle>
             <Toggle
               size="sm"
               pressed={editor.isActive('italic')}
               onPressedChange={() => editor.chain().focus().toggleItalic().run()}
             >
-              <Italic className="h-3 w-3" />
+              <Italic className="h-3.5 w-3.5" />
             </Toggle>
             <Toggle
               size="sm"
               pressed={editor.isActive('link')}
               onPressedChange={setLink}
             >
-              <LinkIcon className="h-3 w-3" />
+              <LinkIcon className="h-3.5 w-3.5" />
             </Toggle>
+            <Separator orientation="vertical" className="h-4 mx-0.5" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setImageAlignment('left')}
+              className="h-7 w-7 p-0"
+              title="Float Left"
+            >
+              <AlignLeft className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setImageAlignment('center')}
+              className="h-7 w-7 p-0"
+              title="Center Image"
+            >
+              <AlignCenter className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setImageAlignment('right')}
+              className="h-7 w-7 p-0"
+              title="Float Right"
+            >
+              <AlignRight className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setImageAlignment('full')}
+              className="h-7 w-7 p-0"
+              title="Full Width"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </BubbleMenu>
       )}
 
-      {/* Editor Content */}
+      {/* Editor Content Container */}
       <EditorContent editor={editor} />
     </div>
   );

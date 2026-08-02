@@ -344,4 +344,56 @@
   .touch-feedback {
     @apply active:scale-[0.98] active:opacity-90 transition-all duration-150;
   }
+
+  /* Inline Rich Text Article Media & Positioning Styles */
+  .prose img[data-align="left"],
+  .prose img.align-left {
+    float: left;
+    margin-right: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+    max-width: 50%;
+    border-radius: 0.75rem;
+  }
+
+  .prose img[data-align="right"],
+  .prose img.align-right {
+    float: right;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+    max-width: 50%;
+    border-radius: 0.75rem;
+  }
+
+  .prose img[data-align="center"],
+  .prose img.align-center {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    max-width: 100%;
+    border-radius: 0.75rem;
+  }
+
+  .prose img[data-align="full"],
+  .prose img.align-full {
+    width: 100%;
+    display: block;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .prose img[data-align="left"],
+    .prose img[data-align="right"],
+    .prose img.align-left,
+    .prose img.align-right {
+      float: none;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 100%;
+      display: block;
+    }
+  }
 }

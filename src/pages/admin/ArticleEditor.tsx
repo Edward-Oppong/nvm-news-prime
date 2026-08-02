@@ -161,8 +161,8 @@ export default function ArticleEditor() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, publishState: boolean = form.published) => {
+    if (e) e.preventDefault();
 
     if (!form.title.trim()) {
       toast.error('Title is required');
@@ -187,15 +187,16 @@ export default function ArticleEditor() {
       video_url: form.video_url || null,
       featured: form.featured,
       breaking: form.breaking,
-      published: form.published,
+      published: publishState,
+      status: publishState ? 'published' : 'draft',
       read_time: form.read_time,
-      published_at: form.published ? new Date().toISOString() : null,
+      published_at: publishState ? new Date().toISOString() : null,
     };
 
     if (isEditing) {
       const { error } = await supabase
         .from('articles')
-        .update(articleData)
+        .update(articleData as any)
         .eq('id', id);
 
       if (error) {
@@ -205,13 +206,13 @@ export default function ArticleEditor() {
         await queryClient.invalidateQueries({ queryKey: ['articles'] });
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
-        toast.success('Article updated');
+        toast.success(publishState ? 'Article published live!' : 'Article saved as draft');
         navigate('/admin/articles');
       }
     } else {
       const { data: inserted, error } = await supabase
         .from('articles')
-        .insert(articleData)
+        .insert(articleData as any)
         .select('id')
         .single();
 
@@ -226,7 +227,7 @@ export default function ArticleEditor() {
         await queryClient.invalidateQueries({ queryKey: ['articles'] });
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
-        toast.success('Article created');
+        toast.success(publishState ? 'Article created & published live!' : 'Article created & saved as draft');
         navigate('/admin/articles');
       }
     }
@@ -244,15 +245,39 @@ export default function ArticleEditor() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl">
-      <div className="flex items-center gap-4 mb-6 sm:mb-8">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/admin/articles')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">
-            {isEditing ? 'Edit Article' : 'New Article'}
-          </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/admin/articles')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">
+              {isEditing ? 'Edit Article' : 'New Article'}
+            </h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={saving}
+            onClick={() => handleSubmit(undefined, false)}
+          >
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            Save Draft
+          </Button>
+
+          <Button
+            type="button"
+            disabled={saving}
+            onClick={() => handleSubmit(undefined, true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {isEditing ? 'Publish / Update Live' : 'Publish Live'}
+          </Button>
         </div>
       </div>
 
@@ -395,23 +420,28 @@ export default function ArticleEditor() {
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="flex justify-end gap-4 pt-6 border-t border-divider">
+        {/* Submit Actions */}
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-6 border-t border-divider">
           <Button type="button" variant="outline" onClick={() => navigate('/admin/articles')}>
             Cancel
           </Button>
-          <Button type="submit" disabled={saving}>
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                {isEditing ? 'Update Article' : 'Create Article'}
-              </>
-            )}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={saving}
+            onClick={() => handleSubmit(undefined, false)}
+          >
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            Save Draft
+          </Button>
+          <Button
+            type="button"
+            disabled={saving}
+            onClick={() => handleSubmit(undefined, true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {isEditing ? 'Publish / Update Live' : 'Publish Live'}
           </Button>
         </div>
       </motion.form>
