@@ -17,30 +17,7 @@ export function useAuth() {
     loading: true,
   });
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setAuthState(prev => ({
-          ...prev,
-          session,
-          user: session?.user ?? null,
-          loading: !!session?.user,
-        }));
-
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminStatus(session.user.id);
-          }, 0);
-        } else {
-          setAuthState(prev => ({ ...prev, isAdmin: false, loading: false }));
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -57,7 +34,37 @@ export function useAuth() {
     } catch {
       setAuthState(prev => ({ ...prev, isAdmin: false, loading: false }));
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          // Keep loading=true while we fetch the admin role
+          setAuthState(prev => ({
+            ...prev,
+            session,
+            user: session.user,
+            isAdmin: false,
+            loading: true,
+          }));
+          // Use setTimeout to avoid Supabase deadlock when calling DB inside onAuthStateChange
+          setTimeout(() => {
+            checkAdminStatus(session.user.id);
+          }, 0);
+        } else {
+          setAuthState({
+            user: null,
+            session: null,
+            isAdmin: false,
+            loading: false,
+          });
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [checkAdminStatus]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

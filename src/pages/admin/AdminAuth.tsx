@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
 const authSchema = z.object({
@@ -74,6 +75,10 @@ export default function AdminAuth() {
             setError(signUpError.message);
           }
         } else {
+          // Sign the newly created user out immediately — they have no admin role yet.
+          // Leaving them signed in would cause a redirect loop since AdminLayout
+          // bounces non-admin users back to this page.
+          await supabase.auth.signOut();
           setError('Account created! Note: You need admin privileges to access the dashboard. Contact an existing admin.');
         }
       }
