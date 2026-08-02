@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom';
 import { Search, Menu, X, ChevronDown, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { SearchOverlay } from './SearchOverlay';
+import { TopMastheadBar } from './TopMastheadBar';
 import nvmLogo from '@/assets/nvm-logo.png';
 
 const categories = [
-  { name: 'General', href: '/category/general', color: 'category-general' },
   { name: 'Entertainment', href: '/category/entertainment', color: 'category-entertainment' },
   { name: 'Politics', href: '/category/politics', color: 'category-politics' },
   { name: 'Sports', href: '/category/sports', color: 'category-sports' },
   { name: 'Business', href: '/category/business', color: 'category-business' },
-  { name: 'Videos', href: '/videos', color: 'category-general' },
 ];
 
 export function Header() {
@@ -51,6 +50,7 @@ export function Header() {
       animate={{ y: isHidden ? -100 : 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
+      <TopMastheadBar />
       <div className="container">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Mobile menu toggle */}
@@ -74,11 +74,11 @@ export function Header() {
           </motion.button>
 
           {/* Logo */}
-          <Link to="/" className="hidden sm:flex-shrink-0 group">
+          <Link to="/" className="flex-shrink-0 group">
             <motion.img 
               src={nvmLogo} 
               alt="NVM News - Nhyiraba Viglio Media" 
-              className="h-15 md:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
+              className="h-12 md:h-16 w-auto transition-transform duration-300 group-hover:scale-105"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             />

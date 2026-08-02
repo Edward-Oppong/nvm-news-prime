@@ -12,6 +12,9 @@ import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import SearchPage from "./pages/SearchPage";
 import VideosPage from "./pages/VideosPage";
+import LegalPolicyPage from "./pages/LegalPolicyPage";
+import CompanyPage from "./pages/CompanyPage";
+import AuthorProfilePage from "./pages/AuthorProfilePage";
 
 // Admin Pages
 import AdminAuth from "./pages/admin/AdminAuth";
@@ -21,6 +24,13 @@ import ArticlesList from "./pages/admin/ArticlesList";
 import ArticleEditor from "./pages/admin/ArticleEditor";
 import CategoriesList from "./pages/admin/CategoriesList";
 import AuthorsList from "./pages/admin/AuthorsList";
+import ReviewQueue from "./pages/admin/ReviewQueue";
+
+// Writer Pages
+import WriterAuth from "./pages/writer/WriterAuth";
+import { WriterLayout } from "./components/writer/WriterLayout";
+import WriterPortal from "./pages/writer/WriterPortal";
+import WriterArticleEditor from "./pages/writer/WriterArticleEditor";
 
 const queryClient = new QueryClient();
 
@@ -66,10 +76,33 @@ function AnimatedRoutes() {
         <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
         <Route path="/videos" element={<PageWrapper><VideosPage /></PageWrapper>} />
         
+        {/* Legal & Policy Routes */}
+        <Route path="/terms" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
+        <Route path="/privacy" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
+        <Route path="/cookies" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
+        <Route path="/accessibility" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
+        
+        {/* Company & Opportunities Routes */}
+        <Route path="/careers" element={<PageWrapper><CompanyPage /></PageWrapper>} />
+        <Route path="/advertise" element={<PageWrapper><CompanyPage /></PageWrapper>} />
+        <Route path="/press" element={<PageWrapper><CompanyPage /></PageWrapper>} />
+        
+        {/* Author Profile Route */}
+        <Route path="/author/:name" element={<PageWrapper><AuthorProfilePage /></PageWrapper>} />
+        
+        {/* Writer Portal Routes */}
+        <Route path="/writer/auth" element={<WriterAuth />} />
+        <Route path="/writer" element={<WriterLayout />}>
+          <Route index element={<WriterPortal />} />
+          <Route path="articles/new" element={<WriterArticleEditor />} />
+          <Route path="articles/:id" element={<WriterArticleEditor />} />
+        </Route>
+
         {/* Admin Routes */}
         <Route path="/admin/auth" element={<AdminAuth />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="review" element={<ReviewQueue />} />
           <Route path="articles" element={<ArticlesList />} />
           <Route path="articles/new" element={<ArticleEditor />} />
           <Route path="articles/:id" element={<ArticleEditor />} />

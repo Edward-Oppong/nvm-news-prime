@@ -97,6 +97,7 @@ export function useAuth() {
 
   return {
     ...authState,
+    isWriter: !!authState.user && !authState.isAdmin,
     signIn,
     signUp,
     signOut,

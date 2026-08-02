@@ -1,62 +1,41 @@
-import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
   FileText, 
-  ClipboardCheck,
-  FolderOpen, 
-  Users, 
+  PlusCircle, 
   LogOut,
-  ExternalLink
+  ExternalLink,
+  PenTool
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 
-export function AdminSidebar() {
+const navItems = [
+  { label: 'My Stories', href: '/writer', icon: FileText },
+  { label: 'New Article', href: '/writer/articles/new', icon: PlusCircle },
+];
+
+export function WriterSidebar() {
   const location = useLocation();
   const { signOut, user } = useAuth();
-  const [pendingCount, setPendingCount] = useState(0);
-
-  useEffect(() => {
-    fetchPendingCount();
-  }, [location.pathname]);
-
-  const fetchPendingCount = async () => {
-    try {
-      const { count } = await supabase
-        .from('articles')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending_review');
-      setPendingCount(count || 0);
-    } catch {
-      // Fallback
-    }
-  };
-
-  const navItems = [
-    { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { label: 'Review Queue', href: '/admin/review', icon: ClipboardCheck, badge: pendingCount },
-    { label: 'Articles', href: '/admin/articles', icon: FileText },
-    { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
-    { label: 'Authors', href: '/admin/authors', icon: Users },
-  ];
 
   const handleSignOut = async () => {
     await signOut();
-    window.location.href = '/admin/auth';
+    window.location.href = '/writer/auth';
   };
 
   return (
     <aside className="w-64 bg-surface-elevated border-r border-divider min-h-screen flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-divider">
-        <Link to="/admin" className="block">
-          <h1 className="font-serif text-xl font-bold text-headline">
-            NVM<span className="text-primary">News</span>
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">Admin Dashboard</p>
+        <Link to="/writer" className="block">
+          <div className="flex items-center gap-2">
+            <PenTool className="h-5 w-5 text-primary" />
+            <h1 className="font-serif text-xl font-bold text-headline">
+              NVM<span className="text-primary">News</span>
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Writer Portal</p>
         </Link>
       </div>
 
@@ -64,7 +43,7 @@ export function AdminSidebar() {
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href || 
-            (item.href !== '/admin' && location.pathname.startsWith(item.href));
+            (item.href !== '/writer' && location.pathname.startsWith(item.href));
           
           return (
             <Link
@@ -78,12 +57,7 @@ export function AdminSidebar() {
               )}
             >
               <item.icon className="h-5 w-5" />
-              <span className="flex-1">{item.label}</span>
-              {!!item.badge && item.badge > 0 && (
-                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-accent text-accent-foreground">
-                  {item.badge}
-                </span>
-              )}
+              {item.label}
             </Link>
           );
         })}
@@ -101,7 +75,8 @@ export function AdminSidebar() {
         </Link>
         
         <div className="px-4 py-2">
-          <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+          <p className="text-xs font-semibold text-headline truncate">{user?.email}</p>
+          <p className="text-[10px] text-muted-foreground">Staff Journalist</p>
         </div>
         
         <Button

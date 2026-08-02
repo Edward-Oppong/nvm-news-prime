@@ -4,6 +4,7 @@ import { Clock, ArrowUpRight } from 'lucide-react';
 import { Article } from '@/types/news';
 import { CategoryBadge } from './CategoryBadge';
 import { useState } from 'react';
+import { getAuthorByName } from '@/data/mockAuthors';
 
 interface ArticleCardProps {
   article: Article;
@@ -156,14 +157,22 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
             />
           </div>
         </Link>
-        <CategoryBadge category={article.category} className="mb-2" />
+        <div className="flex items-center gap-2 mb-2">
+          <CategoryBadge category={article.category} />
+        </div>
         <h3 className="font-serif text-xl md:text-2xl font-semibold mb-2 transition-colors group-hover:text-primary leading-tight">
           <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h3>
         <p className="text-muted-foreground line-clamp-2 mb-3 text-sm">{article.excerpt}</p>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{article.author}</span>
-          <span>·</span>
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <Link to={`/author/${encodeURIComponent(article.author)}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+            <img
+              src={article.authorAvatar || getAuthorByName(article.author).avatar}
+              alt={article.author}
+              className="w-6 h-6 rounded-full object-cover border border-border"
+            />
+            <span className="font-semibold text-foreground hover:underline">{article.author}</span>
+          </Link>
           <span className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             {article.readTime}
@@ -174,6 +183,8 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
   }
 
   // Medium (default)
+  const authorData = getAuthorByName(article.author);
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -197,16 +208,24 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           />
         </div>
       </Link>
-      <CategoryBadge category={article.category} className="mb-1.5" />
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <CategoryBadge category={article.category} />
+      </div>
       <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-1.5 transition-colors group-hover:text-primary leading-snug">
         <Link to={`/article/${article.id}`}>{article.title}</Link>
       </h3>
       <p className="text-muted-foreground line-clamp-2 mb-2 text-sm">{article.excerpt}</p>
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">{article.author}</span>
-        <span>·</span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3.5 w-3.5" />
+      <div className="flex items-center justify-between text-sm text-muted-foreground pt-1 border-t border-divider/60">
+        <Link to={`/author/${encodeURIComponent(article.author)}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+          <img
+            src={article.authorAvatar || authorData.avatar}
+            alt={article.author}
+            className="w-5 h-5 rounded-full object-cover border border-border"
+          />
+          <span className="font-medium text-foreground text-xs hover:underline">{article.author}</span>
+        </Link>
+        <span className="flex items-center gap-1 text-xs">
+          <Clock className="h-3 w-3" />
           {article.readTime}
         </span>
       </div>

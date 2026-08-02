@@ -10,17 +10,11 @@ import { SearchFiltersBar } from '@/components/news/SearchFilters';
 import { Input } from '@/components/ui/input';
 import { useSearch } from '@/hooks/useSearch';
 import { useArticles } from '@/hooks/useArticles';
-import { mockArticles } from '@/data/mockArticles';
 
 export default function SearchPage() {
   const { data: dbArticles } = useArticles();
   
-  const allArticles = useMemo(() => {
-    if (dbArticles && dbArticles.length > 0) {
-      return [...dbArticles, ...mockArticles.filter(m => !dbArticles.some(a => a.title === m.title))];
-    }
-    return mockArticles;
-  }, [dbArticles]);
+  const allArticles = useMemo(() => dbArticles ?? [], [dbArticles]);
 
   const { 
     query, setQuery, results, recentSearches, clearRecentSearches,

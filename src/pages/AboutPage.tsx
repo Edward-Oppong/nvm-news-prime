@@ -1,15 +1,9 @@
 import { motion } from 'framer-motion';
-import { Users, Award, Globe, Heart } from 'lucide-react';
+import { Award, Users, Globe, Heart } from 'lucide-react';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
 
 
-const stats = [
-  { label: 'Daily Readers', value: '2.5M+' },
-  { label: 'Countries Reached', value: '180+' },
-  { label: 'Years of Excellence', value: '5+' },
-  { label: 'Award-Winning Stories', value: '500+' },
-];
 
 const values = [
   {
@@ -58,32 +52,10 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="py-12 border-b border-divider">
-          <div className="container">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-muted-foreground">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Values */}
         <section className="py-16 md:py-24">
           <div className="container">
-            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-headline text-center mb-12">
+            <h2 className="headline-lg text-center mb-12">
               Our Values
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -109,7 +81,7 @@ export default function AboutPage() {
         {/* Story */}
         <section className="py-16 md:py-24 bg-muted/30">
           <div className="container max-w-3xl">
-            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-headline text-center mb-8">
+            <h2 className="headline-lg text-center mb-8">
               Our Story
             </h2>
             <div className="prose prose-lg max-w-none text-foreground">

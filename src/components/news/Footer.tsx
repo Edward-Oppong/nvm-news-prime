@@ -5,7 +5,6 @@ import nvmLogo from '@/assets/nvm-logo.png';
 
 const footerLinks = {
   news: [
-    { name: 'General', href: '/category/general' },
     { name: 'Entertainment', href: '/category/entertainment' },
     { name: 'Politics', href: '/category/politics' },
     { name: 'Sports', href: '/category/sports' },
@@ -13,11 +12,11 @@ const footerLinks = {
   ],
   company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Careers', href: '/careers' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Advertise', href: '/advertise' },
-    { name: 'Press', href: '/press' },
-    { name: 'Admin', href: '/admin/auth' },
+    { name: 'Careers', href: '/admin/authors' },
+    { name: 'Advertise', href: '/admin' },
+    { name: 'Press', href: '/admin' },
+    { name: 'Writer CMS', href: '/admin/auth' },
   ],
   legal: [
     { name: 'Terms of Service', href: '/terms' },
@@ -162,7 +161,7 @@ export function Footer() {
           transition={{ delay: 0.4 }}
         >
           <p className="text-sm text-white/50">
-            © {new Date().getFullYear()} NVM News. All rights reserved.
+            © {new Date().getFullYear()} NVM News — Nhyiraba Viglio Media. All rights reserved.
           </p>
           <p className="text-sm text-white/50 flex items-center gap-1.5">
             Made with <Heart className="h-3.5 w-3.5 text-breaking fill-current" /> for truth and transparency

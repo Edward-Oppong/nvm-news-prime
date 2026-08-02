@@ -4,11 +4,12 @@ import { Footer } from '@/components/news/Footer';
 import { HeroSection } from '@/components/news/HeroSection';
 import { BreakingTicker } from '@/components/news/BreakingTicker';
 import { CategoryNewsSection } from '@/components/news/CategoryNewsSection';
-import { VideoNewsSection } from '@/components/news/VideoNewsSection';
 import { MobileBottomNav } from '@/components/news/MobileBottomNav';
-import { useArticles, useFeaturedArticle, useTrendingArticles } from '@/hooks/useArticles';
-import { mockArticles, featuredArticle as mockFeatured, trendingArticles as mockTrending } from '@/data/mockArticles';
+import { DailyPollWidget } from '@/components/news/DailyPollWidget';
+import { useArticles, useTrendingArticles } from '@/hooks/useArticles';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from 'react-router-dom';
+import { Newspaper } from 'lucide-react';
 
 function LoadingSkeleton() {
   return (
@@ -27,24 +28,43 @@ function LoadingSkeleton() {
   );
 }
 
+function EmptyState() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container py-24 text-center">
+        <Newspaper className="h-16 w-16 text-muted-foreground mx-auto mb-6 opacity-40" />
+        <h2 className="font-serif text-2xl font-semibold text-headline mb-3">No stories published yet</h2>
+        <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+          Head to the Writer CMS to publish your first article and it will appear here automatically.
+        </p>
+        <Link
+          to="/admin"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-headline text-background rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity"
+        >
+          Open Writer CMS
+        </Link>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
 const Index = () => {
   const { data: articles, isLoading: articlesLoading } = useArticles();
-  const { data: featuredArticle, isLoading: featuredLoading } = useFeaturedArticle();
   const { data: trendingArticles, isLoading: trendingLoading } = useTrendingArticles(5);
 
-  const isLoading = articlesLoading || featuredLoading || trendingLoading;
-
-  const hasDbData = articles && articles.length > 0;
-  
-  const allArticles = hasDbData 
-    ? [...articles, ...mockArticles.filter(m => !articles.some(a => a.title === m.title))]
-    : mockArticles;
-  const displayTrending = trendingArticles && trendingArticles.length > 0 
-    ? [...trendingArticles, ...mockTrending.filter(m => !trendingArticles.some(t => t.title === m.title))].slice(0, 5)
-    : mockTrending;
+  const isLoading = articlesLoading || trendingLoading;
 
   if (isLoading) {
     return <LoadingSkeleton />;
+  }
+
+  const allArticles = articles ?? [];
+  const displayTrending = trendingArticles ?? [];
+
+  if (allArticles.length === 0) {
+    return <EmptyState />;
   }
 
   const politicsArticles = allArticles.filter(a => a.category.toLowerCase() === 'politics');
@@ -58,53 +78,64 @@ const Index = () => {
 
       {/* Breaking News Ticker */}
       <BreakingTicker articles={allArticles} />
-      
+
       {/* Hero Section — top stories */}
-      <HeroSection articles={allArticles} />
+      <div className="py-2">
+        <HeroSection articles={allArticles} />
+      </div>
 
       {/* Divider */}
-      <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
+      <div className="container px-3 md:px-4 lg:px-6 py-2"><div className="h-px bg-divider" /></div>
 
       {/* Latest News + Trending Sidebar */}
       <LatestNews articles={allArticles.slice(3)} trending={displayTrending} />
 
-      {/* Divider */}
-      <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
-
-      {/* Video News Section */}
-      <VideoNewsSection articles={allArticles} />
+      {/* Daily Poll & Reader Pulse Section */}
+      <div className="container py-10">
+        <div className="max-w-2xl mx-auto">
+          <DailyPollWidget />
+        </div>
+      </div>
 
       {/* Divider */}
       <div className="container px-3 md:px-4 lg:px-6"><div className="h-px bg-divider" /></div>
 
       {/* Category Rows */}
-      <CategoryNewsSection 
-        title="Politics" 
-        articles={politicsArticles} 
-        accentColor="category-politics"
-        linkHref="/category/politics"
-      />
+      {politicsArticles.length > 0 && (
+        <CategoryNewsSection
+          title="Politics"
+          articles={politicsArticles}
+          accentColor="category-politics"
+          linkHref="/category/politics"
+        />
+      )}
 
-      <CategoryNewsSection 
-        title="Sports" 
-        articles={sportsArticles} 
-        accentColor="category-sports"
-        linkHref="/category/sports"
-      />
+      {sportsArticles.length > 0 && (
+        <CategoryNewsSection
+          title="Sports"
+          articles={sportsArticles}
+          accentColor="category-sports"
+          linkHref="/category/sports"
+        />
+      )}
 
-      <CategoryNewsSection 
-        title="Entertainment" 
-        articles={entertainmentArticles} 
-        accentColor="category-entertainment"
-        linkHref="/category/entertainment"
-      />
+      {entertainmentArticles.length > 0 && (
+        <CategoryNewsSection
+          title="Entertainment"
+          articles={entertainmentArticles}
+          accentColor="category-entertainment"
+          linkHref="/category/entertainment"
+        />
+      )}
 
-      <CategoryNewsSection 
-        title="Business" 
-        articles={businessArticles} 
-        accentColor="category-business"
-        linkHref="/category/business"
-      />
+      {businessArticles.length > 0 && (
+        <CategoryNewsSection
+          title="Business"
+          articles={businessArticles}
+          accentColor="category-business"
+          linkHref="/category/business"
+        />
+      )}
 
       <Footer />
       <MobileBottomNav />

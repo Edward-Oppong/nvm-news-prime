@@ -6,7 +6,6 @@ import { Footer } from '@/components/news/Footer';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { MobileBottomNav } from '@/components/news/MobileBottomNav';
 import { useArticlesByCategory } from '@/hooks/useArticles';
-import { getArticlesByCategory as getMockArticles } from '@/data/mockArticles';
 import { categoryConfigs } from '@/data/categoryConfig';
 import { Category } from '@/types/news';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,13 +17,7 @@ export default function CategoryPage() {
   const config = categoryConfigs[categoryKey];
   
   const { data: dbArticles, isLoading } = useArticlesByCategory(categoryKey);
-  
-  // Combine database articles with mock data for richer content display
-  const mockArticles = getMockArticles(categoryKey);
-  // Show DB articles first, then fill with mock data to ensure good content coverage
-  const articles = dbArticles && dbArticles.length > 0 
-    ? [...dbArticles, ...mockArticles.filter(m => !dbArticles.some(d => d.title === m.title))]
-    : mockArticles;
+  const articles = dbArticles ?? [];
 
   if (!config) {
     return (

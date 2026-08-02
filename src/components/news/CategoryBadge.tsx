@@ -17,7 +17,7 @@ export function CategoryBadge({ category, className = '' }: CategoryBadgeProps) 
   const config = categoryConfig[category];
   
   return (
-    <span className={`inline-flex items-center text-[11px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md category-badge ${config.color} ${className}`}>
+    <span className={`inline-flex items-center text-[10px] font-extrabold uppercase tracking-widest text-primary ${className}`}>
       {config.label}
     </span>
   );

@@ -18,8 +18,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["Newsreader", "Lora", "Georgia", "serif"],
+        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -135,15 +135,15 @@ export default {
             maxWidth: "70ch",
             color: "hsl(var(--foreground))",
             h1: {
-              fontFamily: "Playfair Display, Georgia, serif",
+              fontFamily: "Newsreader, Lora, Georgia, serif",
               color: "hsl(var(--headline))",
             },
             h2: {
-              fontFamily: "Playfair Display, Georgia, serif",
+              fontFamily: "Newsreader, Lora, Georgia, serif",
               color: "hsl(var(--headline))",
             },
             h3: {
-              fontFamily: "Playfair Display, Georgia, serif",
+              fontFamily: "Newsreader, Lora, Georgia, serif",
               color: "hsl(var(--headline))",
             },
             a: {
