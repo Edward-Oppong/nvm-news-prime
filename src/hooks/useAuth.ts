@@ -24,7 +24,7 @@ export function useAuth() {
           ...prev,
           session,
           user: session?.user ?? null,
-          loading: !!session?.user, // <-- stay loading until admin check resolves
+          loading: !!session?.user,
         }));
 
         if (session?.user) {
@@ -36,21 +36,6 @@ export function useAuth() {
         }
       }
     );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthState(prev => ({
-        ...prev,
-        session,
-        user: session?.user ?? null,
-        loading: !!session?.user, // <-- same fix here
-      }));
-
-      if (session?.user) {
-        checkAdminStatus(session.user.id);
-      } else {
-        setAuthState(prev => ({ ...prev, loading: false }));
-      }
-    });
 
     return () => subscription.unsubscribe();
   }, []);
