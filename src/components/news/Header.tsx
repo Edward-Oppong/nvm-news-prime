@@ -40,12 +40,11 @@ export function Header() {
   };
 
   return (
-    <motion.header 
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-background/95 backdrop-blur-md shadow-md border-b border-border/50' 
+    <motion.header
+      className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
+          ? 'bg-background/95 backdrop-blur-md shadow-md border-b border-border/50'
           : 'bg-background/80 backdrop-blur-sm border-b border-divider'
-      }`}
+        }`}
       initial={{ y: 0 }}
       animate={{ y: isHidden ? -100 : 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -75,9 +74,9 @@ export function Header() {
 
           {/* Logo */}
           <Link to="/" className="flex-shrink-0 group py-1">
-            <motion.img 
-              src={nvmLogo} 
-              alt="NVM News - Nhyiraba Viglio Media" 
+            <motion.img
+              src={nvmLogo}
+              alt="NVM News - Nhyiraba Viglio Media"
               className="h-14 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-sm"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
@@ -136,14 +135,6 @@ export function Header() {
             >
               <Search className="h-5 w-5" />
             </motion.button>
-
-            <Link
-              to="/writer/auth"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-headline bg-muted hover:bg-muted/80 rounded-full transition-colors border border-border"
-            >
-              <PenTool className="h-3.5 w-3.5 text-accent" />
-              <span>Writer CMS</span>
-            </Link>
           </div>
         </div>
       </div>
