@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
-import { Analytics } from '@vercel/analytics/react';
 import CategoryPage from "./pages/CategoryPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -69,7 +68,6 @@ function AnimatedRoutes() {
 
   return (
     <AnimatePresence mode="wait">
-      <Analytics />
       <Routes location={location} key={location.pathname}>
         {/* Public Routes */}
         <Route path="/" element={<PageWrapper><Index /></PageWrapper>} />
