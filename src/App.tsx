@@ -26,6 +26,7 @@ import CategoriesList from "./pages/admin/CategoriesList";
 import AuthorsList from "./pages/admin/AuthorsList";
 import ReviewQueue from "./pages/admin/ReviewQueue";
 import SiteSettings from "./pages/admin/SiteSettings";
+import PollsList from "./pages/admin/PollsList";
 
 // Writer Pages
 import WriterAuth from "./pages/writer/WriterAuth";
@@ -110,6 +111,7 @@ function AnimatedRoutes() {
           <Route path="articles/new" element={<ArticleEditor />} />
           <Route path="articles/:id" element={<ArticleEditor />} />
           <Route path="categories" element={<CategoriesList />} />
+          <Route path="polls" element={<PollsList />} />
           <Route path="authors" element={<AuthorsList />} />
           <Route path="settings" element={<SiteSettings />} />
         </Route>

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
+import {
+  LayoutDashboard,
+  FileText,
   ClipboardCheck,
-  FolderOpen, 
-  Users, 
+  FolderOpen,
+  Users,
   Settings,
   LogOut,
   ExternalLink,
-  X
+  X,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,6 +48,7 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
     { label: 'Articles', href: '/admin/articles', icon: FileText },
     { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
     { label: 'Authors', href: '/admin/authors', icon: Users },
+    { label: 'Polls', href: '/admin/polls', icon: BarChart3 },
     { label: 'Site Settings', href: '/admin/settings', icon: Settings },
   ];
 
@@ -81,9 +83,9 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.href || 
+          const isActive = location.pathname === item.href ||
             (item.href !== '/admin' && location.pathname.startsWith(item.href));
-          
+
           return (
             <Link
               key={item.href}
@@ -119,11 +121,11 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
           <ExternalLink className="h-5 w-5 shrink-0" />
           View Site
         </Link>
-        
+
         <div className="px-4 py-2">
           <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
         </div>
-        
+
         <Button
           variant="ghost"
           onClick={handleSignOut}
