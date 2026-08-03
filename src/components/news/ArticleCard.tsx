@@ -26,7 +26,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.08, duration: 0.4 }}
-        className="group flex gap-4 py-4 border-b border-divider last:border-0 rounded-lg transition-colors touch-feedback"
+        className="group flex gap-4 py-2 border-b border-divider last:border-0 rounded-lg transition-colors touch-feedback"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -203,17 +203,17 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           />
         </div>
       </Link>
-      
+
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <CategoryBadge label={article.categoryLabel} />
           </div>
-          
+
           <h3 className="font-serif text-base md:text-lg font-semibold line-clamp-2 min-h-[2.75rem] mb-2 transition-colors group-hover:text-primary leading-snug">
             <Link to={`/article/${article.slug}`}>{article.title}</Link>
           </h3>
-          
+
           <p className="text-muted-foreground line-clamp-2 text-sm mb-4 leading-relaxed">{article.excerpt}</p>
         </div>
 
@@ -226,7 +226,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
             />
             <span className="font-medium text-foreground text-xs hover:underline">{article.author}</span>
           </Link>
-          
+
           <div className="flex items-center gap-3">
             {article.viewCount !== undefined && article.viewCount > 0 && (
               <span className="flex items-center gap-1">
