@@ -9,18 +9,18 @@ import { CategoryBadge } from '@/components/news/CategoryBadge';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { VideoPlayer } from '@/components/news/VideoPlayer';
 import { AudioNarrationPlayer } from '@/components/news/AudioNarrationPlayer';
-import { useArticle, useRelatedArticles } from '@/hooks/useArticles';
+import { useArticle, useArticleBySlug, useRelatedArticles } from '@/hooks/useArticles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 export default function ArticlePage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  const { data: article, isLoading } = useArticle(id || '');
+  const { data: article, isLoading } = useArticleBySlug(slug || '');
   const { data: relatedArticles } = useRelatedArticles(
-    id || '',
+    article?.id || '',
     article?.category || 'politics'
   );
 

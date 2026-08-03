@@ -30,7 +30,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link to={`/article/${article.id}`} className="flex-shrink-0 relative overflow-hidden rounded-lg">
+        <Link to={`/article/${article.slug}`} className="flex-shrink-0 relative overflow-hidden rounded-lg">
           <div className="w-24 h-24 md:w-28 md:h-24 rounded-lg overflow-hidden">
             {!isImageLoaded && <ImageSkeleton />}
             <motion.img
@@ -47,7 +47,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         <div className="flex-1 min-w-0 flex flex-col justify-center">
           <CategoryBadge label={article.categoryLabel} className="mb-1.5" />
           <h3 className="font-serif text-base md:text-lg font-medium leading-snug line-clamp-2 mb-1 transition-colors group-hover:text-primary">
-            <Link to={`/article/${article.id}`}>{article.title}</Link>
+            <Link to={`/article/${article.slug}`}>{article.title}</Link>
           </h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{article.date}</span>
@@ -73,7 +73,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link to={`/article/${article.id}`} className="relative block overflow-hidden">
+        <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
           <div className="aspect-[16/9] rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-shadow duration-300">
             {!isImageLoaded && <ImageSkeleton />}
             <motion.img
@@ -88,7 +88,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           </div>
         </Link>
         <h3 className="font-serif text-sm md:text-base font-medium line-clamp-2 mb-1 transition-colors group-hover:text-primary leading-snug">
-          <Link to={`/article/${article.id}`}>{article.title}</Link>
+          <Link to={`/article/${article.slug}`}>{article.title}</Link>
         </h3>
         <p className="text-xs text-muted-foreground">{article.date}</p>
       </motion.article>
@@ -105,7 +105,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link to={`/article/${article.id}`} className="relative block overflow-hidden">
+        <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
           <div className="aspect-[16/10] rounded-xl overflow-hidden mb-3 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
             {!isImageLoaded && <ImageSkeleton />}
             <motion.img
@@ -121,7 +121,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         </Link>
         <CategoryBadge label={article.categoryLabel} className="mb-2" />
         <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-2 transition-colors group-hover:text-primary">
-          <Link to={`/article/${article.id}`}>{article.title}</Link>
+          <Link to={`/article/${article.slug}`}>{article.title}</Link>
         </h3>
         <p className="text-sm text-muted-foreground">{article.date}</p>
       </motion.article>
@@ -138,7 +138,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Link to={`/article/${article.id}`} className="relative block overflow-hidden">
+        <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
           <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-3 shadow-card group-hover:shadow-lg transition-all duration-500">
             {!isImageLoaded && <ImageSkeleton />}
             <motion.img
@@ -161,7 +161,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           <CategoryBadge label={article.categoryLabel} />
         </div>
         <h3 className="font-serif text-xl md:text-2xl font-semibold mb-2 transition-colors group-hover:text-primary leading-tight">
-          <Link to={`/article/${article.id}`}>{article.title}</Link>
+          <Link to={`/article/${article.slug}`}>{article.title}</Link>
         </h3>
         <p className="text-muted-foreground line-clamp-2 mb-3 text-sm">{article.excerpt}</p>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -194,7 +194,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/article/${article.id}`} className="relative block overflow-hidden">
+      <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
         <div className="aspect-[16/10] rounded-xl overflow-hidden mb-3 shadow-card group-hover:shadow-lg transition-all duration-400">
           {!isImageLoaded && <ImageSkeleton />}
           <motion.img
@@ -212,7 +212,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         <CategoryBadge label={article.categoryLabel} />
       </div>
       <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-1.5 transition-colors group-hover:text-primary leading-snug">
-        <Link to={`/article/${article.id}`}>{article.title}</Link>
+        <Link to={`/article/${article.slug}`}>{article.title}</Link>
       </h3>
       <p className="text-muted-foreground line-clamp-2 mb-2 text-sm">{article.excerpt}</p>
       <div className="flex items-center justify-between text-sm text-muted-foreground pt-1 border-t border-divider/60">

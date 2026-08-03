@@ -48,7 +48,7 @@ export function VideoNewsSection({ articles }: VideoNewsSectionProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Link to={`/article/${featured.id}`} className="block group">
+            <Link to={`/article/${featured.slug}`} className="block group">
               <div className="relative aspect-video rounded-xl overflow-hidden bg-black">
                 {featured.videoUrl && isEmbedUrl(featured.videoUrl) ? (
                   <>
@@ -92,13 +92,13 @@ export function VideoNewsSection({ articles }: VideoNewsSectionProps) {
           <div className="lg:col-span-4 space-y-4">
             {secondary.map((article, index) => (
               <motion.div
-                key={article.id}
+                key={article.slug}
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Link to={`/article/${article.id}`} className="flex gap-3 group">
+                <Link to={`/article/${article.slug}`} className="flex gap-3 group">
                   <div className="relative w-36 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-black">
                     <img
                       src={

@@ -12,7 +12,7 @@ interface TrendingSidebarProps {
 export function TrendingSidebar({ articles }: TrendingSidebarProps) {
   return (
     <aside className="lg:sticky lg:top-28">
-      <motion.div 
+      <motion.div
         className="bg-surface-elevated rounded-2xl p-6 border border-border/60"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -28,7 +28,7 @@ export function TrendingSidebar({ articles }: TrendingSidebarProps) {
 
         <div className="space-y-0">
           {articles.slice(0, 5).map((article, index) => (
-            <TrendingItem key={article.id} article={article} index={index} />
+            <TrendingItem key={article.slug} article={article} index={index} />
           ))}
         </div>
       </motion.div>
@@ -40,7 +40,7 @@ function TrendingItem({ article, index }: { article: Article; index: number }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Link to={`/article/${article.id}`}>
+    <Link to={`/article/${article.slug}`}>
       <motion.article
         initial={{ opacity: 0, x: 15 }}
         animate={{ opacity: 1, x: 0 }}
@@ -49,12 +49,11 @@ function TrendingItem({ article, index }: { article: Article; index: number }) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <span 
-          className={`flex-shrink-0 w-9 h-9 flex items-center justify-center font-serif text-lg font-bold rounded-lg transition-all duration-300 ${
-            isHovered 
-              ? 'bg-primary text-primary-foreground' 
+        <span
+          className={`flex-shrink-0 w-9 h-9 flex items-center justify-center font-serif text-lg font-bold rounded-lg transition-all duration-300 ${isHovered
+              ? 'bg-primary text-primary-foreground'
               : 'bg-muted text-muted-foreground'
-          }`}
+            }`}
         >
           {index + 1}
         </span>

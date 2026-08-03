@@ -26,7 +26,7 @@ export function HeroSection({ articles }: HeroSectionProps) {
             transition={{ duration: 0.5 }}
           >
             <Link
-              to={`/article/${hero.id}`}
+              to={`/article/${hero.slug}`}
               className="group block relative overflow-hidden rounded-xl aspect-[16/10] lg:aspect-[4/3] lg:h-full"
             >
               <img
@@ -73,14 +73,14 @@ export function HeroSection({ articles }: HeroSectionProps) {
           <div className="lg:col-span-5 grid grid-cols-2 lg:grid-cols-1 gap-2 md:gap-3">
             {secondary.map((article, i) => (
               <motion.div
-                key={article.id}
+                key={article.slug}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
                 className="flex-1"
               >
                 <Link
-                  to={`/article/${article.id}`}
+                  to={`/article/${article.slug}`}
                   className="group block relative overflow-hidden rounded-xl h-full min-h-[160px]"
                 >
                   <img

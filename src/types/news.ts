@@ -18,6 +18,7 @@ export interface Article {
   category: Category;
   categoryLabel: string;
   categoryColor: string;
+  slug: string;
   author: string;
   authorRole?: string;
   authorAvatar?: string;

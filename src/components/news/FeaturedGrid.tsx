@@ -26,7 +26,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
             transition={{ duration: 0.6 }}
           >
             <Link
-              to={`/article/${main.id}`}
+              to={`/article/${main.slug}`}
               className="group block relative overflow-hidden rounded-2xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[300px] lg:min-h-[380px]"
             >
               <img
@@ -66,14 +66,14 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
           {/* Side articles - 2x2 grid */}
           {sideArticles.map((article, index) => (
             <motion.div
-              key={article.id}
+              key={article.slug}
               className="lg:col-span-5 lg:col-start-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 + index * 0.08, duration: 0.5 }}
             >
               <Link
-                to={`/article/${article.id}`}
+                to={`/article/${article.slug}`}
                 className="group flex gap-3 items-center p-2 rounded-xl hover:bg-muted/60 transition-all duration-300"
               >
                 <div className="relative flex-shrink-0 w-28 h-20 md:w-32 md:h-24 rounded-lg overflow-hidden">

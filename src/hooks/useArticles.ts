@@ -31,6 +31,7 @@ function transformArticle(dbArticle: DBArticle): Article {
     title: dbArticle.title,
     excerpt: dbArticle.excerpt || '',
     content: dbArticle.content || undefined,
+    slug: dbArticle.slug,
     category: (dbArticle.categories?.slug || 'general') as Category,
     categoryLabel: dbArticle.categories?.name || 'General',
     categoryColor: dbArticle.categories?.color || 'category-general',
@@ -272,6 +273,42 @@ export function useVideoArticles() {
       if (error) throw error;
       return (data as DBArticle[]).map(transformArticle);
     },
+  });
+}
+
+// Fetch single article by slug (used by the public article page)
+export function useArticleBySlug(slug: string) {
+  return useQuery({
+    queryKey: ['article', 'slug', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select(`
+          id,
+          slug,
+          title,
+          excerpt,
+          content,
+          image_url,
+          video_url,
+          read_time,
+          featured,
+          breaking,
+          published,
+          published_at,
+          created_at,
+          categories (slug, name, color),
+          authors_public (name, avatar_url)
+        `)
+        .eq('slug', slug)
+        .eq('published', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) return null;
+      return transformArticle(data as DBArticle);
+    },
+    enabled: !!slug,
   });
 }
 

@@ -38,14 +38,14 @@ export function OpinionSection({ articles }: OpinionSectionProps) {
 
             return (
               <motion.div
-                key={article.id}
+                key={article.slug}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08, duration: 0.4 }}
               >
                 <Link
-                  to={`/article/${article.id}`}
+                  to={`/article/${article.slug}`}
                   className="group relative flex flex-col h-full p-5 rounded-xl border border-divider hover:border-headline/40 transition-colors"
                 >
                   <Quote className="absolute top-4 right-4 h-6 w-6 text-muted-foreground/20" />

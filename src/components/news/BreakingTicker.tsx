@@ -30,9 +30,9 @@ export function BreakingTicker({ articles }: BreakingTickerProps) {
             transition={{ duration: tickerItems.length * 12, repeat: Infinity, ease: 'linear' }}
           >
             {tickerItems.map((article, i) => (
-              <span key={article.id}>
+              <span key={article.slug}>
                 <Link
-                  to={`/article/${article.id}`}
+                  to={`/article/${article.slug}`}
                   className="hover:underline underline-offset-2"
                 >
                   {article.title}
@@ -43,9 +43,9 @@ export function BreakingTicker({ articles }: BreakingTickerProps) {
               </span>
             ))}
             {tickerItems.map((article, i) => (
-              <span key={`dup-${article.id}`}>
+              <span key={`dup-${article.slug}`}>
                 <Link
-                  to={`/article/${article.id}`}
+                  to={`/article/${article.slug}`}
                   className="hover:underline underline-offset-2"
                 >
                   {article.title}

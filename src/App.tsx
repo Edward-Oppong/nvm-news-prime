@@ -72,7 +72,7 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         {/* Public Routes */}
         <Route path="/" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/article/:id" element={<PageWrapper><ArticlePage /></PageWrapper>} />
+        <Route path="/article/:slug" element={<PageWrapper><ArticlePage /></PageWrapper>} />
         <Route path="/category/:category" element={<PageWrapper><CategoryPage /></PageWrapper>} />
         <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
