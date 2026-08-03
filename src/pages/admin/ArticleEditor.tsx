@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -129,6 +129,14 @@ export default function ArticleEditor() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
+  }, []);
+
+  /** Calculate read time from HTML content (strips tags, counts words at 238 wpm) */
+  const calculateReadTime = useCallback((html: string): string => {
+    const text = html.replace(/<[^>]*>/g, ' ');
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.ceil(words / 238);
+    return `${Math.max(1, minutes)} min read`;
   }, []);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -376,20 +384,19 @@ export default function ArticleEditor() {
           <Label>Content</Label>
           <RichTextEditor
             content={form.content}
-            onChange={(content) => setForm(prev => ({ ...prev, content }))}
+            onChange={(content) => setForm(prev => ({ ...prev, content, read_time: calculateReadTime(content) }))}
             placeholder="Write your article content here..."
           />
         </div>
 
-        {/* Read Time */}
-        <div className="space-y-2 max-w-xs">
-          <Label htmlFor="read_time">Read Time</Label>
-          <Input
-            id="read_time"
-            value={form.read_time}
-            onChange={(e) => setForm(prev => ({ ...prev, read_time: e.target.value }))}
-            placeholder="5 min read"
-          />
+        {/* Read Time — auto-calculated, read-only display */}
+        <div className="flex items-center gap-3 py-2 px-4 bg-muted/40 border border-border/60 rounded-xl max-w-xs">
+          <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Estimated Read Time</p>
+            <p className="text-sm font-semibold text-headline">{form.read_time || '1 min read'}</p>
+          </div>
+          <span className="ml-auto text-[10px] uppercase tracking-wide font-bold text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded">Auto</span>
         </div>
 
         {/* Toggles */}

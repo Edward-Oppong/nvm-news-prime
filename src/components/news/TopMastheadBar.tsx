@@ -2,16 +2,11 @@ import { useState, useEffect } from 'react';
 import { CloudSun, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-
-const weatherData = [
-  { city: 'Accra', temp: '29°C', icon: '⛅' },
-  { city: 'London', temp: '21°C', icon: '🌧️' },
-  { city: 'New York', temp: '26°C', icon: '☀️' },
-  { city: 'Lagos', temp: '31°C', icon: '⛅' },
-];
+import { useWeather } from '@/hooks/useWeather';
 
 export function TopMastheadBar() {
   const [currentWeatherIndex, setCurrentWeatherIndex] = useState(0);
+  const { cities, loading } = useWeather();
 
   const formattedDate = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
@@ -21,11 +16,14 @@ export function TopMastheadBar() {
   }).format(new Date());
 
   useEffect(() => {
+    if (cities.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentWeatherIndex((prev) => (prev + 1) % weatherData.length);
+      setCurrentWeatherIndex((prev) => (prev + 1) % cities.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [cities.length]);
+
+  const currentCity = cities[currentWeatherIndex];
 
   return (
     <div className="bg-headline text-background/90 text-xs py-1.5 px-4 border-b border-border/20">
@@ -39,21 +37,25 @@ export function TopMastheadBar() {
 
           {/* Animated Weather Ticker */}
           <div className="flex items-center gap-1.5 bg-background/10 px-2 py-0.5 rounded-full">
-            <CloudSun className="h-3.5 w-3.5 text-accent" />
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={currentWeatherIndex}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.2 }}
-                className="font-medium flex items-center gap-1"
-              >
-                <span>{weatherData[currentWeatherIndex].city}:</span>
-                <span className="font-semibold text-background">{weatherData[currentWeatherIndex].temp}</span>
-                <span>{weatherData[currentWeatherIndex].icon}</span>
-              </motion.span>
-            </AnimatePresence>
+            <CloudSun className="h-3.5 w-3.5 text-accent flex-shrink-0" />
+            {loading ? (
+              <span className="font-medium animate-pulse text-background/50">Loading weather...</span>
+            ) : currentCity ? (
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={currentWeatherIndex}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.2 }}
+                  className="font-medium flex items-center gap-1"
+                >
+                  <span>{currentCity.city}:</span>
+                  <span className="font-semibold text-background">{currentCity.temp}</span>
+                  <span>{currentCity.icon}</span>
+                </motion.span>
+              </AnimatePresence>
+            ) : null}
           </div>
         </div>
 

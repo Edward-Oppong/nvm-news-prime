@@ -18,6 +18,7 @@ interface DBArticle {
   published: boolean | null;
   published_at: string | null;
   created_at: string;
+  view_count: number | null;
   categories: { slug: string; name: string; color: string | null } | null;
   authors_public: { name: string; avatar_url: string | null } | null;
 }
@@ -42,6 +43,7 @@ function transformArticle(dbArticle: DBArticle): Article {
     featured: dbArticle.featured || false,
     breaking: dbArticle.breaking || false,
     videoUrl: dbArticle.video_url || undefined,
+    viewCount: dbArticle.view_count || 0,
   };
 }
 
@@ -66,6 +68,7 @@ export function useArticles() {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -99,6 +102,7 @@ export function useFeaturedArticle() {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -146,6 +150,7 @@ export function useArticlesByCategory(categorySlug: string) {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -181,6 +186,7 @@ export function useArticle(id: string) {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -226,6 +232,7 @@ export function useRelatedArticles(articleId: string, category: Category) {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -263,6 +270,7 @@ export function useVideoArticles() {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -297,6 +305,7 @@ export function useArticleBySlug(slug: string) {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -333,6 +342,7 @@ export function useTrendingArticles(limit = 5) {
           published,
           published_at,
           created_at,
+          view_count,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)

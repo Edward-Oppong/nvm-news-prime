@@ -25,8 +25,15 @@ interface Article {
   featured: boolean;
   breaking: boolean;
   created_at: string;
+  view_count: number;
   categories: { name: string } | null;
   authors: { name: string } | null;
+}
+
+function formatViews(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return `${n}`;
 }
 
 export default function ArticlesList() {
@@ -51,6 +58,7 @@ export default function ArticlesList() {
         featured,
         breaking,
         created_at,
+        view_count,
         categories (name),
         authors (name)
       `)
@@ -143,6 +151,7 @@ export default function ArticlesList() {
                 <th className="text-left p-4 font-medium text-muted-foreground">Title</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Category</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Author</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Views</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
                 <th className="text-right p-4 font-medium text-muted-foreground">Actions</th>
               </tr>
@@ -174,6 +183,12 @@ export default function ArticlesList() {
                   </td>
                   <td className="p-4 text-muted-foreground">
                     {article.authors?.name || 'Unknown'}
+                  </td>
+                  <td className="p-4">
+                    <span className="flex items-center gap-1 text-sm font-semibold text-headline">
+                      <Eye className="h-3.5 w-3.5 text-primary/60" />
+                      {formatViews(article.view_count || 0)}
+                    </span>
                   </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${

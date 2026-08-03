@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react';
-import { Loader2, X, Image as ImageIcon, Video, Play, Upload, Link as LinkIcon, Plus, GripVertical } from 'lucide-react';
+import { Loader2, X, Image as ImageIcon, Video, Play, Upload, Link as LinkIcon, Plus, GripVertical, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { resizeAndConvertToWebP, isPortraitImage } from '@/lib/imageUtils';
 
 export interface VideoItem {
   id?: string;
@@ -35,6 +36,7 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [isPortrait, setIsPortrait] = useState(false);
   const [embedUrl, setEmbedUrl] = useState('');
   const [newVideoTitle, setNewVideoTitle] = useState('');
   const [embedTitle, setEmbedTitle] = useState('');
@@ -42,11 +44,19 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   // --- Image handlers ---
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Image must be less than 10MB'); return; }
+
+    // Check orientation and warn
+    const portrait = await isPortraitImage(file);
+    setIsPortrait(portrait);
+    if (portrait) {
+      toast.warning('Portrait image detected — it will be cropped to fit the landscape hero. A landscape photo works best.');
+    }
+
     setSelectedImageFile(file);
     const reader = new FileReader();
     reader.onload = (event) => setImagePreview(event.target?.result as string);
@@ -59,22 +69,26 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { toast.error('You must be logged in to upload images'); return; }
-      const fileExt = selectedImageFile.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      // Resize + convert to WebP before upload
+      const resized = await resizeAndConvertToWebP(selectedImageFile, 2000, 1500, 0.87);
+
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
       const filePath = `articles/${fileName}`;
-      const { error } = await supabase.storage.from('article-images').upload(filePath, selectedImageFile, { cacheControl: '3600', upsert: false });
+      const { error } = await supabase.storage.from('article-images').upload(filePath, resized, { cacheControl: '3600', upsert: false });
       if (error) { toast.error(error.message || 'Failed to upload image'); return; }
       const { data: { publicUrl } } = supabase.storage.from('article-images').getPublicUrl(filePath);
       onImageChange(publicUrl);
       setImagePreview(null);
       setSelectedImageFile(null);
-      toast.success('Image uploaded');
+      setIsPortrait(false);
+      toast.success('Image uploaded & optimised!');
       if (imageInputRef.current) imageInputRef.current.value = '';
     } catch { toast.error('An unexpected error occurred'); } finally { setUploadingImage(false); }
   };
 
-  const cancelImagePreview = () => { setImagePreview(null); setSelectedImageFile(null); if (imageInputRef.current) imageInputRef.current.value = ''; };
-  const removeImage = () => { onImageChange(''); setImagePreview(null); setSelectedImageFile(null); };
+  const cancelImagePreview = () => { setImagePreview(null); setSelectedImageFile(null); setIsPortrait(false); if (imageInputRef.current) imageInputRef.current.value = ''; };
+  const removeImage = () => { onImageChange(''); setImagePreview(null); setSelectedImageFile(null); setIsPortrait(false); };
 
   // --- Video file upload (adds to videos list) ---
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,6 +212,12 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
                 <div className="relative">
                   <img src={imagePreview} alt="Preview" className="w-full h-64 object-cover rounded-lg border-2 border-primary/50" />
                   <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium">Preview</div>
+                  {isPortrait && (
+                    <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2 bg-amber-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
+                      <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+                      Portrait image — will be cropped in the hero. Landscape works best.
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center justify-center gap-3">
                   <Button type="button" variant="outline" onClick={cancelImagePreview} disabled={uploadingImage}>Cancel</Button>

@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, Link as LinkIcon, X, Loader2, Check } from 'lucide-react';
+import { Upload, Image as ImageIcon, Link as LinkIcon, X, Loader2, Check, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { resizeAndConvertToWebP, isPortraitImage } from '@/lib/imageUtils';
 
 interface ImageUploaderProps {
   value: string;
@@ -26,6 +27,7 @@ export function ImageUploader({
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [activeTab, setActiveTab] = useState<'upload' | 'url'>('upload');
+  const [isPortrait, setIsPortrait] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,27 +44,34 @@ export function ImageUploader({
       return;
     }
 
+    // Check portrait and warn
+    const portrait = await isPortraitImage(file);
+    setIsPortrait(portrait);
+    if (portrait && aspect === 'cover') {
+      toast.warning('Portrait image detected — it will be cropped to fit the landscape cover. A landscape photo works best.');
+    }
+
     setUploading(true);
 
     try {
-      // 1. Try uploading to Supabase Storage bucket
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Resize + convert to WebP before uploading
+      const resized = await resizeAndConvertToWebP(file, 2000, 1500, 0.87);
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
       const filePath = `${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+        .upload(filePath, resized, { cacheControl: '3600', upsert: true });
 
       if (!uploadError) {
         const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
         onChange(publicUrlData.publicUrl);
-        toast.success(`${label} uploaded successfully!`);
+        toast.success(`${label} uploaded & optimised!`);
         setUploading(false);
         return;
       }
 
-      // 2. If bucket is not public/configured yet, convert to Data URL fallback
+      // 2. Fallback: convert original to Data URL if bucket not configured
       const reader = new FileReader();
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string;
@@ -94,6 +103,7 @@ export function ImageUploader({
 
   const removeImage = () => {
     onChange('');
+    setIsPortrait(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -106,10 +116,16 @@ export function ImageUploader({
             className={
               aspect === 'square'
                 ? 'w-24 h-24 rounded-full overflow-hidden mx-auto my-3 border-2 border-primary/30'
-                : 'aspect-[21/9] w-full max-h-56 overflow-hidden'
+                : 'aspect-[21/9] w-full max-h-56 overflow-hidden relative'
             }
           >
-            <img src={value} alt="Preview" className="w-full h-full object-cover" />
+            <img src={value} alt="Preview" className="w-full h-full object-cover" style={{ objectPosition: isPortrait && aspect === 'cover' ? 'center top' : 'center center' }} />
+            {isPortrait && aspect === 'cover' && (
+              <div className="absolute bottom-1 left-1 right-1 flex items-center gap-1.5 bg-amber-500/80 text-white px-2 py-1 rounded text-[10px] font-medium">
+                <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                Portrait — cropped to landscape in hero
+              </div>
+            )}
           </div>
 
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">

@@ -29,13 +29,15 @@ import {
   AlignCenter,
   AlignRight,
   Maximize2,
-  Video as VideoIcon
+  Video as VideoIcon,
+  Music,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { resizeAndConvertToWebP } from '@/lib/imageUtils';
 
 // Custom TipTap Image Extension with alignment attribute & class mapping
 const CustomImage = Image.extend({
@@ -74,8 +76,10 @@ interface RichTextEditorProps {
 export function RichTextEditor({ content, onChange, placeholder = 'Start writing your story...' }: RichTextEditorProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -123,7 +127,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     }
   }, [content, editor]);
 
-  // Handle uploading image to article-images bucket
+  // Handle uploading image to article-images bucket (with client-side resize)
   const handleImageFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
@@ -141,13 +145,15 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     setUploadingImage(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Resize + convert to WebP before upload
+      const resized = await resizeAndConvertToWebP(file, 1600, 1200, 0.85);
+
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
       const filePath = `inline/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('article-images')
-        .upload(filePath, file);
+        .upload(filePath, resized);
 
       if (uploadError) throw uploadError;
 
@@ -207,6 +213,50 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     } finally {
       setUploadingVideo(false);
       if (videoInputRef.current) videoInputRef.current.value = '';
+    }
+  };
+
+  // Handle uploading audio to article-audios bucket
+  const handleAudioFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+
+    if (!file.type.startsWith('audio/')) {
+      toast.error('Please select a valid audio file (MP3, WAV, OGG, AAC)');
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Audio file must be under 50MB');
+      return;
+    }
+
+    setUploadingAudio(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `inline/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('article-audios')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-audios')
+        .getPublicUrl(filePath);
+
+      // Insert styled audio player into content
+      const audioHtml = `<audio controls preload="metadata" class="w-full rounded-xl my-4" src="${publicUrl}" style="width:100%;border-radius:0.75rem;margin:1rem 0;"></audio><p></p>`;
+      editor.chain().focus().insertContent(audioHtml).run();
+      toast.success('Audio inserted into article!');
+    } catch {
+      toast.error('Failed to upload audio');
+    } finally {
+      setUploadingAudio(false);
+      if (audioInputRef.current) audioInputRef.current.value = '';
     }
   };
 
@@ -353,7 +403,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
           <LinkIcon className="h-4 w-4" />
         </Toggle>
 
-        {/* Hidden inputs for Image and Video upload */}
+        {/* Hidden file inputs */}
         <input
           ref={imageInputRef}
           type="file"
@@ -366,6 +416,13 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
           type="file"
           accept="video/*"
           onChange={handleVideoFileSelect}
+          className="hidden"
+        />
+        <input
+          ref={audioInputRef}
+          type="file"
+          accept="audio/*"
+          onChange={handleAudioFileSelect}
           className="hidden"
         />
 
@@ -402,7 +459,25 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
           ) : (
             <VideoIcon className="h-4 w-4 text-purple-600" />
           )}
-          <span className="hidden sm:inline">Video File</span>
+          <span className="hidden sm:inline">Video</span>
+        </Button>
+
+        {/* Upload Inline Audio File */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => audioInputRef.current?.click()}
+          disabled={uploadingAudio}
+          className="h-8 px-2 gap-1 text-xs"
+          title="Upload audio clip into article body"
+        >
+          {uploadingAudio ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Music className="h-4 w-4 text-amber-600" />
+          )}
+          <span className="hidden sm:inline">Audio</span>
         </Button>
 
         {/* YouTube Embed */}

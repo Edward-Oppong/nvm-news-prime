@@ -33,6 +33,7 @@ export interface Article {
   editorsPick?: boolean;
   isOpinion?: boolean;
   audioDuration?: string;
+  viewCount?: number;
   reactions?: {
     mindBlowing: number;
     insightful: number;

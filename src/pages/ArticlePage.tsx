@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper } from 'lucide-react';
+import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
@@ -9,14 +9,24 @@ import { CategoryBadge } from '@/components/news/CategoryBadge';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { VideoPlayer } from '@/components/news/VideoPlayer';
 import { AudioNarrationPlayer } from '@/components/news/AudioNarrationPlayer';
-import { useArticle, useArticleBySlug, useRelatedArticles } from '@/hooks/useArticles';
+import { useArticleBySlug, useRelatedArticles } from '@/hooks/useArticles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+/** Format a raw view count number into a compact display string */
+function formatViews(count: number): string {
+  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}k`;
+  return `${count}`;
+}
 
 export default function ArticlePage() {
   const { slug } = useParams();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [viewCount, setViewCount] = useState<number | null>(null);
+  const hasTrackedView = useRef(false);
 
   const { data: article, isLoading } = useArticleBySlug(slug || '');
   const { data: relatedArticles } = useRelatedArticles(
@@ -35,6 +45,25 @@ export default function ArticlePage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Increment view count once per page load
+  useEffect(() => {
+    if (!article?.id || hasTrackedView.current) return;
+    hasTrackedView.current = true;
+
+    // Optimistically show the current count + 1
+    const currentCount = article.viewCount ?? 0;
+    setViewCount(currentCount + 1);
+
+    // Fire and forget the DB increment
+    supabase.rpc('increment_article_view', { article_id: article.id }).then(({ error }) => {
+      if (error) {
+        console.warn('Failed to track article view:', error.message);
+        // Revert to original count if RPC fails
+        setViewCount(currentCount);
+      }
+    });
+  }, [article?.id, article?.viewCount]);
 
   const getArticleUrl = useCallback(() => window.location.href, []);
 
@@ -68,14 +97,45 @@ export default function ArticlePage() {
   const articleContent = useMemo(() => {
     const raw = article?.content || '';
     return DOMPurify.sanitize(raw, {
-      ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'b', 'i', 'u', 's', 'a', 'ul', 'ol', 'li', 'blockquote', 'cite', 'img', 'br', 'hr', 'span', 'div', 'figure', 'figcaption', 'pre', 'code'],
-      ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel', 'title', 'width', 'height', 'style'],
+      ALLOWED_TAGS: [
+        'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'strong', 'em', 'b', 'i', 'u', 's',
+        'a', 'ul', 'ol', 'li',
+        'blockquote', 'cite',
+        'img', 'br', 'hr',
+        'span', 'div', 'figure', 'figcaption',
+        'pre', 'code',
+        // Audio support
+        'audio', 'source',
+        // Video support
+        'video',
+      ],
+      ALLOWED_ATTR: [
+        'href', 'src', 'alt', 'class', 'target', 'rel', 'title',
+        'width', 'height', 'style',
+        // Audio/video attributes
+        'controls', 'preload', 'autoplay', 'loop', 'muted', 'type',
+        'playsinline', 'poster',
+        // Data attributes for alignment
+        'data-align',
+      ],
       ALLOW_DATA_ATTR: false,
       ADD_ATTR: ['target'],
       FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'button', 'object', 'embed'],
       FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
     });
   }, [article?.content]);
+
+  // Detect if the featured image is portrait orientation
+  const [isPortrait, setIsPortrait] = useState(false);
+  useEffect(() => {
+    if (!article?.image) return;
+    const img = new Image();
+    img.onload = () => {
+      setIsPortrait(img.naturalHeight > img.naturalWidth);
+    };
+    img.src = article.image;
+  }, [article?.image]);
 
   // Loading state
   if (isLoading) {
@@ -120,6 +180,8 @@ export default function ArticlePage() {
     );
   }
 
+  const displayViewCount = viewCount ?? article.viewCount ?? 0;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Reading progress bar */}
@@ -147,6 +209,7 @@ export default function ArticlePage() {
                 src={article.image}
                 alt={article.title}
                 className="w-full h-full object-cover"
+                style={{ objectPosition: isPortrait ? 'center top' : 'center center' }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
@@ -197,6 +260,12 @@ export default function ArticlePage() {
                   <span className="flex items-center gap-1 mt-0.5">
                     <Clock className="h-3.5 w-3.5" /> {article.readTime}
                   </span>
+                </div>
+                {/* View Count */}
+                <div className="flex items-center gap-1.5 border-l border-divider pl-4">
+                  <Eye className="h-3.5 w-3.5 text-primary/70" />
+                  <span className="font-semibold text-headline">{formatViews(displayViewCount)}</span>
+                  <span className="text-muted-foreground">views</span>
                 </div>
               </div>
             </div>
@@ -254,7 +323,8 @@ export default function ArticlePage() {
                   prose-a:text-secondary prose-a:no-underline hover:prose-a:underline
                   prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-muted-foreground
                   prose-blockquote:my-8 prose-blockquote:bg-muted/30 prose-blockquote:py-4 prose-blockquote:pr-4 prose-blockquote:rounded-r-lg
-                  [&_blockquote_cite]:block [&_blockquote_cite]:mt-2 [&_blockquote_cite]:text-sm [&_blockquote_cite]:font-semibold [&_blockquote_cite]:not-italic [&_blockquote_cite]:text-headline"
+                  [&_blockquote_cite]:block [&_blockquote_cite]:mt-2 [&_blockquote_cite]:text-sm [&_blockquote_cite]:font-semibold [&_blockquote_cite]:not-italic [&_blockquote_cite]:text-headline
+                  [&_audio]:w-full [&_audio]:rounded-xl [&_audio]:my-4"
                 dangerouslySetInnerHTML={{ __html: articleContent }}
               />
             ) : (
