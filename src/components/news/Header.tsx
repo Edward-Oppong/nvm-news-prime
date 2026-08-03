@@ -74,11 +74,11 @@ export function Header() {
           </motion.button>
 
           {/* Logo */}
-          <Link to="/" className="flex-shrink-0 group">
+          <Link to="/" className="flex-shrink-0 group py-1">
             <motion.img 
               src={nvmLogo} 
               alt="NVM News - Nhyiraba Viglio Media" 
-              className="h-12 md:h-16 w-auto transition-transform duration-300 group-hover:scale-105"
+              className="h-14 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105 filter drop-shadow-sm"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             />

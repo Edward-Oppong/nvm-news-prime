@@ -37,7 +37,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
               accentColor="accent"
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
               {articles.slice(0, visibleCount).map((article, index) => (
                 <motion.div
                   key={article.id}
@@ -45,6 +45,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: (index % 6) * 0.06, duration: 0.4 }}
+                  className="h-full"
                 >
                   <ArticleCard
                     article={article}

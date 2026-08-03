@@ -174,7 +174,7 @@
   /* Page / article titles */
   .headline-xl {
     font-family: var(--font-serif);
-    @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.12] tracking-tight;
+    @apply text-[33px] md:text-[45px] lg:text-[57px] font-bold leading-[1.12] tracking-tight;
     color: hsl(var(--headline));
   }
 

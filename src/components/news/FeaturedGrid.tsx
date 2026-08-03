@@ -74,7 +74,7 @@ export function FeaturedGrid({ articles }: FeaturedGridProps) {
             >
               <Link
                 to={`/article/${article.slug}`}
-                className="group flex gap-3 items-center p-2 rounded-xl hover:bg-muted/60 transition-all duration-300"
+                className="group flex gap-3 items-center p-2 rounded-xl transition-all duration-300"
               >
                 <div className="relative flex-shrink-0 w-28 h-20 md:w-32 md:h-24 rounded-lg overflow-hidden">
                   <img
