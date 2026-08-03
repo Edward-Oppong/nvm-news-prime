@@ -14,8 +14,6 @@ const footerLinks = {
     { name: 'About Us', href: '/about' },
     { name: 'Contact', href: '/contact' },
     { name: 'Careers', href: '/admin/authors' },
-    { name: 'Writer CMS', href: '/writer/auth' },
-    { name: 'Admin Portal', href: '/admin/auth' },
   ],
   legal: [
     { name: 'Terms of Service', href: '/terms' },
@@ -41,7 +39,7 @@ export function Footer() {
       <div className="container px-3 md:px-4 lg:px-6 py-8 md:py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 lg:gap-8">
           {/* Brand column */}
-          <motion.div 
+          <motion.div
             className="col-span-2 md:col-span-4 lg:col-span-1"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -49,9 +47,9 @@ export function Footer() {
             transition={{ duration: 0.5 }}
           >
             <Link to="/" className="inline-block mb-5 group">
-              <img 
-                src={nvmLogo} 
-                alt="NVM News - Nhyiraba Viglio Media" 
+              <img
+                src={nvmLogo}
+                alt="NVM News - Nhyiraba Viglio Media"
                 className="h-12 w-auto brightness-0 invert transition-transform group-hover:scale-105"
               />
             </Link>
@@ -92,8 +90,8 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.news.map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="group text-sm hover:text-white transition-colors flex items-center gap-1"
                   >
                     {link.name}
@@ -115,8 +113,8 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="group text-sm hover:text-white transition-colors flex items-center gap-1"
                   >
                     {link.name}
@@ -138,8 +136,8 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="group text-sm hover:text-white transition-colors flex items-center gap-1"
                   >
                     {link.name}
@@ -152,7 +150,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <motion.div 
+        <motion.div
           className="mt-6 pt-4 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

@@ -32,12 +32,12 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           {/* Main content */}
           <div className="lg:col-span-8">
-            <SectionHeader 
+            <SectionHeader
               title="Latest News"
               accentColor="accent"
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
               {articles.slice(0, visibleCount).map((article, index) => (
                 <motion.div
                   key={article.id}
@@ -57,7 +57,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
             </div>
 
             {hasMore && (
-              <motion.div 
+              <motion.div
                 className="mt-5 text-center"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -68,7 +68,7 @@ export function LatestNews({ articles, trending }: LatestNewsProps) {
                   size="lg"
                   onClick={handleLoadMore}
                   disabled={isLoading}
-                  className="group min-w-[200px] border-foreground/20 hover:bg-foreground hover:text-background transition-all duration-300 rounded-full"
+                  className="group min-w-[200px] border-foreground/40 hover:bg-foreground hover:text-background transition-all duration-300 rounded-full"
                 >
                   {isLoading ? (
                     <>
