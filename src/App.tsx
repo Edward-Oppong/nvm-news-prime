@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
+import { Analytics } from "@vercel/analytics/next"
 import CategoryPage from "./pages/CategoryPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -65,9 +66,10 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 
 function AnimatedRoutes() {
   const location = useLocation();
-  
+
   return (
     <AnimatePresence mode="wait">
+      <Analytics />
       <Routes location={location} key={location.pathname}>
         {/* Public Routes */}
         <Route path="/" element={<PageWrapper><Index /></PageWrapper>} />
@@ -77,21 +79,21 @@ function AnimatedRoutes() {
         <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
         <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
         <Route path="/videos" element={<PageWrapper><VideosPage /></PageWrapper>} />
-        
+
         {/* Legal & Policy Routes */}
         <Route path="/terms" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
         <Route path="/privacy" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
         <Route path="/cookies" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
         <Route path="/accessibility" element={<PageWrapper><LegalPolicyPage /></PageWrapper>} />
-        
+
         {/* Company & Opportunities Routes */}
         <Route path="/careers" element={<PageWrapper><CompanyPage /></PageWrapper>} />
         <Route path="/advertise" element={<PageWrapper><CompanyPage /></PageWrapper>} />
         <Route path="/press" element={<PageWrapper><CompanyPage /></PageWrapper>} />
-        
+
         {/* Author Profile Route */}
         <Route path="/author/:name" element={<PageWrapper><AuthorProfilePage /></PageWrapper>} />
-        
+
         {/* Writer Portal Routes */}
         <Route path="/writer/auth" element={<WriterAuth />} />
         <Route path="/writer" element={<WriterLayout />}>
@@ -113,7 +115,7 @@ function AnimatedRoutes() {
           <Route path="authors" element={<AuthorsList />} />
           <Route path="settings" element={<SiteSettings />} />
         </Route>
-        
+
         {/* Catch-all */}
         <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
       </Routes>
