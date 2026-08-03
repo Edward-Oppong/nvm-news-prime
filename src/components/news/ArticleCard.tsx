@@ -45,7 +45,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           </div>
         </Link>
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <CategoryBadge category={article.category} className="mb-1.5" />
+          <CategoryBadge label={article.categoryLabel} className="mb-1.5" />
           <h3 className="font-serif text-base md:text-lg font-medium leading-snug line-clamp-2 mb-1 transition-colors group-hover:text-primary">
             <Link to={`/article/${article.id}`}>{article.title}</Link>
           </h3>
@@ -53,7 +53,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
             <span>{article.date}</span>
           </div>
         </div>
-        <motion.div 
+        <motion.div
           className="hidden md:flex items-center"
           animate={{ x: isHovered ? 0 : -10, opacity: isHovered ? 1 : 0 }}
         >
@@ -119,7 +119,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
             />
           </div>
         </Link>
-        <CategoryBadge category={article.category} className="mb-2" />
+        <CategoryBadge label={article.categoryLabel} className="mb-2" />
         <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-2 transition-colors group-hover:text-primary">
           <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h3>
@@ -158,7 +158,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
           </div>
         </Link>
         <div className="flex items-center gap-2 mb-2">
-          <CategoryBadge category={article.category} />
+          <CategoryBadge label={article.categoryLabel} />
         </div>
         <h3 className="font-serif text-xl md:text-2xl font-semibold mb-2 transition-colors group-hover:text-primary leading-tight">
           <Link to={`/article/${article.id}`}>{article.title}</Link>
@@ -209,7 +209,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         </div>
       </Link>
       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-        <CategoryBadge category={article.category} />
+        <CategoryBadge label={article.categoryLabel} />
       </div>
       <h3 className="font-serif text-base md:text-lg font-medium line-clamp-2 mb-1.5 transition-colors group-hover:text-primary leading-snug">
         <Link to={`/article/${article.id}`}>{article.title}</Link>

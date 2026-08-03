@@ -169,7 +169,7 @@ export default function ArticlePage() {
             </Link>
 
             <div className="flex items-center gap-2 mb-4 flex-wrap">
-              <CategoryBadge category={article.category} />
+              <CategoryBadge label={article.categoryLabel} />
             </div>
 
             <h1 className="headline-xl mb-6">{article.title}</h1>

@@ -69,7 +69,7 @@ export default function VideosPage() {
                       </div>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                      <CategoryBadge category={article.category} className="mb-2" />
+                      <CategoryBadge label={article.categoryLabel} className="mb-2" />
                       <h3 className="text-white font-serif text-lg font-bold line-clamp-2">
                         {article.title}
                       </h3>

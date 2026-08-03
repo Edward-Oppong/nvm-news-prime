@@ -37,7 +37,7 @@ export function HeroSection({ articles }: HeroSectionProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6">
                 <div className="flex items-center gap-2 mb-1.5 md:mb-2">
-                  <CategoryBadge category={hero.category} />
+                  <CategoryBadge label={hero.categoryLabel} />
                   {hero.breaking && (
                     <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-breaking text-breaking-foreground">
                       Breaking
@@ -90,7 +90,7 @@ export function HeroSection({ articles }: HeroSectionProps) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-                    <CategoryBadge category={article.category} className="mb-1.5 !text-[10px]" />
+                    <CategoryBadge label={article.categoryLabel} className="mb-1.5 !text-[10px]" />
                     <h2 className="font-serif text-sm md:text-base font-semibold text-white leading-snug line-clamp-2 mb-1">
                       {article.title}
                     </h2>

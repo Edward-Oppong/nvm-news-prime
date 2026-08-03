@@ -78,7 +78,7 @@ export function VideoNewsSection({ articles }: VideoNewsSectionProps) {
                   </>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <CategoryBadge category={featured.category} className="mb-2" />
+                  <CategoryBadge label={featured.categoryLabel} className="mb-2" />
                   <h3 className="text-white font-serif text-xl md:text-2xl font-bold line-clamp-2">
                     {featured.title}
                   </h3>

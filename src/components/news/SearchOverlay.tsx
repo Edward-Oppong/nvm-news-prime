@@ -17,9 +17,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const { data: articles } = useArticles();
-  
+
   const {
     query,
     setQuery,
@@ -72,7 +72,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   const renderHighlightedText = (text: string, searchQuery: string) => {
     const parts = highlightMatch(text, searchQuery);
-    return parts.map((part: HighlightPart) => 
+    return parts.map((part: HighlightPart) =>
       part.type === 'highlight' ? (
         <mark key={part.key} className="bg-primary/20 text-primary px-0.5 rounded">{part.text}</mark>
       ) : (
@@ -229,18 +229,18 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                           <img src={result.image} alt={result.title} className="w-20 h-20 object-cover rounded-lg flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <CategoryBadge category={result.category} className="text-xs" />
+                              <CategoryBadge label={result.categoryLabel} className="text-xs" />
                               <span className="text-xs text-muted-foreground">{result.date}</span>
                             </div>
                             <h3 className="font-serif text-lg font-semibold text-headline line-clamp-2">
                               {renderHighlightedText(result.title, query)}
                             </h3>
                             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                              {result.matchType === 'excerpt' 
+                              {result.matchType === 'excerpt'
                                 ? renderHighlightedText(result.excerpt, query)
                                 : result.matchType === 'author'
-                                ? <>By {renderHighlightedText(result.author, query)}</>
-                                : result.excerpt}
+                                  ? <>By {renderHighlightedText(result.author, query)}</>
+                                  : result.excerpt}
                             </p>
                             <span className="text-xs text-muted-foreground mt-1 block">By {result.author}</span>
                           </div>

@@ -18,20 +18,22 @@ interface DBArticle {
   published: boolean | null;
   published_at: string | null;
   created_at: string;
-  categories: { slug: string; name: string } | null;
+  categories: { slug: string; name: string; color: string | null } | null;
   authors_public: { name: string; avatar_url: string | null } | null;
 }
 
 // Transform database article to frontend Article type
 function transformArticle(dbArticle: DBArticle): Article {
   const publishDate = dbArticle.published_at || dbArticle.created_at;
-  
+
   return {
     id: dbArticle.id,
     title: dbArticle.title,
     excerpt: dbArticle.excerpt || '',
     content: dbArticle.content || undefined,
     category: (dbArticle.categories?.slug || 'general') as Category,
+    categoryLabel: dbArticle.categories?.name || 'General',
+    categoryColor: dbArticle.categories?.color || 'category-general',
     author: dbArticle.authors_public?.name || 'Unknown Author',
     date: format(new Date(publishDate), 'MMMM d, yyyy'),
     readTime: dbArticle.read_time || '5 min read',
@@ -63,7 +65,7 @@ export function useArticles() {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('published', true)
@@ -96,7 +98,7 @@ export function useFeaturedArticle() {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('published', true)
@@ -143,7 +145,7 @@ export function useArticlesByCategory(categorySlug: string) {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('published', true)
@@ -178,7 +180,7 @@ export function useArticle(id: string) {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('id', id)
@@ -223,7 +225,7 @@ export function useRelatedArticles(articleId: string, category: Category) {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('published', true)
@@ -260,7 +262,7 @@ export function useVideoArticles() {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('published', true)
@@ -294,7 +296,7 @@ export function useTrendingArticles(limit = 5) {
           published,
           published_at,
           created_at,
-          categories (slug, name),
+          categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
         .eq('published', true)

@@ -1,4 +1,4 @@
-export type Category = 'general' | 'entertainment' | 'politics' | 'sports' | 'business';
+export type Category = string;
 
 export interface Author {
   id?: string;
@@ -16,6 +16,8 @@ export interface Article {
   excerpt: string;
   content?: string;
   category: Category;
+  categoryLabel: string;
+  categoryColor: string;
   author: string;
   authorRole?: string;
   authorAvatar?: string;
