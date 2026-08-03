@@ -235,7 +235,7 @@ export default function ArticlePage() {
               <CategoryBadge label={article.categoryLabel} />
             </div>
 
-            <h1 className="headline-xl mb-6">{article.title}</h1>
+            <h1 className="headline-lg mb-6">{article.title}</h1>
 
             {/* Author Meta Card */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border/80 mb-6 shadow-sm">
