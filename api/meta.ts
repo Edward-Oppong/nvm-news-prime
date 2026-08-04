@@ -47,8 +47,8 @@ export default async function handler(req: any, res: any) {
             description = article.excerpt || description;
             image = article.image_url || image;
         }
-    } catch {
-        // Fall back to defaults if the lookup fails — never break the preview entirely
+    } catch (err) {
+        console.error('Meta fetch error:', err);
     }
 
     const safeTitle = escapeHtml(title);
