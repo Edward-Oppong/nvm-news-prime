@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, Sun, Moon, PenTool } from 'lucide-react';
+import { Menu, X, ChevronDown, Sun, Moon, PenTool } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { SearchOverlay } from './SearchOverlay';
 import { TopMastheadBar } from './TopMastheadBar';
 import nvmLogo from '@/assets/nvm-logo.png';
 
@@ -14,7 +13,6 @@ const categories = [
 ];
 
 export function Header() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -42,8 +40,8 @@ export function Header() {
   return (
     <motion.header
       className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
-          ? 'bg-background/95 backdrop-blur-md shadow-md border-b border-border/50'
-          : 'bg-background/80 backdrop-blur-sm border-b border-divider'
+        ? 'bg-background/95 backdrop-blur-md shadow-md border-b border-border/50'
+        : 'bg-background/80 backdrop-blur-sm border-b border-divider'
         }`}
       initial={{ y: 0 }}
       animate={{ y: isHidden ? -100 : 0 }}
@@ -125,22 +123,10 @@ export function Header() {
                 )}
               </AnimatePresence>
             </motion.button>
-
-            <motion.button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2.5 text-muted-foreground hover:text-headline transition-colors rounded-full hover:bg-muted"
-              aria-label="Search"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Search className="h-5 w-5" />
-            </motion.button>
           </div>
         </div>
       </div>
 
-      {/* Search Overlay */}
-      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
       {/* Mobile menu */}
       <AnimatePresence>
