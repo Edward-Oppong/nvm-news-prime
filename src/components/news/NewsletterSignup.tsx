@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { Mail, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { subscribeUser } from '@/lib/subscriptionService';
+import { toast } from 'sonner';
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState('');
@@ -17,22 +17,15 @@ export function NewsletterSignup() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('newsletter_subscribers')
-        .insert({ email });
-
-      if (error) {
-        if (error.code === '23505') {
-          toast({ title: 'Already subscribed', description: 'This email is already on our list.' });
-        } else {
-          throw error;
-        }
-      } else {
+      const res = await subscribeUser(email);
+      if (res.success) {
         setIsSubscribed(true);
-        toast({ title: 'Subscribed!', description: 'Welcome to the NVM newsletter.' });
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
       }
     } catch {
-      toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }

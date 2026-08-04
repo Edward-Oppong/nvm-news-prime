@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, FolderOpen, Users, TrendingUp, Plus, Edit } from 'lucide-react';
+import { FileText, FolderOpen, Users, TrendingUp, Plus, Edit, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { getSubscriberCount } from '@/lib/subscriptionService';
 
 interface Stats {
   articles: number;
   published: number;
   categories: number;
   authors: number;
+  subscribers: number;
 }
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<Stats>({ articles: 0, published: 0, categories: 0, authors: 0 });
+  const [stats, setStats] = useState<Stats>({ articles: 0, published: 0, categories: 0, authors: 0, subscribers: 0 });
   const [recentArticles, setRecentArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,11 +25,12 @@ export default function Dashboard() {
   }, []);
 
   const fetchStats = async () => {
-    const [articlesRes, publishedRes, categoriesRes, authorsRes] = await Promise.all([
+    const [articlesRes, publishedRes, categoriesRes, authorsRes, subCount] = await Promise.all([
       supabase.from('articles').select('id', { count: 'exact', head: true }),
       supabase.from('articles').select('id', { count: 'exact', head: true }).eq('published', true),
       supabase.from('categories').select('id', { count: 'exact', head: true }),
       supabase.from('authors').select('id', { count: 'exact', head: true }),
+      getSubscriberCount(),
     ]);
 
     setStats({
@@ -35,6 +38,7 @@ export default function Dashboard() {
       published: publishedRes.count || 0,
       categories: categoriesRes.count || 0,
       authors: authorsRes.count || 0,
+      subscribers: subCount,
     });
   };
 
@@ -58,7 +62,8 @@ export default function Dashboard() {
 
   const statCards = [
     { label: 'Total Articles', value: stats.articles, icon: FileText, color: 'bg-blue-500' },
-    { label: 'Published', value: stats.published, icon: TrendingUp, color: 'bg-green-500' },
+    { label: 'Published Stories', value: stats.published, icon: TrendingUp, color: 'bg-green-500' },
+    { label: 'Total Subscribers (Admin Only)', value: stats.subscribers, icon: Bell, color: 'bg-amber-500' },
     { label: 'Categories', value: stats.categories, icon: FolderOpen, color: 'bg-purple-500' },
     { label: 'Authors', value: stats.authors, icon: Users, color: 'bg-orange-500' },
   ];
@@ -79,7 +84,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 mb-8">
         {statCards.map((stat, index) => (
           <motion.div
             key={stat.label}

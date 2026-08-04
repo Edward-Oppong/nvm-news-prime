@@ -119,8 +119,9 @@ export default function ArticlePage() {
         // Data attributes for alignment
         'data-align',
       ],
-      ALLOW_DATA_ATTR: false,
-      ADD_ATTR: ['target'],
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|callto|cid|xmpp|data|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+      ALLOW_DATA_ATTR: true,
+      ADD_ATTR: ['target', 'controls', 'preload', 'src'],
       FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'button', 'object', 'embed'],
       FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
     });

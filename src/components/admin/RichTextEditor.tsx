@@ -31,6 +31,8 @@ import {
   Maximize2,
   Video as VideoIcon,
   Music,
+  Mic,
+  Square,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -77,9 +79,12 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const editor = useEditor({
     extensions: [
@@ -216,13 +221,18 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     }
   };
 
-  // Handle uploading audio to article-audios bucket
+  // Handle uploading or embedding audio files (MP3, WAV, OGG, M4A, AAC, WEBM, Voice Memos)
   const handleAudioFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
 
-    if (!file.type.startsWith('audio/')) {
-      toast.error('Please select a valid audio file (MP3, WAV, OGG, AAC)');
+    const isAudioType =
+      file.type.startsWith('audio/') ||
+      file.type.startsWith('video/webm') ||
+      /\.(mp3|wav|ogg|m4a|aac|opus|webm|flac|mp4)$/i.test(file.name);
+
+    if (!isAudioType) {
+      toast.error('Please select a valid audio file (MP3, WAV, OGG, M4A, AAC, WEBM)');
       return;
     }
 
@@ -234,29 +244,96 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     setUploadingAudio(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `inline/${fileName}`;
+      let finalAudioUrl = '';
 
-      const { error: uploadError } = await supabase.storage
-        .from('article-audios')
-        .upload(filePath, file);
+      // 1. Try uploading to Supabase Storage bucket 'article-audios'
+      try {
+        const fileExt = file.name.split('.').pop() || 'mp3';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `inline/${fileName}`;
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from('article-audios')
+          .upload(filePath, file, { upsert: true });
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('article-audios')
-        .getPublicUrl(filePath);
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('article-audios')
+            .getPublicUrl(filePath);
+          finalAudioUrl = publicUrl;
+        }
+      } catch {
+        // Ignore Supabase storage failure, fallback to Data URL below
+      }
+
+      // 2. Fallback to Data URL if Supabase storage is unavailable
+      if (!finalAudioUrl) {
+        finalAudioUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
 
       // Insert styled audio player into content
-      const audioHtml = `<audio controls preload="metadata" class="w-full rounded-xl my-4" src="${publicUrl}" style="width:100%;border-radius:0.75rem;margin:1rem 0;"></audio><p></p>`;
+      const audioHtml = `<audio controls preload="metadata" class="w-full rounded-xl my-4" src="${finalAudioUrl}" style="width:100%;border-radius:0.75rem;margin:1rem 0;"></audio><p></p>`;
       editor.chain().focus().insertContent(audioHtml).run();
-      toast.success('Audio inserted into article!');
+      toast.success('Audio narration inserted into article!');
     } catch {
-      toast.error('Failed to upload audio');
+      toast.error('Failed to process audio file');
     } finally {
       setUploadingAudio(false);
       if (audioInputRef.current) audioInputRef.current.value = '';
+    }
+  };
+
+  // Live Voice Note recording capability using Web MediaRecorder API
+  const startVoiceRecording = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error('Microphone voice recording is not supported in this browser.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Audio = reader.result as string;
+          const audioHtml = `<audio controls preload="metadata" class="w-full rounded-xl my-4" src="${base64Audio}" style="width:100%;border-radius:0.75rem;margin:1rem 0;"></audio><p></p>`;
+          if (editor) {
+            editor.chain().focus().insertContent(audioHtml).run();
+            toast.success('Recorded voice narration inserted into article!');
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecordingVoice(true);
+      toast.info('🎙️ Voice recording started! Speak clearly, then click Stop Voice to insert.');
+    } catch {
+      toast.error('Could not access microphone for voice recording.');
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current && isRecordingVoice) {
+      mediaRecorderRef.current.stop();
+      setIsRecordingVoice(false);
     }
   };
 
@@ -421,7 +498,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         <input
           ref={audioInputRef}
           type="file"
-          accept="audio/*"
+          accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.webm,.opus,.mp4"
           onChange={handleAudioFileSelect}
           className="hidden"
         />
@@ -477,8 +554,35 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
           ) : (
             <Music className="h-4 w-4 text-amber-600" />
           )}
-          <span className="hidden sm:inline">Audio</span>
+          <span className="hidden sm:inline">Upload Audio</span>
         </Button>
+
+        {/* Live Voice Recording Tool */}
+        {isRecordingVoice ? (
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={stopVoiceRecording}
+            className="h-8 px-2 gap-1 text-xs animate-pulse font-bold"
+            title="Click to stop voice recording and insert into story"
+          >
+            <Square className="h-3.5 w-3.5 fill-current" />
+            <span>Stop Voice</span>
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={startVoiceRecording}
+            className="h-8 px-2 gap-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+            title="Record voice narration using microphone"
+          >
+            <Mic className="h-4 w-4 text-rose-600" />
+            <span className="hidden sm:inline">Record Voice</span>
+          </Button>
+        )}
 
         {/* YouTube Embed */}
         <Button

@@ -27,7 +27,7 @@ export function BreakingTicker({ articles }: BreakingTickerProps) {
           <motion.div
             className="whitespace-nowrap text-sm font-medium"
             animate={{ x: ['0%', '-50%'] }}
-            transition={{ duration: tickerItems.length * 12, repeat: Infinity, ease: 'linear' }}
+            transition={{ duration: tickerItems.length * 5, repeat: Infinity, ease: 'linear' }}
           >
             {tickerItems.map((article, i) => (
               <span key={article.slug}>

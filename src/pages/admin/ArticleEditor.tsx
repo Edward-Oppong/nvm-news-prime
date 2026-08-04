@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Loader2, Clock } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Clock, Bell } from 'lucide-react';
+import { notifySubscribersOnPublish } from '@/lib/subscriptionService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +40,7 @@ export default function ArticleEditor() {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [notifySubscribers, setNotifySubscribers] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
@@ -214,6 +216,9 @@ export default function ArticleEditor() {
         await queryClient.invalidateQueries({ queryKey: ['articles'] });
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
+        if (publishState && notifySubscribers) {
+          await notifySubscribersOnPublish(form.title, form.slug);
+        }
         toast.success(publishState ? 'Article published live!' : 'Article saved as draft');
         navigate('/admin/articles');
       }
@@ -235,6 +240,9 @@ export default function ArticleEditor() {
         await queryClient.invalidateQueries({ queryKey: ['articles'] });
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
+        if (publishState && notifySubscribers) {
+          await notifySubscribersOnPublish(form.title, form.slug);
+        }
         toast.success(publishState ? 'Article created & published live!' : 'Article created & saved as draft');
         navigate('/admin/articles');
       }
@@ -400,7 +408,18 @@ export default function ArticleEditor() {
         </div>
 
         {/* Toggles */}
-        <div className="flex flex-wrap gap-8">
+        <div className="flex flex-wrap items-center gap-6 p-4 bg-muted/30 border border-border/60 rounded-xl">
+          <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl">
+            <Switch
+              id="notifySubscribers"
+              checked={notifySubscribers}
+              onCheckedChange={setNotifySubscribers}
+            />
+            <Label htmlFor="notifySubscribers" className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm">
+              <Bell className="h-4 w-4 fill-current text-amber-500" />
+              Notify Subscribers on Story Publish
+            </Label>
+          </div>
           <div className="flex items-center gap-3">
             <Switch
               id="published"
