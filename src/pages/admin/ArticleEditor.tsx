@@ -54,6 +54,7 @@ export default function ArticleEditor() {
     author_id: '',
     image_url: '',
     video_url: '',
+    audio_url: '',
     featured: false,
     breaking: false,
     published: false,
@@ -100,6 +101,7 @@ export default function ArticleEditor() {
       author_id: data.author_id || '',
       image_url: data.image_url || '',
       video_url: data.video_url || '',
+      audio_url: data.audio_url || '',
       featured: data.featured ?? false,
       breaking: data.breaking ?? false,
       published: data.published ?? false,
@@ -195,6 +197,7 @@ export default function ArticleEditor() {
       author_id: form.author_id || null,
       image_url: form.image_url || null,
       video_url: form.video_url || null,
+      audio_url: form.audio_url || null,
       featured: form.featured,
       breaking: form.breaking,
       published: publishState,
@@ -308,9 +311,11 @@ export default function ArticleEditor() {
           imageUrl={form.image_url}
           videoUrl={form.video_url}
           videos={videos}
+          audioUrl={form.audio_url}
           onImageChange={(url) => setForm(prev => ({ ...prev, image_url: url }))}
           onVideoChange={(url) => setForm(prev => ({ ...prev, video_url: url }))}
           onVideosChange={setVideos}
+          onAudioChange={(url) => setForm(prev => ({ ...prev, audio_url: url }))}
         />
 
         {/* Title & Slug */}

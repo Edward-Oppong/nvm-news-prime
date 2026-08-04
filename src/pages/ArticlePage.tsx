@@ -271,12 +271,13 @@ export default function ArticlePage() {
               </div>
             </div>
 
-            {/* Audio Narration Player */}
+            {/* MP3 Audio Player */}
             <AudioNarrationPlayer
               title={article.title}
               excerpt={article.excerpt}
               contentHtml={articleContent}
               readTime={article.readTime}
+              audioUrl={article.audioUrl}
             />
 
             {/* Share buttons */}

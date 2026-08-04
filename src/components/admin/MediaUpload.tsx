@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Loader2, X, Image as ImageIcon, Video, Play, Upload, Link as LinkIcon, Plus, GripVertical, AlertTriangle } from 'lucide-react';
+import { Loader2, X, Image as ImageIcon, Video, Play, Upload, Link as LinkIcon, Plus, GripVertical, AlertTriangle, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,28 +20,33 @@ interface MediaUploadProps {
   imageUrl: string;
   videoUrl: string;
   videos: VideoItem[];
+  audioUrl?: string;
   onImageChange: (url: string) => void;
   onVideoChange: (url: string) => void;
   onVideosChange: (videos: VideoItem[]) => void;
+  onAudioChange?: (url: string) => void;
 }
 
 function isEmbedUrl(url: string) {
   return /youtube\.com|youtu\.be|vimeo\.com/i.test(url);
 }
 
-export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideoChange, onVideosChange }: MediaUploadProps) {
+export function MediaUpload({ imageUrl, videoUrl, videos, audioUrl, onImageChange, onVideoChange, onVideosChange, onAudioChange }: MediaUploadProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [selectedAudioFile, setSelectedAudioFile] = useState<File | null>(null);
   const [isPortrait, setIsPortrait] = useState(false);
   const [embedUrl, setEmbedUrl] = useState('');
   const [newVideoTitle, setNewVideoTitle] = useState('');
   const [embedTitle, setEmbedTitle] = useState('');
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   // --- Image handlers ---
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,6 +169,41 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
     toast.success('Video embed added');
   };
 
+  // --- Audio handlers ---
+  const handleAudioSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) { toast.error('Please select an MP3 or audio file'); return; }
+    setSelectedAudioFile(file);
+  };
+
+  const uploadAudio = async () => {
+    if (!selectedAudioFile) return;
+    setUploadingAudio(true);
+    try {
+      const ext = selectedAudioFile.name.split('.').pop() || 'mp3';
+      const fileName = `audio_${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from('article-audios')
+        .upload(fileName, selectedAudioFile, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('article-audios').getPublicUrl(fileName);
+      onAudioChange?.(publicUrl);
+      setSelectedAudioFile(null);
+      if (audioInputRef.current) audioInputRef.current.value = '';
+      toast.success('MP3 audio uploaded!');
+    } catch (err: any) {
+      toast.error('Audio upload failed: ' + (err?.message || err));
+    } finally {
+      setUploadingAudio(false);
+    }
+  };
+
+  const removeAudio = () => {
+    onAudioChange?.('');
+    setSelectedAudioFile(null);
+  };
+
   // --- Remove a video from list ---
   const removeVideoItem = (index: number) => {
     const updated = videos.filter((_, i) => i !== index);
@@ -183,18 +223,22 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
     <div className="space-y-4">
       <Label>Featured Media</Label>
       <Tabs defaultValue="image" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-4 max-w-xl">
           <TabsTrigger value="image" className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4" />
             Image
           </TabsTrigger>
           <TabsTrigger value="video-upload" className="flex items-center gap-2">
             <Video className="h-4 w-4" />
-            Upload Video
+            Video
           </TabsTrigger>
           <TabsTrigger value="video-embed" className="flex items-center gap-2">
             <LinkIcon className="h-4 w-4" />
-            Embed Video
+            Embed
+          </TabsTrigger>
+          <TabsTrigger value="audio" className="flex items-center gap-2">
+            <Music className="h-4 w-4" />
+            MP3 Audio
           </TabsTrigger>
         </TabsList>
 
@@ -301,6 +345,57 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
             </div>
           </div>
         </TabsContent>
+
+        {/* MP3 Audio Tab */}
+        <TabsContent value="audio" className="mt-4">
+          <div className="border-2 border-dashed border-divider rounded-xl p-6 bg-muted/30 space-y-4">
+            {audioUrl ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/40">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                    <Music className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">MP3 Audio Track</p>
+                    <p className="text-xs text-muted-foreground truncate">{audioUrl}</p>
+                  </div>
+                  <Button type="button" variant="destructive" size="sm" onClick={removeAudio}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <audio controls src={audioUrl} className="w-full rounded-xl border border-border/40" preload="metadata" />
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center h-40 cursor-pointer hover:bg-muted/50 transition-colors rounded-lg">
+                <Music className="h-10 w-10 text-muted-foreground mb-4" />
+                <span className="text-muted-foreground font-medium">Click to select an MP3 audio file</span>
+                <span className="text-sm text-muted-foreground mt-1">MP3, M4A, WAV, OGG up to 50MB</span>
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioSelect}
+                  className="hidden"
+                />
+              </label>
+            )}
+            {selectedAudioFile && !audioUrl && (
+              <div className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <Music className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium truncate max-w-xs">{selectedAudioFile.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedAudioFile(null); if (audioInputRef.current) audioInputRef.current.value = ''; }}
+                    disabled={uploadingAudio}>Cancel</Button>
+                  <Button type="button" size="sm" onClick={uploadAudio} disabled={uploadingAudio}>
+                    {uploadingAudio ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading...</> : <><Upload className="h-4 w-4 mr-2" />Upload MP3</>}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Videos list */}
@@ -341,6 +436,8 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
         </div>
       )}
 
+
+
       {/* Status indicators */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         {imageUrl && (
@@ -353,6 +450,12 @@ export function MediaUpload({ imageUrl, videoUrl, videos, onImageChange, onVideo
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-blue-500" />
             {videos.length} video{videos.length !== 1 ? 's' : ''} attached
+          </span>
+        )}
+        {audioUrl && (
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-purple-500" />
+            MP3 audio attached
           </span>
         )}
       </div>

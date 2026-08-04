@@ -29,6 +29,7 @@ export interface Article {
   featured?: boolean;
   breaking?: boolean;
   videoUrl?: string;
+  audioUrl?: string;
   factChecked?: boolean;
   editorsPick?: boolean;
   isOpinion?: boolean;

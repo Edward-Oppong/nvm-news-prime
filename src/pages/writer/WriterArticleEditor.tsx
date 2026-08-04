@@ -56,6 +56,7 @@ export default function WriterArticleEditor() {
     author_id: '',
     image_url: '',
     video_url: '',
+    audio_url: '',
     read_time: '5 min read',
   });
 
@@ -113,6 +114,7 @@ export default function WriterArticleEditor() {
       author_id: data.author_id || '',
       image_url: data.image_url || '',
       video_url: data.video_url || '',
+      audio_url: (data as any).audio_url || '',
       read_time: data.read_time || '5 min read',
     });
 
@@ -188,6 +190,7 @@ export default function WriterArticleEditor() {
         author_id: form.author_id || null,
         image_url: form.image_url || null,
         video_url: form.video_url || null,
+        audio_url: form.audio_url || null,
         read_time: form.read_time,
         published: false, // Writers cannot publish directly
         status: status,
@@ -406,8 +409,17 @@ export default function WriterArticleEditor() {
           </div>
 
           <div className="space-y-2">
-            <Label>Video Attachments</Label>
-            <MediaUpload videos={videos} onChange={setVideos} />
+            <Label>Video & Audio Attachments</Label>
+            <MediaUpload
+              imageUrl=""
+              videoUrl={form.video_url}
+              videos={videos}
+              audioUrl={form.audio_url}
+              onImageChange={() => {}}
+              onVideoChange={(url) => setForm((prev) => ({ ...prev, video_url: url }))}
+              onVideosChange={setVideos}
+              onAudioChange={(url) => setForm((prev) => ({ ...prev, audio_url: url }))}
+            />
           </div>
         </div>
       </div>
