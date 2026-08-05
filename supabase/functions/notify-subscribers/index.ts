@@ -53,7 +53,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const siteOrigin = req.headers.get("origin") || "https://nvm-news.vercel.app";
+    const siteOrigin = req.headers.get("origin") || "https://nvmnews.com";
     const articleUrl = `${siteOrigin}/article/${slug}`;
     const logoUrl = `${siteOrigin}/nvm-logo.png`;
 
