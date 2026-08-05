@@ -56,6 +56,17 @@ serve(async (req: Request) => {
     const siteOrigin = req.headers.get("origin") || "https://nvmnews.com";
     const articleUrl = `${siteOrigin}/article/${slug}`;
     const logoUrl = `${siteOrigin}/nvm-logo.png`;
+    function escapeHtml(str: string = "") {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    const safeTitle = escapeHtml(title);
+    const safeExcerpt = escapeHtml(excerpt || "Read the latest update on NVM News.");
 
     const htmlContent = `
     <!DOCTYPE html>
@@ -84,9 +95,9 @@ serve(async (req: Request) => {
           </div>
           <div class="content">
             <span class="badge">New Story Alert</span>
-            <h1 class="title">${title}</h1>
+            <h1 class="title">${safeTitle}</h1>
             ${image_url ? `<img src="${image_url}" alt="${title}" class="cover-img" />` : ""}
-            <p class="excerpt">${excerpt || "Read the latest update on NVM News."}</p>
+            <p class="excerpt">${safeExcerpt}</p>
             <div style="text-align: center;">
               <a href="${articleUrl}" class="btn" target="_blank">Read Full Article &rarr;</a>
             </div>
