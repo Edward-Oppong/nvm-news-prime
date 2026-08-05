@@ -63,7 +63,7 @@ export default function Dashboard() {
   const statCards = [
     { label: 'Total Articles', value: stats.articles, icon: FileText, color: 'bg-blue-500' },
     { label: 'Published Stories', value: stats.published, icon: TrendingUp, color: 'bg-green-500' },
-    { label: 'Total Subscribers (Admin Only)', value: stats.subscribers, icon: Bell, color: 'bg-amber-500' },
+    { label: 'Newsletter Subscribers', value: stats.subscribers, icon: Bell, color: 'bg-amber-500', href: '/admin/subscribers' },
     { label: 'Categories', value: stats.categories, icon: FolderOpen, color: 'bg-purple-500' },
     { label: 'Authors', value: stats.authors, icon: Users, color: 'bg-orange-500' },
   ];
@@ -85,25 +85,32 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 mb-8">
-        {statCards.map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-surface-elevated rounded-xl border border-divider p-6"
-          >
-            <div className="flex items-center gap-4">
-              <div className={`${stat.color} p-3 rounded-lg`}>
-                <stat.icon className="h-6 w-6 text-white" />
+        {statCards.map((stat, index) => {
+          const card = (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`bg-surface-elevated rounded-xl border border-divider p-6 ${stat.href ? 'cursor-pointer hover:border-primary/40 hover:shadow-md transition-all' : ''}`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`${stat.color} p-3 rounded-lg`}>
+                  <stat.icon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-headline">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-3xl font-bold text-headline">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+          return stat.href ? (
+            <Link key={stat.label} to={stat.href}>{card}</Link>
+          ) : (
+            <div key={stat.label}>{card}</div>
+          );
+        })}
       </div>
 
       {/* Recent Articles */}

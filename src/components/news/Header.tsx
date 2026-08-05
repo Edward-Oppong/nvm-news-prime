@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, Sun, Moon, Bell, Check, Loader2, Mail } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { TopMastheadBar } from './TopMastheadBar';
@@ -11,39 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const categories = [
-  {
-    name: 'General News',
-    href: '/category/general',
-    badgeClass: 'bg-category-general/10 text-category-general hover:bg-category-general hover:text-white border border-category-general/20 dark:bg-category-general/20 dark:text-indigo-300 dark:hover:bg-category-general dark:hover:text-white',
-    mobileBadgeClass: 'bg-category-general/10 text-category-general border-category-general/20 dark:text-indigo-300',
-  },
-  {
-    name: 'Entertainment',
-    href: '/category/entertainment',
-    badgeClass: 'bg-category-entertainment/10 text-category-entertainment hover:bg-category-entertainment hover:text-white border border-category-entertainment/20 dark:bg-category-entertainment/20 dark:text-pink-300 dark:hover:bg-category-entertainment dark:hover:text-white',
-    mobileBadgeClass: 'bg-category-entertainment/10 text-category-entertainment border-category-entertainment/20 dark:text-pink-300',
-  },
-  {
-    name: 'Politics',
-    href: '/category/politics',
-    badgeClass: 'bg-category-politics/10 text-category-politics hover:bg-category-politics hover:text-white border border-category-politics/20 dark:bg-category-politics/20 dark:text-blue-300 dark:hover:bg-category-politics dark:hover:text-white',
-    mobileBadgeClass: 'bg-category-politics/10 text-category-politics border-category-politics/20 dark:text-blue-300',
-  },
-  {
-    name: 'Sports',
-    href: '/category/sports',
-    badgeClass: 'bg-category-sports/10 text-category-sports hover:bg-category-sports hover:text-white border border-category-sports/20 dark:bg-category-sports/20 dark:text-amber-300 dark:hover:bg-category-sports dark:hover:text-white',
-    mobileBadgeClass: 'bg-category-sports/10 text-category-sports border-category-sports/20 dark:text-amber-300',
-  },
-  {
-    name: 'Business',
-    href: '/category/business',
-    badgeClass: 'bg-category-business/10 text-category-business hover:bg-category-business hover:text-white border border-category-business/20 dark:bg-category-business/20 dark:text-emerald-300 dark:hover:bg-category-business dark:hover:text-white',
-    mobileBadgeClass: 'bg-category-business/10 text-category-business border-category-business/20 dark:text-emerald-300',
-  },
+  { name: 'General', href: '/category/general' },
+  { name: 'Entertainment', href: '/category/entertainment' },
+  { name: 'Politics', href: '/category/politics' },
+  { name: 'Sports', href: '/category/sports' },
+  { name: 'Business', href: '/category/business' },
 ];
 
+
 export function Header() {
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -137,16 +114,27 @@ export function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-2">
-              {categories.map((category) => (
-                <Link
-                  key={category.name}
-                  to={category.href}
-                  className={`px-3.5 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all duration-200 ${category.badgeClass}`}
-                >
-                  {category.name}
-                </Link>
-              ))}
+            <nav className="hidden md:flex items-center gap-1">
+              {categories.map((category) => {
+                const isActive = location.pathname === category.href ||
+                  location.pathname.startsWith(category.href);
+                return (
+                  <Link
+                    key={category.name}
+                    to={category.href}
+                    className={`relative px-3.5 py-2 text-[13px] font-semibold tracking-wide rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? 'bg-foreground text-background'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-foreground/8'
+                    }`}
+                  >
+                    {category.name}
+                    {isActive && (
+                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Right side actions */}
@@ -193,27 +181,36 @@ export function Header() {
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="md:hidden bg-background border-b border-border overflow-hidden"
             >
-              <nav className="container py-4 space-y-2">
-                {categories.map((category, index) => (
-                  <motion.div
-                    key={category.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ delay: index * 0.05, duration: 0.3 }}
-                  >
-                    <Link
-                      to={category.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center justify-between py-2.5 px-4 text-base font-semibold rounded-lg border transition-all duration-200 ${category.mobileBadgeClass}`}
+              <nav className="container py-3 grid grid-cols-2 gap-2">
+                {categories.map((category, index) => {
+                  const isActive = location.pathname.startsWith(category.href);
+                  return (
+                    <motion.div
+                      key={category.name}
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ delay: index * 0.04, duration: 0.25 }}
                     >
-                      <span>{category.name}</span>
-                      <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground" />
-                    </Link>
-                  </motion.div>
-                ))}
+                      <Link
+                        to={category.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center justify-between py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                          isActive
+                            ? 'bg-foreground text-background'
+                            : 'bg-muted/60 text-foreground/80 hover:bg-muted hover:text-foreground'
+                        }`}
+                      >
+                        <span>{category.name}</span>
+                        <ChevronDown className={`h-4 w-4 -rotate-90 ${
+                          isActive ? 'opacity-100' : 'opacity-40'
+                        }`} />
+                      </Link>
+                    </motion.div>
+                  );
+                })}
 
-                <div className="pt-3 border-t border-border flex items-center gap-2 px-2">
+                <div className="col-span-2 pt-3 border-t border-border flex items-center gap-2 px-2">
                   <Link
                     to="/writer/auth"
                     onClick={() => setIsMobileMenuOpen(false)}

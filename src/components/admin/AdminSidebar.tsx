@@ -10,7 +10,8 @@ import {
   LogOut,
   ExternalLink,
   X,
-  BarChart3
+  BarChart3,
+  Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,9 +26,11 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
   const location = useLocation();
   const { signOut, user } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
+  const [subscriberCount, setSubscriberCount] = useState(0);
 
   useEffect(() => {
     fetchPendingCount();
+    fetchSubscriberCount();
   }, [location.pathname]);
 
   const fetchPendingCount = async () => {
@@ -42,12 +45,25 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
     }
   };
 
+  const fetchSubscriberCount = async () => {
+    try {
+      const { count } = await supabase
+        .from('newsletter_subscribers')
+        .select('id', { count: 'exact', head: true })
+        .is('unsubscribed_at', null);
+      setSubscriberCount(count || 0);
+    } catch {
+      // Fallback
+    }
+  };
+
   const navItems = [
     { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { label: 'Review Queue', href: '/admin/review', icon: ClipboardCheck, badge: pendingCount },
     { label: 'Articles', href: '/admin/articles', icon: FileText },
     { label: 'Categories', href: '/admin/categories', icon: FolderOpen },
     { label: 'Authors', href: '/admin/authors', icon: Users },
+    { label: 'Subscribers', href: '/admin/subscribers', icon: Bell, badge: subscriberCount },
     { label: 'Polls', href: '/admin/polls', icon: BarChart3 },
     { label: 'Site Settings', href: '/admin/settings', icon: Settings },
   ];

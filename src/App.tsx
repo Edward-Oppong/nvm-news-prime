@@ -32,6 +32,7 @@ const AuthorsList = lazy(() => import("./pages/admin/AuthorsList"));
 const ReviewQueue = lazy(() => import("./pages/admin/ReviewQueue"));
 const SiteSettings = lazy(() => import("./pages/admin/SiteSettings"));
 const PollsList = lazy(() => import("./pages/admin/PollsList"));
+const SubscribersList = lazy(() => import("./pages/admin/SubscribersList"));
 
 // Lazy-loaded Writer Pages
 const WriterAuth = lazy(() => import("./pages/writer/WriterAuth"));
@@ -143,6 +144,7 @@ function AnimatedRoutes() {
             <Route path="articles/:id" element={<ArticleEditor />} />
             <Route path="categories" element={<CategoriesList />} />
             <Route path="polls" element={<PollsList />} />
+            <Route path="subscribers" element={<SubscribersList />} />
             <Route path="authors" element={<AuthorsList />} />
             <Route path="settings" element={<SiteSettings />} />
           </Route>

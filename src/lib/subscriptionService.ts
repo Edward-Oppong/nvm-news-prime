@@ -81,7 +81,7 @@ export async function getSubscriberCount(): Promise<number> {
     localCount = 0;
   }
 
-  return Math.max(dbCount, localCount, 142); // Baseline fallback for admin view
+  return dbCount > 0 ? dbCount : localCount;
 }
 
 /** Notify subscribers when a new article/story is published */
