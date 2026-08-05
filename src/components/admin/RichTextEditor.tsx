@@ -1,4 +1,5 @@
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Node } from '@tiptap/core';
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -69,6 +70,70 @@ const CustomImage = Image.extend({
   },
 });
 
+// Custom TipTap Audio Extension for inline story audio clips & voice memos
+const CustomAudio = Node.create({
+  name: 'audio',
+  group: 'block',
+  selectable: true,
+  draggable: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      title: {
+        default: 'Inline Story Audio Clip',
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'audio',
+        getAttrs: (element) => ({
+          src: (element as HTMLElement).getAttribute('src'),
+          title: (element as HTMLElement).getAttribute('title') || 'Inline Story Audio Clip',
+        }),
+      },
+      {
+        tag: 'div[data-type="audio-player"]',
+        getAttrs: (element) => ({
+          src: (element as HTMLElement).getAttribute('data-src'),
+          title: (element as HTMLElement).getAttribute('data-title') || 'Inline Story Audio Clip',
+        }),
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'div',
+      {
+        'data-type': 'audio-player',
+        'data-src': HTMLAttributes.src,
+        'data-title': HTMLAttributes.title || 'Inline Story Audio Clip',
+        class: 'my-6 p-4 rounded-2xl bg-card border border-border/80 shadow-sm flex flex-col gap-2',
+      },
+      [
+        'div',
+        { class: 'flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary' },
+        '🎵 Inline Story Audio / Clip'
+      ],
+      [
+        'audio',
+        {
+          controls: true,
+          preload: 'metadata',
+          src: HTMLAttributes.src,
+          class: 'w-full rounded-xl mt-2',
+        },
+      ],
+    ];
+  },
+});
+
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -103,6 +168,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         },
       }),
       CustomImage,
+      CustomAudio,
       Youtube.configure({
         HTMLAttributes: {
           class: 'w-full aspect-video rounded-xl my-6 shadow-md',
@@ -276,10 +342,15 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         });
       }
 
-      // Insert styled audio player into content
-      const audioHtml = `<audio controls preload="metadata" class="w-full rounded-xl my-4" src="${finalAudioUrl}" style="width:100%;border-radius:0.75rem;margin:1rem 0;"></audio><p></p>`;
-      editor.chain().focus().insertContent(audioHtml).run();
-      toast.success('Audio narration inserted into article!');
+      // Insert styled audio player node into content
+      editor.chain().focus().insertContent({
+        type: 'audio',
+        attrs: {
+          src: finalAudioUrl,
+          title: file.name || 'Inline Story Audio Clip',
+        },
+      }).run();
+      toast.success('Audio clip inserted into story text!');
     } catch {
       toast.error('Failed to process audio file');
     } finally {
@@ -312,10 +383,15 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64Audio = reader.result as string;
-          const audioHtml = `<audio controls preload="metadata" class="w-full rounded-xl my-4" src="${base64Audio}" style="width:100%;border-radius:0.75rem;margin:1rem 0;"></audio><p></p>`;
           if (editor) {
-            editor.chain().focus().insertContent(audioHtml).run();
-            toast.success('Recorded voice narration inserted into article!');
+            editor.chain().focus().insertContent({
+              type: 'audio',
+              attrs: {
+                src: base64Audio,
+                title: 'Recorded Voice Clip',
+              },
+            }).run();
+            toast.success('Recorded voice clip inserted into story text!');
           }
         };
         reader.readAsDataURL(audioBlob);
