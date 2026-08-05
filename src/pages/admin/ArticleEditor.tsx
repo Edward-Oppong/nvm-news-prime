@@ -207,10 +207,22 @@ export default function ArticleEditor() {
     };
 
     if (isEditing) {
-      const { error } = await supabase
+      let { error } = await supabase
         .from('articles')
         .update(articleData as any)
         .eq('id', id);
+
+      // Graceful fallback if database schema is missing status or audio_url columns
+      if (error && (error.code === 'PGRST204' || error.message.includes('column') || error.message.includes('schema'))) {
+        const fallbackData = { ...articleData };
+        delete (fallbackData as any).status;
+        delete (fallbackData as any).audio_url;
+        const fallbackRes = await supabase
+          .from('articles')
+          .update(fallbackData as any)
+          .eq('id', id);
+        error = fallbackRes.error;
+      }
 
       if (error) {
         toast.error(error.message);
@@ -226,11 +238,25 @@ export default function ArticleEditor() {
         navigate('/admin/articles');
       }
     } else {
-      const { data: inserted, error } = await supabase
+      let { data: inserted, error } = await supabase
         .from('articles')
         .insert(articleData as any)
         .select('id')
         .single();
+
+      // Graceful fallback if database schema is missing status or audio_url columns
+      if (error && (error.code === 'PGRST204' || error.message.includes('column') || error.message.includes('schema'))) {
+        const fallbackData = { ...articleData };
+        delete (fallbackData as any).status;
+        delete (fallbackData as any).audio_url;
+        const fallbackRes = await supabase
+          .from('articles')
+          .insert(fallbackData as any)
+          .select('id')
+          .single();
+        inserted = fallbackRes.data;
+        error = fallbackRes.error;
+      }
 
       if (error) {
         if (error.code === '23505') {

@@ -86,6 +86,7 @@ export type Database = {
       }
       articles: {
         Row: {
+          audio_url: string | null
           author_id: string | null
           breaking: boolean | null
           category_id: string | null
@@ -99,11 +100,13 @@ export type Database = {
           published_at: string | null
           read_time: string | null
           slug: string
+          status: string | null
           title: string
           updated_at: string
           video_url: string | null
         }
         Insert: {
+          audio_url?: string | null
           author_id?: string | null
           breaking?: boolean | null
           category_id?: string | null
@@ -117,11 +120,13 @@ export type Database = {
           published_at?: string | null
           read_time?: string | null
           slug: string
+          status?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
         }
         Update: {
+          audio_url?: string | null
           author_id?: string | null
           breaking?: boolean | null
           category_id?: string | null
@@ -135,6 +140,7 @@ export type Database = {
           published_at?: string | null
           read_time?: string | null
           slug?: string
+          status?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
