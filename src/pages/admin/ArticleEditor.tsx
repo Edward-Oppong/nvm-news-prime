@@ -220,7 +220,7 @@ export default function ArticleEditor() {
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
         if (publishState && notifySubscribers) {
-          await notifySubscribersOnPublish(form.title, form.slug);
+          await notifySubscribersOnPublish(form.title, form.slug, form.excerpt, form.image_url);
         }
         toast.success(publishState ? 'Article published live!' : 'Article saved as draft');
         navigate('/admin/articles');
@@ -244,7 +244,7 @@ export default function ArticleEditor() {
         await queryClient.invalidateQueries({ queryKey: ['featured-article'] });
         await queryClient.invalidateQueries({ queryKey: ['trending-articles'] });
         if (publishState && notifySubscribers) {
-          await notifySubscribersOnPublish(form.title, form.slug);
+          await notifySubscribersOnPublish(form.title, form.slug, form.excerpt, form.image_url);
         }
         toast.success(publishState ? 'Article created & published live!' : 'Article created & saved as draft');
         navigate('/admin/articles');

@@ -47,11 +47,15 @@ function transformArticle(dbArticle: DBArticle): Article {
   };
 }
 
-// Fetch all published articles
+// Fetch published articles for Homepage (0 to 2 weeks old / <= 14 days)
 export function useArticles() {
   return useQuery({
-    queryKey: ['articles'],
+    queryKey: ['articles', 'homepage-14days'],
     queryFn: async () => {
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+      const isoCutoff = fourteenDaysAgo.toISOString();
+
       const { data, error } = await supabase
         .from('articles')
         .select(`
@@ -73,10 +77,29 @@ export function useArticles() {
           authors_public (name, avatar_url)
         `)
         .eq('published', true)
+        .gte('created_at', isoCutoff)
         .order('published_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;
-      return (data as DBArticle[]).map(transformArticle);
+
+      // If database has very few/no articles within 14 days, return what we have (or fallback if empty to ensure initial experience is smooth)
+      const transformed = (data as DBArticle[]).map(transformArticle);
+      if (transformed.length > 0) {
+        return transformed;
+      }
+
+      // Fallback query if no articles in last 14 days exist yet
+      const { data: fallbackData } = await supabase
+        .from('articles')
+        .select(`
+          id, slug, title, excerpt, content, image_url, video_url, read_time, featured, breaking, published, published_at, created_at, view_count,
+          categories (slug, name, color), authors_public (name, avatar_url)
+        `)
+        .eq('published', true)
+        .order('published_at', { ascending: false, nullsFirst: false })
+        .limit(10);
+
+      return (fallbackData as DBArticle[] || []).map(transformArticle);
     },
   });
 }
@@ -119,7 +142,7 @@ export function useFeaturedArticle() {
   });
 }
 
-// Fetch articles by category
+// Fetch articles by category (up to 1 month old / <= 30 days)
 export function useArticlesByCategory(categorySlug: string) {
   return useQuery({
     queryKey: ['articles', 'category', categorySlug],
@@ -133,6 +156,10 @@ export function useArticlesByCategory(categorySlug: string) {
 
       if (catError) throw catError;
       if (!category) return [];
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const isoCutoff = thirtyDaysAgo.toISOString();
 
       const { data, error } = await supabase
         .from('articles')
@@ -156,6 +183,7 @@ export function useArticlesByCategory(categorySlug: string) {
         `)
         .eq('published', true)
         .eq('category_id', category.id)
+        .gte('created_at', isoCutoff)
         .order('published_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;

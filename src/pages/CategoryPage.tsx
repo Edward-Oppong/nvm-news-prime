@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, X } from 'lucide-react';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
 import { ArticleCard } from '@/components/news/ArticleCard';
@@ -10,6 +10,7 @@ import { useArticlesByCategory } from '@/hooks/useArticles';
 import { categoryConfigs } from '@/data/categoryConfig';
 import { Category } from '@/types/news';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function CategoryPage() {
@@ -20,9 +21,13 @@ export default function CategoryPage() {
   const { data: dbArticles, isLoading } = useArticlesByCategory(categoryKey);
   const articles = dbArticles ?? [];
 
-  // Fetch DB-managed hero image & description
+  const [searchQuery, setSearchQuery] = useState('');
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const [categoryDescription, setCategoryDescription] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSearchQuery('');
+  }, [categoryKey]);
 
   useEffect(() => {
     if (!categoryKey) return;
@@ -37,9 +42,19 @@ export default function CategoryPage() {
       });
   }, [categoryKey]);
 
-  // DB value takes priority; local bundled asset is the fallback
   const bannerSrc = heroImageUrl || config?.banner;
   const description = categoryDescription || config?.description;
+
+  // Filter articles based on search query
+  const filteredArticles = articles.filter((article) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      article.title.toLowerCase().includes(query) ||
+      article.excerpt.toLowerCase().includes(query) ||
+      article.author.toLowerCase().includes(query)
+    );
+  });
 
   if (!config) {
     return (
@@ -96,14 +111,35 @@ export default function CategoryPage() {
           </div>
         </section>
 
-        {/* Articles Grid */}
+        {/* Articles Section & Category Search */}
         <section className="py-8 md:py-12">
           <div className="container">
-            <div className="flex items-center justify-between mb-8">
-              <p className="text-muted-foreground">
-                <span className="font-semibold text-foreground">{articles.length}</span> articles
-              </p>
-              <div className="h-px flex-1 bg-divider ml-6" />
+            {/* Search Bar & Count Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-bold text-lg text-foreground">{filteredArticles.length}</span>
+                <span>{filteredArticles.length === 1 ? 'story' : 'stories'} from the past 30 days</span>
+              </div>
+
+              <div className="relative max-w-md w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={`Search ${config.name}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-10 py-2 rounded-full border-border bg-card shadow-sm text-sm focus-visible:ring-primary"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {isLoading ? (
@@ -112,16 +148,16 @@ export default function CategoryPage() {
                   <Skeleton key={i} className="h-64 rounded-lg" />
                 ))}
               </div>
-            ) : articles.length > 0 ? (
+            ) : filteredArticles.length > 0 ? (
               <>
-                {articles[0] && (
+                {filteredArticles[0] && (
                   <div className="mb-12">
-                    <ArticleCard article={articles[0]} variant="large" index={0} />
+                    <ArticleCard article={filteredArticles[0]} variant="large" index={0} />
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {articles.slice(1).map((article, index) => (
+                  {filteredArticles.slice(1).map((article, index) => (
                     <ArticleCard
                       key={article.id}
                       article={article}
@@ -130,19 +166,13 @@ export default function CategoryPage() {
                     />
                   ))}
                 </div>
-
-                {articles.length > 6 && (
-                  <div className="mt-12 text-center">
-                    <button className="inline-flex items-center px-8 py-3 border border-foreground text-foreground font-medium rounded-lg hover:bg-foreground hover:text-background transition-colors">
-                      Load More Stories
-                    </button>
-                  </div>
-                )}
               </>
             ) : (
               <div className="text-center py-16">
-                <p className="text-xl text-muted-foreground mb-4">No articles in this category yet.</p>
-                <Link to="/" className="text-primary hover:underline">← Browse all stories</Link>
+                <p className="text-xl text-muted-foreground mb-4">
+                  {searchQuery ? `No stories matching "${searchQuery}"` : 'No articles in this category within the past 30 days.'}
+                </p>
+                <Link to="/" className="text-primary hover:underline">← Browse recent stories on home</Link>
               </div>
             )}
           </div>

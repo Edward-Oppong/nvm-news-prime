@@ -81,7 +81,7 @@ export function Header() {
       >
         <TopMastheadBar />
         <div className="container">
-          <div className="flex items-center justify-between h-20 md:h-24 py-2">
+          <div className="flex items-center justify-between h-24 md:h-32 py-2">
             {/* Mobile menu toggle */}
             <motion.button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -102,19 +102,19 @@ export function Header() {
               </AnimatePresence>
             </motion.button>
 
-            {/* Logo */}
+            {/* Logo - bigger size */}
             <Link to="/" className="flex-shrink-0 group py-1">
               <motion.img
                 src={nvmLogo}
                 alt="NVM News - Nhyiraba Viglio Media"
-                className="h-16 md:h-24 lg:h-28 w-auto object-contain max-h-24 md:max-h-32 transition-transform duration-300 group-hover:scale-105 filter drop-shadow-sm"
-                whileHover={{ scale: 1.03 }}
+                className="h-20 md:h-28 lg:h-36 w-auto object-contain max-h-28 md:max-h-36 transition-transform duration-300 group-hover:scale-105 filter drop-shadow-md"
+                whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.98 }}
               />
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            {/* Desktop Navigation with high-end active and hover styling */}
+            <nav className="hidden md:flex items-center gap-1.5 bg-muted/40 p-1.5 rounded-full border border-border/50">
               {categories.map((category) => {
                 const isActive = location.pathname === category.href ||
                   location.pathname.startsWith(category.href);
@@ -122,15 +122,19 @@ export function Header() {
                   <Link
                     key={category.name}
                     to={category.href}
-                    className={`relative px-3.5 py-2 text-[13px] font-semibold tracking-wide rounded-lg transition-all duration-200 ${
+                    className={`relative px-4 py-2 text-xs md:text-sm font-bold tracking-wide rounded-full transition-all duration-300 ${
                       isActive
-                        ? 'bg-foreground text-background'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-foreground/8'
+                        ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                        : 'text-foreground/80 hover:text-primary hover:bg-background/80 hover:shadow-sm'
                     }`}
                   >
                     {category.name}
                     {isActive && (
-                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
+                      <motion.span
+                        layoutId="activeTabDot"
+                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-accent"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
                     )}
                   </Link>
                 );

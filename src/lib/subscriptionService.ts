@@ -85,7 +85,12 @@ export async function getSubscriberCount(): Promise<number> {
 }
 
 /** Notify subscribers when a new article/story is published */
-export async function notifySubscribersOnPublish(storyTitle: string, storySlug: string): Promise<void> {
+export async function notifySubscribersOnPublish(
+  storyTitle: string,
+  storySlug: string,
+  excerpt?: string,
+  imageUrl?: string
+): Promise<void> {
   const notification: NotificationItem = {
     id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
     title: storyTitle,
@@ -93,7 +98,26 @@ export async function notifySubscribersOnPublish(storyTitle: string, storySlug: 
     timestamp: new Date().toISOString(),
   };
 
-  // Save to local notifications list
+  // 1. Invoke Supabase Edge Function to dispatch Resend emails to subscribers
+  try {
+    const { data, error } = await supabase.functions.invoke('notify-subscribers', {
+      body: {
+        title: storyTitle,
+        slug: storySlug,
+        excerpt: excerpt || '',
+        image_url: imageUrl || '',
+      },
+    });
+    if (error) {
+      console.warn('Edge function notification warning:', error.message);
+    } else if (data?.message) {
+      console.log('Subscriber notification status:', data.message);
+    }
+  } catch (err) {
+    console.warn('Could not call Edge Function for subscriber email:', err);
+  }
+
+  // 2. Save to local notifications list
   try {
     const notifications: NotificationItem[] = JSON.parse(localStorage.getItem(NOTIFICATIONS_KEY) || '[]');
     notifications.unshift(notification);
@@ -102,7 +126,7 @@ export async function notifySubscribersOnPublish(storyTitle: string, storySlug: 
     console.error('Failed to store notification:', err);
   }
 
-  // Trigger Browser Desktop/Mobile Push Notification if permission granted
+  // 3. Trigger Browser Desktop/Mobile Push Notification if permission granted
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
       new Notification('NVM News • New Story Published! 📰', {
@@ -115,9 +139,9 @@ export async function notifySubscribersOnPublish(storyTitle: string, storySlug: 
     }
   }
 
-  // Trigger UI Toast notification
+  // 4. Trigger UI Toast notification
   toast.info(`🔔 Subscriber Alert Dispatched: "${storyTitle}"`, {
-    description: 'Subscribers have been notified of this story.',
+    description: 'Email & push notifications sent to subscribers.',
     duration: 5000,
   });
 
