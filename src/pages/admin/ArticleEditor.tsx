@@ -192,14 +192,22 @@ export default function ArticleEditor() {
 
     let reviewerName: string | null = null;
     if (publishState && user) {
-      reviewerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin Reviewer';
+      reviewerName = 'Editorial Admin';
       const { data: authorData } = await supabase
         .from('authors')
         .select('name')
         .or(`user_id.eq.${user.id},email.eq.${user.email}`)
         .maybeSingle();
-      if (authorData?.name) {
+
+      if (authorData?.name?.trim()) {
         reviewerName = authorData.name;
+      } else if (user.user_metadata?.full_name?.trim()) {
+        reviewerName = user.user_metadata.full_name;
+      } else if (user.email) {
+        const raw = user.email.split('@')[0].replace(/[0-9_.-]+/g, ' ').trim();
+        reviewerName = raw
+          ? raw.split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+          : 'Editorial Admin';
       }
     }
 

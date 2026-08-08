@@ -51,7 +51,7 @@ export default function ArticlesList() {
   }, []);
 
   const fetchArticles = async () => {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('articles')
       .select(`
         id,
@@ -68,7 +68,29 @@ export default function ArticlesList() {
       `)
       .order('created_at', { ascending: false });
 
+    // Fallback if reviewed_by_name column does not exist yet on remote Supabase DB
+    if (error && (error.code === '42703' || error.message?.includes('reviewed_by_name') || error.message?.includes('column'))) {
+      const fallbackRes = await supabase
+        .from('articles')
+        .select(`
+          id,
+          title,
+          slug,
+          published,
+          featured,
+          breaking,
+          created_at,
+          view_count,
+          categories (name),
+          authors (name)
+        `)
+        .order('created_at', { ascending: false });
+      data = fallbackRes.data;
+      error = fallbackRes.error;
+    }
+
     if (error) {
+      console.error('Failed to fetch articles:', error);
       toast.error('Failed to fetch articles');
     } else {
       setArticles(data || []);
@@ -82,14 +104,22 @@ export default function ArticlesList() {
     const now = new Date().toISOString();
 
     if (nextPublished && user) {
-      reviewerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin Reviewer';
+      reviewerName = 'Editorial Admin';
       const { data: authorData } = await supabase
         .from('authors')
         .select('name')
         .or(`user_id.eq.${user.id},email.eq.${user.email}`)
         .maybeSingle();
-      if (authorData?.name) {
+
+      if (authorData?.name?.trim()) {
         reviewerName = authorData.name;
+      } else if (user.user_metadata?.full_name?.trim()) {
+        reviewerName = user.user_metadata.full_name;
+      } else if (user.email) {
+        const raw = user.email.split('@')[0].replace(/[0-9_.-]+/g, ' ').trim();
+        reviewerName = raw
+          ? raw.split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+          : 'Editorial Admin';
       }
     }
 
