@@ -24,13 +24,18 @@ interface DBArticle {
   reviewed_by_name?: string | null;
   reviewed_at?: string | null;
   categories: { slug: string; name: string; color: string | null } | null;
-  authors_public: { name: string; avatar_url: string | null } | null;
+  authors?: { name: string; avatar_url: string | null } | null;
+  authors_public?: { name: string; avatar_url: string | null } | null;
   reviewer?: { name: string; avatar_url: string | null } | null;
 }
 
 // Transform database article to frontend Article type
 function transformArticle(dbArticle: DBArticle): Article {
   const publishDate = dbArticle.published_at || dbArticle.created_at;
+
+  const authorObj = dbArticle.authors || dbArticle.authors_public;
+  const authorName = authorObj?.name || 'Staff Writer';
+  const authorAvatar = authorObj?.avatar_url || undefined;
 
   const reviewerName = dbArticle.reviewer?.name || dbArticle.reviewed_by_name || (dbArticle.published ? 'Editorial Admin' : undefined);
   const reviewerAvatar = dbArticle.reviewer?.avatar_url || undefined;
@@ -45,8 +50,8 @@ function transformArticle(dbArticle: DBArticle): Article {
     category: (dbArticle.categories?.slug || 'general') as Category,
     categoryLabel: dbArticle.categories?.name || 'General',
     categoryColor: dbArticle.categories?.color || 'category-general',
-    author: dbArticle.authors_public?.name || 'Unknown Author',
-    authorAvatar: dbArticle.authors_public?.avatar_url || undefined,
+    author: authorName,
+    authorAvatar: authorAvatar,
     reviewedBy: dbArticle.published ? reviewerName : undefined,
     reviewedByRole: dbArticle.published ? reviewerRole : undefined,
     reviewedByAvatar: dbArticle.published ? reviewerAvatar : undefined,
@@ -62,62 +67,47 @@ function transformArticle(dbArticle: DBArticle): Article {
   };
 }
 
-// Fetch published articles for Homepage (0 to 2 weeks old / <= 14 days)
+// Select query fields for articles
+const ARTICLE_SELECT_FIELDS = `
+  id,
+  slug,
+  title,
+  excerpt,
+  content,
+  image_url,
+  video_url,
+  audio_url,
+  read_time,
+  featured,
+  breaking,
+  published,
+  published_at,
+  created_at,
+  view_count,
+  reviewed_by,
+  reviewed_by_name,
+  reviewed_at,
+  categories (slug, name, color),
+  authors (name, avatar_url)
+`;
+
+// Fetch published articles for Homepage
 export function useArticles() {
   return useQuery({
-    queryKey: ['articles', 'homepage-14days'],
+    queryKey: ['articles', 'homepage'],
     queryFn: async () => {
-      const fourteenDaysAgo = new Date();
-      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-      const isoCutoff = fourteenDaysAgo.toISOString();
-
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('published', true)
-        .gte('created_at', isoCutoff)
         .order('published_at', { ascending: false, nullsFirst: false });
 
-      if (error) throw error;
-
-      // If database has very few/no articles within 14 days, return what we have (or fallback if empty to ensure initial experience is smooth)
-      const transformed = (data as DBArticle[]).map(transformArticle);
-      if (transformed.length > 0) {
-        return transformed;
+      if (error) {
+        console.error('Failed to fetch articles:', error);
+        throw error;
       }
 
-      // Fallback query if no articles in last 14 days exist yet
-      const { data: fallbackData } = await supabase
-        .from('articles')
-        .select(`
-          id, slug, title, excerpt, content, image_url, video_url, read_time, featured, breaking, published, published_at, created_at, view_count, reviewed_by, reviewed_by_name, reviewed_at,
-          categories (slug, name, color), authors_public (name, avatar_url)
-        `)
-        .eq('published', true)
-        .order('published_at', { ascending: false, nullsFirst: false })
-        .limit(10);
-
-      return (fallbackData as DBArticle[] || []).map(transformArticle);
+      return (data as DBArticle[] || []).map(transformArticle);
     },
   });
 }
@@ -129,41 +119,24 @@ export function useFeaturedArticle() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('published', true)
         .eq('featured', true)
         .order('published_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Failed to fetch featured article:', error);
+        throw error;
+      }
       if (!data) return null;
       return transformArticle(data as DBArticle);
     },
   });
 }
 
-// Fetch articles by category (up to 1 month old / <= 30 days)
+// Fetch articles by category
 export function useArticlesByCategory(categorySlug: string) {
   return useQuery({
     queryKey: ['articles', 'category', categorySlug],
@@ -178,40 +151,15 @@ export function useArticlesByCategory(categorySlug: string) {
       if (catError) throw catError;
       if (!category) return [];
 
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const isoCutoff = thirtyDaysAgo.toISOString();
-
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('published', true)
         .eq('category_id', category.id)
-        .gte('created_at', isoCutoff)
         .order('published_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;
-      return (data as DBArticle[]).map(transformArticle);
+      return (data as DBArticle[] || []).map(transformArticle);
     },
     enabled: !!categorySlug,
   });
@@ -224,27 +172,7 @@ export function useArticle(id: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('id', id)
         .maybeSingle();
 
@@ -273,27 +201,7 @@ export function useRelatedArticles(articleId: string, category: Category) {
 
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('published', true)
         .eq('category_id', cat.id)
         .neq('id', articleId)
@@ -301,7 +209,7 @@ export function useRelatedArticles(articleId: string, category: Category) {
         .limit(3);
 
       if (error) throw error;
-      return (data as DBArticle[]).map(transformArticle);
+      return (data as DBArticle[] || []).map(transformArticle);
     },
     enabled: !!articleId && !!category,
   });
@@ -314,33 +222,13 @@ export function useVideoArticles() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('published', true)
         .not('video_url', 'is', null)
         .order('published_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;
-      return (data as DBArticle[]).map(transformArticle);
+      return (data as DBArticle[] || []).map(transformArticle);
     },
   });
 }
@@ -352,27 +240,7 @@ export function useArticleBySlug(slug: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('slug', slug)
         .eq('published', true)
         .maybeSingle();
@@ -392,33 +260,13 @@ export function useTrendingArticles(limit = 5) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('articles')
-        .select(`
-          id,
-          slug,
-          title,
-          excerpt,
-          content,
-          image_url,
-          video_url,
-          read_time,
-          featured,
-          breaking,
-          published,
-          published_at,
-          created_at,
-          view_count,
-          reviewed_by,
-          reviewed_by_name,
-          reviewed_at,
-          categories (slug, name, color),
-          authors_public (name, avatar_url)
-        `)
+        .select(ARTICLE_SELECT_FIELDS)
         .eq('published', true)
         .order('published_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return (data as DBArticle[]).map(transformArticle);
+      return (data as DBArticle[] || []).map(transformArticle);
     },
   });
 }
