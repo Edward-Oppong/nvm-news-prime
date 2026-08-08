@@ -8,7 +8,6 @@ import { Footer } from '@/components/news/Footer';
 import { CategoryBadge } from '@/components/news/CategoryBadge';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { VideoPlayer } from '@/components/news/VideoPlayer';
-import { AudioNarrationPlayer } from '@/components/news/AudioNarrationPlayer';
 import { useArticleBySlug, useRelatedArticles } from '@/hooks/useArticles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -303,15 +302,6 @@ export default function ArticlePage() {
                 </div>
               </div>
             </div>
-
-            {/* MP3 Audio Player */}
-            <AudioNarrationPlayer
-              title={article.title}
-              excerpt={article.excerpt}
-              contentHtml={articleContent}
-              readTime={article.readTime}
-              audioUrl={article.audioUrl}
-            />
 
             {/* Share buttons */}
             <div className="flex items-center justify-between py-4 mb-8 border-y border-divider">
