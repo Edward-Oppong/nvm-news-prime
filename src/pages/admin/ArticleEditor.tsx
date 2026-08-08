@@ -20,6 +20,7 @@ import { MediaUpload, type VideoItem } from '@/components/admin/MediaUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Category {
   id: string;
@@ -36,6 +37,7 @@ export default function ArticleEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const isEditing = !!id && id !== 'new';
 
   const [loading, setLoading] = useState(isEditing);
@@ -188,6 +190,19 @@ export default function ArticleEditor() {
 
     setSaving(true);
 
+    let reviewerName: string | null = null;
+    if (publishState && user) {
+      reviewerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin Reviewer';
+      const { data: authorData } = await supabase
+        .from('authors')
+        .select('name')
+        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+        .maybeSingle();
+      if (authorData?.name) {
+        reviewerName = authorData.name;
+      }
+    }
+
     const articleData = {
       title: form.title,
       slug: form.slug,
@@ -204,6 +219,9 @@ export default function ArticleEditor() {
       status: publishState ? 'published' : 'draft',
       read_time: form.read_time,
       published_at: publishState ? new Date().toISOString() : null,
+      reviewed_by: publishState ? (user?.id || null) : null,
+      reviewed_by_name: publishState ? reviewerName : null,
+      reviewed_at: publishState ? new Date().toISOString() : null,
     };
 
     if (isEditing) {

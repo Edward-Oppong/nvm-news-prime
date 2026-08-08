@@ -90,11 +90,25 @@ export default function ReviewQueue() {
     setActionLoading(true);
     try {
       const now = new Date().toISOString();
+      let reviewerName = user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'Admin Reviewer');
+      
+      if (user) {
+        const { data: authorData } = await supabase
+          .from('authors')
+          .select('name')
+          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+          .maybeSingle();
+        if (authorData?.name) {
+          reviewerName = authorData.name;
+        }
+      }
+
       const updatePayload: any = {
         published: true,
         published_at: now,
         status: 'published',
         reviewed_by: user?.id || null,
+        reviewed_by_name: reviewerName,
         reviewed_at: now,
       };
 

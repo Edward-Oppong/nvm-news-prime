@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Article {
   id: string;
@@ -26,6 +27,7 @@ interface Article {
   breaking: boolean;
   created_at: string;
   view_count: number;
+  reviewed_by_name?: string | null;
   categories: { name: string } | null;
   authors: { name: string } | null;
 }
@@ -37,6 +39,7 @@ function formatViews(n: number): string {
 }
 
 export default function ArticlesList() {
+  const { user } = useAuth();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,6 +62,7 @@ export default function ArticlesList() {
         breaking,
         created_at,
         view_count,
+        reviewed_by_name,
         categories (name),
         authors (name)
       `)
@@ -73,16 +77,51 @@ export default function ArticlesList() {
   };
 
   const togglePublish = async (id: string, published: boolean) => {
+    const nextPublished = !published;
+    let reviewerName: string | null = null;
+    const now = new Date().toISOString();
+
+    if (nextPublished && user) {
+      reviewerName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Admin Reviewer';
+      const { data: authorData } = await supabase
+        .from('authors')
+        .select('name')
+        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+        .maybeSingle();
+      if (authorData?.name) {
+        reviewerName = authorData.name;
+      }
+    }
+
+    const updatePayload = nextPublished
+      ? {
+          published: true,
+          status: 'published',
+          published_at: now,
+          reviewed_by: user?.id || null,
+          reviewed_by_name: reviewerName,
+          reviewed_at: now,
+        }
+      : {
+          published: false,
+          status: 'draft',
+          published_at: null,
+        };
+
     const { error } = await supabase
       .from('articles')
-      .update({ published: !published, published_at: !published ? new Date().toISOString() : null })
+      .update(updatePayload as any)
       .eq('id', id);
 
     if (error) {
       toast.error('Failed to update article');
     } else {
-      setArticles(articles.map(a => a.id === id ? { ...a, published: !published } : a));
-      toast.success(published ? 'Article unpublished' : 'Article published');
+      setArticles(articles.map(a => a.id === id ? {
+        ...a,
+        published: nextPublished,
+        reviewed_by_name: nextPublished ? (reviewerName || 'Editorial Admin') : null,
+      } : a));
+      toast.success(nextPublished ? 'Article published' : 'Article unpublished');
     }
   };
 
@@ -150,7 +189,8 @@ export default function ArticlesList() {
               <tr>
                 <th className="text-left p-4 font-medium text-muted-foreground">Title</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Category</th>
-                <th className="text-left p-4 font-medium text-muted-foreground">Author</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Author (Writer)</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Reviewed By</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Views</th>
                 <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
                 <th className="text-right p-4 font-medium text-muted-foreground">Actions</th>
@@ -181,8 +221,17 @@ export default function ArticlesList() {
                   <td className="p-4 text-muted-foreground">
                     {article.categories?.name || 'Uncategorized'}
                   </td>
-                  <td className="p-4 text-muted-foreground">
-                    {article.authors?.name || 'Unknown'}
+                  <td className="p-4 text-muted-foreground font-medium">
+                    {article.authors?.name || 'Staff Writer'}
+                  </td>
+                  <td className="p-4 text-muted-foreground text-sm">
+                    {article.published ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                        {article.reviewed_by_name || 'Editorial Admin'}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">Pending Review</span>
+                    )}
                   </td>
                   <td className="p-4">
                     <span className="flex items-center gap-1 text-sm font-semibold text-headline">

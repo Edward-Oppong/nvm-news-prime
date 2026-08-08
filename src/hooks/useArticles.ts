@@ -12,6 +12,7 @@ interface DBArticle {
   content: string | null;
   image_url: string | null;
   video_url: string | null;
+  audio_url?: string | null;
   read_time: string | null;
   featured: boolean | null;
   breaking: boolean | null;
@@ -19,13 +20,21 @@ interface DBArticle {
   published_at: string | null;
   created_at: string;
   view_count: number | null;
+  reviewed_by?: string | null;
+  reviewed_by_name?: string | null;
+  reviewed_at?: string | null;
   categories: { slug: string; name: string; color: string | null } | null;
   authors_public: { name: string; avatar_url: string | null } | null;
+  reviewer?: { name: string; avatar_url: string | null } | null;
 }
 
 // Transform database article to frontend Article type
 function transformArticle(dbArticle: DBArticle): Article {
   const publishDate = dbArticle.published_at || dbArticle.created_at;
+
+  const reviewerName = dbArticle.reviewer?.name || dbArticle.reviewed_by_name || (dbArticle.published ? 'Editorial Admin' : undefined);
+  const reviewerAvatar = dbArticle.reviewer?.avatar_url || undefined;
+  const reviewerRole = 'Editorial Administrator';
 
   return {
     id: dbArticle.id,
@@ -37,12 +46,18 @@ function transformArticle(dbArticle: DBArticle): Article {
     categoryLabel: dbArticle.categories?.name || 'General',
     categoryColor: dbArticle.categories?.color || 'category-general',
     author: dbArticle.authors_public?.name || 'Unknown Author',
+    authorAvatar: dbArticle.authors_public?.avatar_url || undefined,
+    reviewedBy: dbArticle.published ? reviewerName : undefined,
+    reviewedByRole: dbArticle.published ? reviewerRole : undefined,
+    reviewedByAvatar: dbArticle.published ? reviewerAvatar : undefined,
+    reviewedAt: dbArticle.reviewed_at ? format(new Date(dbArticle.reviewed_at), 'MMMM d, yyyy') : undefined,
     date: format(new Date(publishDate), 'MMMM d, yyyy'),
     readTime: dbArticle.read_time || '5 min read',
     image: dbArticle.image_url || '/placeholder.svg',
     featured: dbArticle.featured || false,
     breaking: dbArticle.breaking || false,
     videoUrl: dbArticle.video_url || undefined,
+    audioUrl: dbArticle.audio_url || undefined,
     viewCount: dbArticle.view_count || 0,
   };
 }
@@ -73,6 +88,9 @@ export function useArticles() {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -92,7 +110,7 @@ export function useArticles() {
       const { data: fallbackData } = await supabase
         .from('articles')
         .select(`
-          id, slug, title, excerpt, content, image_url, video_url, read_time, featured, breaking, published, published_at, created_at, view_count,
+          id, slug, title, excerpt, content, image_url, video_url, read_time, featured, breaking, published, published_at, created_at, view_count, reviewed_by, reviewed_by_name, reviewed_at,
           categories (slug, name, color), authors_public (name, avatar_url)
         `)
         .eq('published', true)
@@ -126,6 +144,9 @@ export function useFeaturedArticle() {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -178,6 +199,9 @@ export function useArticlesByCategory(categorySlug: string) {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -215,6 +239,9 @@ export function useArticle(id: string) {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -261,6 +288,9 @@ export function useRelatedArticles(articleId: string, category: Category) {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -299,6 +329,9 @@ export function useVideoArticles() {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -334,6 +367,9 @@ export function useArticleBySlug(slug: string) {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)
@@ -371,6 +407,9 @@ export function useTrendingArticles(limit = 5) {
           published_at,
           created_at,
           view_count,
+          reviewed_by,
+          reviewed_by_name,
+          reviewed_at,
           categories (slug, name, color),
           authors_public (name, avatar_url)
         `)

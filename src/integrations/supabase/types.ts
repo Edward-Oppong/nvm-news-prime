@@ -99,6 +99,9 @@ export type Database = {
           published: boolean | null
           published_at: string | null
           read_time: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_name: string | null
           slug: string
           status: string | null
           title: string
@@ -119,6 +122,9 @@ export type Database = {
           published?: boolean | null
           published_at?: string | null
           read_time?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_name?: string | null
           slug: string
           status?: string | null
           title: string
@@ -139,6 +145,9 @@ export type Database = {
           published?: boolean | null
           published_at?: string | null
           read_time?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_name?: string | null
           slug?: string
           status?: string | null
           title?: string

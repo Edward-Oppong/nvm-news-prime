@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye } from 'lucide-react';
+import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye, ShieldCheck, CheckCircle2, User } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
@@ -238,24 +238,57 @@ export default function ArticlePage() {
 
             <h1 className="headline-lg font-justify mb-6">{article.title}</h1>
 
-            {/* Author Meta Card */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border/80 mb-6 shadow-sm">
-              <div className="flex items-center gap-3.5">
-                {article.authorAvatar && (
-                  <img
-                    src={article.authorAvatar}
-                    alt={article.author}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-primary/30 shadow-sm"
-                  />
-                )}
-                <div>
-                  <h4 className="font-semibold text-headline text-base">{article.author}</h4>
-                  {article.authorRole && (
-                    <p className="text-xs text-muted-foreground font-medium">{article.authorRole}</p>
+            {/* Author & Reviewer Meta Card */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-card border border-border/80 mb-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                {/* Writer / Author */}
+                <div className="flex items-center gap-3">
+                  {article.authorAvatar ? (
+                    <img
+                      src={article.authorAvatar}
+                      alt={article.author}
+                      className="w-11 h-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
+                      {article.author.charAt(0).toUpperCase()}
+                    </div>
                   )}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Written By</span>
+                    <h4 className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.author}</h4>
+                    {article.authorRole && (
+                      <p className="text-xs text-muted-foreground font-medium">{article.authorRole}</p>
+                    )}
+                  </div>
                 </div>
+
+                {/* Reviewing & Publishing Admin */}
+                {article.reviewedBy && (
+                  <div className="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-divider pt-3 sm:pt-0 sm:pl-6">
+                    {article.reviewedByAvatar ? (
+                      <img
+                        src={article.reviewedByAvatar}
+                        alt={article.reviewedBy}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/30 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-sm">
+                        <ShieldCheck className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Reviewed &amp; Published By
+                      </span>
+                      <h4 className="font-semibold text-headline text-sm leading-snug">{article.reviewedBy}</h4>
+                      <p className="text-[11px] text-muted-foreground">{article.reviewedByRole || 'Editorial Administrator'}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground border-t sm:border-t-0 pt-3 sm:pt-0 border-divider">
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground border-t lg:border-t-0 pt-3 lg:pt-0 border-divider">
                 <div>
                   <span className="block font-semibold text-headline">{article.date}</span>
                   <span className="flex items-center gap-1 mt-0.5">

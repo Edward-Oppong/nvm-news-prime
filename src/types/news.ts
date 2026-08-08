@@ -22,6 +22,10 @@ export interface Article {
   author: string;
   authorRole?: string;
   authorAvatar?: string;
+  reviewedBy?: string;
+  reviewedByRole?: string;
+  reviewedByAvatar?: string;
+  reviewedAt?: string;
   date: string;
   readTime: string;
   image: string;
