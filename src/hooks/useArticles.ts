@@ -67,46 +67,63 @@ function transformArticle(dbArticle: DBArticle): Article {
   };
 }
 
-// Select query fields for articles
-const ARTICLE_SELECT_FIELDS = `
-  id,
-  slug,
-  title,
-  excerpt,
-  content,
-  image_url,
-  video_url,
-  audio_url,
-  read_time,
-  featured,
-  breaking,
-  published,
-  published_at,
-  created_at,
-  view_count,
-  reviewed_by,
-  reviewed_by_name,
-  reviewed_at,
-  categories (slug, name, color),
-  authors (name, avatar_url)
-`;
+/**
+  * Safely execute article queries.
+  * Tries selecting full schema fields (including audio_url and reviewed_by columns).
+  * If the remote Supabase database has not migrated these columns yet (SQL error 42703),
+  * it automatically falls back to core fields so published articles always render cleanly.
+  */
+async function fetchArticlesQuery(buildQuery: (selectStr: string) => any) {
+  const FULL_FIELDS = `
+    id, slug, title, excerpt, content, image_url, video_url, audio_url, read_time,
+    featured, breaking, published, published_at, created_at, view_count,
+    reviewed_by, reviewed_by_name, reviewed_at,
+    categories (slug, name, color), authors (name, avatar_url)
+  `;
+
+  const CORE_FIELDS = `
+    id, slug, title, excerpt, content, image_url, video_url, read_time,
+    featured, breaking, published, published_at, created_at, view_count,
+    categories (slug, name, color), authors (name, avatar_url)
+  `;
+
+  let { data, error } = await buildQuery(FULL_FIELDS);
+
+  if (error && (
+    error.code === '42703' ||
+    error.code === 'PGRST204' ||
+    (error.message && (
+      error.message.includes('column') ||
+      error.message.includes('audio_url') ||
+      error.message.includes('reviewed')
+    ))
+  )) {
+    console.warn('Falling back to core article fields due to remote DB schema:', error.message);
+    const fallbackRes = await buildQuery(CORE_FIELDS);
+    data = fallbackRes.data;
+    error = fallbackRes.error;
+  }
+
+  if (error) {
+    console.error('Failed to fetch articles:', error);
+    throw error;
+  }
+
+  return data;
+}
 
 // Fetch published articles for Homepage
 export function useArticles() {
   return useQuery({
     queryKey: ['articles', 'homepage'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('published', true)
-        .order('published_at', { ascending: false, nullsFirst: false });
-
-      if (error) {
-        console.error('Failed to fetch articles:', error);
-        throw error;
-      }
-
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('published', true)
+          .order('published_at', { ascending: false, nullsFirst: false })
+      );
       return (data as DBArticle[] || []).map(transformArticle);
     },
   });
@@ -117,19 +134,16 @@ export function useFeaturedArticle() {
   return useQuery({
     queryKey: ['featured-article'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('published', true)
-        .eq('featured', true)
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Failed to fetch featured article:', error);
-        throw error;
-      }
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('published', true)
+          .eq('featured', true)
+          .order('published_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      );
       if (!data) return null;
       return transformArticle(data as DBArticle);
     },
@@ -151,14 +165,14 @@ export function useArticlesByCategory(categorySlug: string) {
       if (catError) throw catError;
       if (!category) return [];
 
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('published', true)
-        .eq('category_id', category.id)
-        .order('published_at', { ascending: false, nullsFirst: false });
-
-      if (error) throw error;
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('published', true)
+          .eq('category_id', category.id)
+          .order('published_at', { ascending: false, nullsFirst: false })
+      );
       return (data as DBArticle[] || []).map(transformArticle);
     },
     enabled: !!categorySlug,
@@ -170,13 +184,13 @@ export function useArticle(id: string) {
   return useQuery({
     queryKey: ['article', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) throw error;
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('id', id)
+          .maybeSingle()
+      );
       if (!data) return null;
       return transformArticle(data as DBArticle);
     },
@@ -199,16 +213,16 @@ export function useRelatedArticles(articleId: string, category: Category) {
       if (catError) throw catError;
       if (!cat) return [];
 
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('published', true)
-        .eq('category_id', cat.id)
-        .neq('id', articleId)
-        .order('published_at', { ascending: false })
-        .limit(3);
-
-      if (error) throw error;
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('published', true)
+          .eq('category_id', cat.id)
+          .neq('id', articleId)
+          .order('published_at', { ascending: false })
+          .limit(3)
+      );
       return (data as DBArticle[] || []).map(transformArticle);
     },
     enabled: !!articleId && !!category,
@@ -220,14 +234,14 @@ export function useVideoArticles() {
   return useQuery({
     queryKey: ['video-articles'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('published', true)
-        .not('video_url', 'is', null)
-        .order('published_at', { ascending: false, nullsFirst: false });
-
-      if (error) throw error;
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('published', true)
+          .not('video_url', 'is', null)
+          .order('published_at', { ascending: false, nullsFirst: false })
+      );
       return (data as DBArticle[] || []).map(transformArticle);
     },
   });
@@ -238,14 +252,14 @@ export function useArticleBySlug(slug: string) {
   return useQuery({
     queryKey: ['article', 'slug', slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('slug', slug)
-        .eq('published', true)
-        .maybeSingle();
-
-      if (error) throw error;
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('slug', slug)
+          .eq('published', true)
+          .maybeSingle()
+      );
       if (!data) return null;
       return transformArticle(data as DBArticle);
     },
@@ -258,14 +272,14 @@ export function useTrendingArticles(limit = 5) {
   return useQuery({
     queryKey: ['trending-articles', limit],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select(ARTICLE_SELECT_FIELDS)
-        .eq('published', true)
-        .order('published_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
+      const data = await fetchArticlesQuery((selectStr) =>
+        supabase
+          .from('articles')
+          .select(selectStr)
+          .eq('published', true)
+          .order('published_at', { ascending: false })
+          .limit(limit)
+      );
       return (data as DBArticle[] || []).map(transformArticle);
     },
   });
