@@ -12,7 +12,7 @@ export interface SearchFilters {
 }
 
 export interface SearchResult extends Article {
-  matchType: 'title' | 'excerpt' | 'author';
+  matchType: 'title' | 'excerpt' | 'content' | 'author' | 'writer' | 'publisher';
   matchedText: string;
 }
 
@@ -139,10 +139,38 @@ export function useSearch(options: UseSearchOptions = {}) {
       }
       if (article.author.toLowerCase().includes(searchLower)) {
         matches.push({ ...article, matchType: 'author', matchedText: article.author });
+        return;
+      }
+      // Search writer name
+      if (article.writerName && article.writerName.toLowerCase().includes(searchLower)) {
+        matches.push({ ...article, matchType: 'writer', matchedText: article.writerName });
+        return;
+      }
+      // Search author name (byline field)
+      if (article.authorName && article.authorName.toLowerCase().includes(searchLower)) {
+        matches.push({ ...article, matchType: 'author', matchedText: article.authorName });
+        return;
+      }
+      // Search publisher name
+      if (article.publisherName && article.publisherName.toLowerCase().includes(searchLower)) {
+        matches.push({ ...article, matchType: 'publisher', matchedText: article.publisherName });
+        return;
+      }
+      // Search article body content (strip HTML tags)
+      if (article.content) {
+        const plainContent = article.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (plainContent.toLowerCase().includes(searchLower)) {
+          // Extract a snippet around the match for display
+          const idx = plainContent.toLowerCase().indexOf(searchLower);
+          const start = Math.max(0, idx - 40);
+          const snippet = (start > 0 ? '…' : '') + plainContent.slice(start, idx + searchLower.length + 80).trim() + '…';
+          matches.push({ ...article, matchType: 'content', matchedText: snippet });
+          return;
+        }
       }
     });
 
-    return matches.slice(0, 12);
+    return matches.slice(0, 20);
   }, [query, articles, filters, activeFilterCount]);
 
   // Autocomplete suggestions

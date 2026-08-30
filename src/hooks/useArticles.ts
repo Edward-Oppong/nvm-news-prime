@@ -23,6 +23,11 @@ interface DBArticle {
   reviewed_by?: string | null;
   reviewed_by_name?: string | null;
   reviewed_at?: string | null;
+  // Three-tier byline hierarchy
+  writer_name?: string | null;
+  author_name?: string | null;
+  publisher_name?: string | null;
+  title_font_size?: string | null;
   categories: { slug: string; name: string; color: string | null } | null;
   authors?: { name: string; avatar_url: string | null } | null;
   authors_public?: { name: string; avatar_url: string | null } | null;
@@ -52,6 +57,11 @@ function transformArticle(dbArticle: DBArticle): Article {
     categoryColor: dbArticle.categories?.color || 'category-general',
     author: authorName,
     authorAvatar: authorAvatar,
+    // Three-tier byline hierarchy
+    writerName: dbArticle.writer_name || undefined,
+    authorName: dbArticle.author_name || undefined,
+    publisherName: dbArticle.publisher_name || undefined,
+    titleFontSize: dbArticle.title_font_size || 'text-4xl',
     reviewedBy: dbArticle.published ? reviewerName : undefined,
     reviewedByRole: dbArticle.published ? reviewerRole : undefined,
     reviewedByAvatar: dbArticle.published ? reviewerAvatar : undefined,
@@ -78,6 +88,7 @@ async function fetchArticlesQuery(buildQuery: (selectStr: string) => any) {
     id, slug, title, excerpt, content, image_url, video_url, audio_url, read_time,
     featured, breaking, published, published_at, created_at, view_count,
     reviewed_by, reviewed_by_name, reviewed_at,
+    writer_name, author_name, publisher_name, title_font_size,
     categories (slug, name, color), authors (name, avatar_url)
   `;
 

@@ -22,12 +22,17 @@ interface Article {
   id: string;
   title: string;
   slug: string;
+  excerpt: string | null;
+  content: string | null;
   published: boolean;
   featured: boolean;
   breaking: boolean;
   created_at: string;
   view_count: number;
   reviewed_by_name?: string | null;
+  writer_name?: string | null;
+  author_name?: string | null;
+  publisher_name?: string | null;
   categories: { name: string } | null;
   authors: { name: string } | null;
 }
@@ -57,19 +62,24 @@ export default function ArticlesList() {
         id,
         title,
         slug,
+        excerpt,
+        content,
         published,
         featured,
         breaking,
         created_at,
         view_count,
         reviewed_by_name,
+        writer_name,
+        author_name,
+        publisher_name,
         categories (name),
         authors (name)
       `)
       .order('created_at', { ascending: false });
 
-    // Fallback if reviewed_by_name column does not exist yet on remote Supabase DB
-    if (error && (error.code === '42703' || error.message?.includes('reviewed_by_name') || error.message?.includes('column'))) {
+    // Fallback if new columns do not exist yet on remote Supabase DB
+    if (error && (error.code === '42703' || error.message?.includes('column'))) {
       const fallbackRes = await supabase
         .from('articles')
         .select(`
@@ -172,9 +182,25 @@ export default function ArticlesList() {
     setDeleteId(null);
   };
 
-  const filteredArticles = articles.filter(a =>
-    a.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredArticles = articles.filter(a => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    // Search title
+    if (a.title.toLowerCase().includes(q)) return true;
+    // Search byline people
+    if (a.authors?.name?.toLowerCase().includes(q)) return true;
+    if (a.writer_name?.toLowerCase().includes(q)) return true;
+    if (a.author_name?.toLowerCase().includes(q)) return true;
+    if (a.publisher_name?.toLowerCase().includes(q)) return true;
+    if (a.reviewed_by_name?.toLowerCase().includes(q)) return true;
+    // Search excerpt & content (strip HTML)
+    if (a.excerpt?.toLowerCase().includes(q)) return true;
+    if (a.content) {
+      const plain = a.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+      if (plain.toLowerCase().includes(q)) return true;
+    }
+    return false;
+  });
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

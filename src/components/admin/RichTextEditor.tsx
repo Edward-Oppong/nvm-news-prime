@@ -138,9 +138,21 @@ interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  /** Optional: current title font size class e.g. 'text-3xl', 'text-4xl', 'text-5xl' */
+  titleFontSize?: string;
+  /** Optional: called when user changes the title font size */
+  onTitleFontSizeChange?: (size: string) => void;
 }
 
-export function RichTextEditor({ content, onChange, placeholder = 'Start writing your story...' }: RichTextEditorProps) {
+const TITLE_FONT_SIZES = [
+  { label: 'Small', value: 'text-2xl' },
+  { label: 'Medium', value: 'text-3xl' },
+  { label: 'Large', value: 'text-4xl' },
+  { label: 'XL', value: 'text-5xl' },
+  { label: 'XXL', value: 'text-6xl' },
+];
+
+export function RichTextEditor({ content, onChange, placeholder = 'Start writing your story...', titleFontSize = 'text-4xl', onTitleFontSizeChange }: RichTextEditorProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
@@ -157,6 +169,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
         heading: {
           levels: [1, 2, 3],
         },
+        // Preserve whitespace — allow consecutive blank paragraphs for spacing
+        paragraph: {},
       }),
       Placeholder.configure({
         placeholder,
@@ -181,7 +195,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[350px] px-4 py-4',
+        // whitespace-pre-wrap ensures spacing/blank lines inside editor are visible
+        class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[350px] px-4 py-4 [&_p:empty]:min-h-[1.5em] [&_p]:mb-4',
       },
     },
   });
@@ -458,6 +473,26 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
     <div className="border border-input rounded-xl overflow-hidden bg-background shadow-sm">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 p-2 border-b border-input bg-muted/40">
+
+        {/* Title Font Size Selector — shown only when onTitleFontSizeChange is provided */}
+        {onTitleFontSizeChange && (
+          <>
+            <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/20 px-2 py-1 rounded-lg mr-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary/70">Title Size</span>
+              <select
+                value={titleFontSize}
+                onChange={(e) => onTitleFontSizeChange(e.target.value)}
+                className="text-xs font-semibold bg-transparent border-none outline-none cursor-pointer text-headline"
+                title="Change article title font size"
+              >
+                {TITLE_FONT_SIZES.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+            <Separator orientation="vertical" className="h-6 mx-1" />
+          </>
+        )}
         <Toggle
           size="sm"
           pressed={editor.isActive('bold')}

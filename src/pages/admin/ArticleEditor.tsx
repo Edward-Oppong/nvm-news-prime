@@ -61,6 +61,11 @@ export default function ArticleEditor() {
     breaking: false,
     published: false,
     read_time: '5 min read',
+    // Three-tier byline credit fields
+    writer_name: '',
+    author_name: '',
+    publisher_name: '',
+    title_font_size: 'text-4xl',
   });
 
   useEffect(() => {
@@ -108,6 +113,10 @@ export default function ArticleEditor() {
       breaking: data.breaking ?? false,
       published: data.published ?? false,
       read_time: data.read_time || '5 min read',
+      writer_name: (data as any).writer_name || '',
+      author_name: (data as any).author_name || '',
+      publisher_name: (data as any).publisher_name || '',
+      title_font_size: (data as any).title_font_size || 'text-4xl',
     });
 
     // Fetch associated videos
@@ -230,6 +239,11 @@ export default function ArticleEditor() {
       reviewed_by: publishState ? (user?.id || null) : null,
       reviewed_by_name: publishState ? reviewerName : null,
       reviewed_at: publishState ? new Date().toISOString() : null,
+      // Byline credits
+      writer_name: form.writer_name || null,
+      author_name: form.author_name || null,
+      publisher_name: form.publisher_name || null,
+      title_font_size: form.title_font_size || 'text-4xl',
     };
 
     if (isEditing) {
@@ -444,6 +458,46 @@ export default function ArticleEditor() {
           />
         </div>
 
+        {/* Three-tier Byline Credits */}
+        <div className="space-y-3 p-4 bg-muted/30 border border-border/60 rounded-xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Article Credits (Byline)</span>
+            <span className="text-[10px] text-muted-foreground/70">Displayed publicly on the article page</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="writer_name" className="text-xs font-semibold text-blue-600 dark:text-blue-400">✍️ Writer</Label>
+              <Input
+                id="writer_name"
+                value={form.writer_name}
+                onChange={(e) => setForm(prev => ({ ...prev, writer_name: e.target.value }))}
+                placeholder="Writer's full name"
+              />
+              <p className="text-[10px] text-muted-foreground">Person who wrote the article</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="author_name" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">📝 Author</Label>
+              <Input
+                id="author_name"
+                value={form.author_name}
+                onChange={(e) => setForm(prev => ({ ...prev, author_name: e.target.value }))}
+                placeholder="Author's full name"
+              />
+              <p className="text-[10px] text-muted-foreground">Credited author / correspondent</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="publisher_name" className="text-xs font-semibold text-purple-600 dark:text-purple-400">🏢 Publisher</Label>
+              <Input
+                id="publisher_name"
+                value={form.publisher_name}
+                onChange={(e) => setForm(prev => ({ ...prev, publisher_name: e.target.value }))}
+                placeholder="Publisher or organization"
+              />
+              <p className="text-[10px] text-muted-foreground">Publishing entity or org</p>
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
         <div className="space-y-2">
           <Label>Content</Label>
@@ -451,6 +505,8 @@ export default function ArticleEditor() {
             content={form.content}
             onChange={(content) => setForm(prev => ({ ...prev, content, read_time: calculateReadTime(content) }))}
             placeholder="Write your article content here..."
+            titleFontSize={form.title_font_size}
+            onTitleFontSizeChange={(size) => setForm(prev => ({ ...prev, title_font_size: size }))}
           />
         </div>
 

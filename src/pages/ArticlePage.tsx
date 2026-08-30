@@ -235,36 +235,77 @@ export default function ArticlePage() {
               <CategoryBadge label={article.categoryLabel} />
             </div>
 
-            <h1 className="headline-lg font-justify mb-6">{article.title}</h1>
+            <h1 className={`${article.titleFontSize || 'text-4xl'} font-serif font-bold text-headline leading-tight mb-6`}>{article.title}</h1>
 
-            {/* Author & Reviewer Meta Card */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-card border border-border/80 mb-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                {/* Writer / Author */}
-                <div className="flex items-center gap-3">
-                  {article.authorAvatar ? (
-                    <img
-                      src={article.authorAvatar}
-                      alt={article.author}
-                      className="w-11 h-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
-                    />
-                  ) : (
-                    <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
-                      {article.author.charAt(0).toUpperCase()}
+            {/* Author & Credits Meta Card — three-tier hierarchy: Writer → Author → Publisher */}
+            <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-2xl bg-card border border-border/80 mb-6 shadow-sm">
+              {/* Top row: byline people */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+
+                {/* WRITER */}
+                {article.writerName ? (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 text-sm font-bold">
+                      {article.writerName.charAt(0).toUpperCase()}
                     </div>
-                  )}
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Written By</span>
-                    <h4 className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.author}</h4>
-                    {article.authorRole && (
-                      <p className="text-xs text-muted-foreground font-medium">{article.authorRole}</p>
-                    )}
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">✍️ Writer</span>
+                      <p className="font-semibold text-headline text-sm leading-snug">{article.writerName}</p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  /* Fallback: show the linked author profile if no separate writer name */
+                  <div className="flex items-center gap-3">
+                    {article.authorAvatar ? (
+                      <img
+                        src={article.authorAvatar}
+                        alt={article.author}
+                        className="w-11 h-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
+                        {article.author.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Written By</span>
+                      <h4 className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.author}</h4>
+                      {article.authorRole && (
+                        <p className="text-xs text-muted-foreground font-medium">{article.authorRole}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                {/* Reviewing & Publishing Admin */}
+                {/* AUTHOR (byline credit) */}
+                {article.authorName && (
+                  <div className="flex items-center gap-2.5 border-l border-divider pl-5">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 text-sm font-bold">
+                      {article.authorName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">📝 Author</span>
+                      <p className="font-semibold text-headline text-sm leading-snug">{article.authorName}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* PUBLISHER */}
+                {article.publisherName && (
+                  <div className="flex items-center gap-2.5 border-l border-divider pl-5">
+                    <div className="w-9 h-9 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20 text-sm font-bold">
+                      {article.publisherName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">🏢 Publisher</span>
+                      <p className="font-semibold text-headline text-sm leading-snug">{article.publisherName}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reviewed & Published By — existing logic */}
                 {article.reviewedBy && (
-                  <div className="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-divider pt-3 sm:pt-0 sm:pl-6">
+                  <div className="flex items-center gap-3 border-l border-divider pl-5">
                     {article.reviewedByAvatar ? (
                       <img
                         src={article.reviewedByAvatar}
@@ -287,7 +328,8 @@ export default function ArticlePage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-4 text-xs text-muted-foreground border-t lg:border-t-0 pt-3 lg:pt-0 border-divider">
+              {/* Bottom row: date, read time, views */}
+              <div className="flex items-center gap-4 text-xs text-muted-foreground border-t border-divider pt-3">
                 <div>
                   <span className="block font-semibold text-headline">{article.date}</span>
                   <span className="flex items-center gap-1 mt-0.5">
@@ -344,12 +386,13 @@ export default function ArticlePage() {
                 className="prose prose-lg max-w-none
                   prose-headings:font-serif prose-headings:text-headline prose-headings:font-semibold
                   prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-                  prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-6
+                  prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-5
                   prose-a:text-secondary prose-a:no-underline hover:prose-a:underline
                   prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-muted-foreground
                   prose-blockquote:my-8 prose-blockquote:bg-muted/30 prose-blockquote:py-4 prose-blockquote:pr-4 prose-blockquote:rounded-r-lg
                   [&_blockquote_cite]:block [&_blockquote_cite]:mt-2 [&_blockquote_cite]:text-sm [&_blockquote_cite]:font-semibold [&_blockquote_cite]:not-italic [&_blockquote_cite]:text-headline
-                  [&_audio]:w-full [&_audio]:rounded-xl [&_audio]:my-4"
+                  [&_audio]:w-full [&_audio]:rounded-xl [&_audio]:my-4
+                  [&_p:empty]:min-h-[1.2em] [&_p:empty]:block"
                 dangerouslySetInnerHTML={{ __html: articleContent }}
               />
             ) : (

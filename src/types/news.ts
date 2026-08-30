@@ -22,6 +22,12 @@ export interface Article {
   author: string;
   authorRole?: string;
   authorAvatar?: string;
+  // Three-tier byline hierarchy (free-text credit fields)
+  writerName?: string;
+  authorName?: string;
+  publisherName?: string;
+  // Title font size class for display control
+  titleFontSize?: string;
   reviewedBy?: string;
   reviewedByRole?: string;
   reviewedByAvatar?: string;

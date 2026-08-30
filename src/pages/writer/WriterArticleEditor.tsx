@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Send, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Send, Globe, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +58,11 @@ export default function WriterArticleEditor() {
     video_url: '',
     audio_url: '',
     read_time: '5 min read',
+    // Three-tier byline credit fields
+    writer_name: '',
+    author_name: '',
+    publisher_name: '',
+    title_font_size: 'text-4xl',
   });
 
   useEffect(() => {
@@ -116,6 +121,10 @@ export default function WriterArticleEditor() {
       video_url: data.video_url || '',
       audio_url: (data as any).audio_url || '',
       read_time: data.read_time || '5 min read',
+      writer_name: (data as any).writer_name || '',
+      author_name: (data as any).author_name || '',
+      publisher_name: (data as any).publisher_name || '',
+      title_font_size: (data as any).title_font_size || 'text-4xl',
     });
 
     setRejectionNote((data as any).rejection_note || null);
@@ -170,7 +179,7 @@ export default function WriterArticleEditor() {
     }));
   }, []);
 
-  const saveArticle = async (status: 'draft' | 'pending_review') => {
+  const saveArticle = async (status: 'draft' | 'pending_review' | 'published') => {
     if (!form.title.trim()) {
       toast.error('Please enter an article title');
       return;
@@ -178,9 +187,11 @@ export default function WriterArticleEditor() {
 
     if (status === 'draft') setSaving(true);
     if (status === 'pending_review') setSubmitting(true);
+    if (status === 'published') setSubmitting(true);
 
     try {
       const now = new Date().toISOString();
+      const isPublishing = status === 'published';
       const articleData: any = {
         title: form.title,
         slug: form.slug || generateSlug(form.title),
@@ -192,9 +203,15 @@ export default function WriterArticleEditor() {
         video_url: form.video_url || null,
         audio_url: form.audio_url || null,
         read_time: form.read_time,
-        published: false, // Writers cannot publish directly
+        published: isPublishing,
         status: status,
         submitted_at: status === 'pending_review' ? now : null,
+        published_at: isPublishing ? now : null,
+        // Byline credits
+        writer_name: form.writer_name || null,
+        author_name: form.author_name || null,
+        publisher_name: form.publisher_name || null,
+        title_font_size: form.title_font_size || 'text-4xl',
       };
 
       let articleId = id;
@@ -234,7 +251,10 @@ export default function WriterArticleEditor() {
 
       queryClient.invalidateQueries({ queryKey: ['articles'] });
 
-      if (status === 'pending_review') {
+      if (status === 'published') {
+        toast.success('Story published live! 🎉');
+        navigate('/writer');
+      } else if (status === 'pending_review') {
         toast.success('Story submitted to editors for review!');
         navigate('/writer');
       } else {
@@ -287,7 +307,8 @@ export default function WriterArticleEditor() {
           <Button
             onClick={() => saveArticle('pending_review')}
             disabled={saving || submitting}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            variant="outline"
+            className="border-primary/40 text-primary hover:bg-primary/10"
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -295,6 +316,19 @@ export default function WriterArticleEditor() {
               <Send className="h-4 w-4 mr-2" />
             )}
             Submit for Review
+          </Button>
+
+          <Button
+            onClick={() => saveArticle('published')}
+            disabled={saving || submitting}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+          >
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Globe className="h-4 w-4 mr-2" />
+            )}
+            {isEditing ? 'Publish / Update Live' : 'Publish Live'}
           </Button>
         </div>
       </div>
@@ -389,7 +423,49 @@ export default function WriterArticleEditor() {
             content={form.content}
             onChange={handleContentChange}
             placeholder="Write your story here..."
+            titleFontSize={form.title_font_size}
+            onTitleFontSizeChange={(size) => setForm((prev) => ({ ...prev, title_font_size: size }))}
           />
+        </div>
+
+        {/* Three-tier Byline Credits */}
+        <div className="space-y-3 p-4 bg-muted/30 border border-border/60 rounded-xl">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Article Credits (Byline)</span>
+            <span className="text-[10px] text-muted-foreground/70">Displayed publicly on the published article</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="w_writer_name" className="text-xs font-semibold text-blue-600 dark:text-blue-400">✍️ Writer</Label>
+              <Input
+                id="w_writer_name"
+                value={form.writer_name}
+                onChange={(e) => setForm((prev) => ({ ...prev, writer_name: e.target.value }))}
+                placeholder="Writer's full name"
+              />
+              <p className="text-[10px] text-muted-foreground">Person who wrote the article</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="w_author_name" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">📝 Author</Label>
+              <Input
+                id="w_author_name"
+                value={form.author_name}
+                onChange={(e) => setForm((prev) => ({ ...prev, author_name: e.target.value }))}
+                placeholder="Author's full name"
+              />
+              <p className="text-[10px] text-muted-foreground">Credited author / correspondent</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="w_publisher_name" className="text-xs font-semibold text-purple-600 dark:text-purple-400">🏢 Publisher</Label>
+              <Input
+                id="w_publisher_name"
+                value={form.publisher_name}
+                onChange={(e) => setForm((prev) => ({ ...prev, publisher_name: e.target.value }))}
+                placeholder="Publisher or organization"
+              />
+              <p className="text-[10px] text-muted-foreground">Publishing entity or org</p>
+            </div>
+          </div>
         </div>
 
         {/* Media */}

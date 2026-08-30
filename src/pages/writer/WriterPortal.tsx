@@ -147,8 +147,8 @@ export default function WriterPortal() {
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 flex items-start gap-3 text-xs text-subheadline">
         <HelpCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
         <div>
-          <strong className="text-headline block font-semibold mb-0.5">Editorial Workflow Policy</strong>
-          When you compose a story, save it as a draft first. When ready, click <strong>"Submit for Review"</strong>. An editor will proofread your article before it is published live on NVM News.
+          <strong className="text-headline block font-semibold mb-0.5">Publishing Options</strong>
+          You can <strong>Save a Draft</strong> to continue editing later, <strong>Submit for Review</strong> to have an editor proofread before going live, or <strong>Publish Live</strong> directly to make the article immediately visible on NVM News.
         </div>
       </div>
 

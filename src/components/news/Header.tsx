@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Sun, Moon, Bell, Check, Loader2, Mail } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, ChevronDown, Sun, Moon, Bell, Check, Loader2, Mail, Search } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { TopMastheadBar } from './TopMastheadBar';
 import nvmLogo from '@/assets/nvm-logo.png';
@@ -21,6 +21,7 @@ const categories = [
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -143,6 +144,18 @@ export function Header() {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Search button */}
+              <motion.button
+                onClick={() => navigate('/search')}
+                className="p-2.5 text-muted-foreground hover:text-primary transition-colors rounded-full hover:bg-muted border border-border/60"
+                aria-label="Search"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Search articles"
+              >
+                <Search className="h-5 w-5" />
+              </motion.button>
+
               <Button
                 onClick={() => setShowSubscribeModal(true)}
                 size="sm"
@@ -214,21 +227,32 @@ export function Header() {
                   );
                 })}
 
-                <div className="col-span-2 pt-3 border-t border-border flex items-center gap-2 px-2">
+                <div className="col-span-2 pt-3 border-t border-border flex flex-col gap-2 px-2">
+                  {/* Search in mobile menu */}
                   <Link
-                    to="/writer/auth"
+                    to="/search"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex-1 text-center py-2.5 text-xs font-bold bg-muted text-foreground hover:bg-muted/80 rounded-lg border border-border"
+                    className="flex items-center justify-center gap-2 py-2.5 text-xs font-bold bg-muted/60 text-foreground hover:bg-muted rounded-lg border border-border transition-colors"
                   >
-                    Writer CMS
+                    <Search className="h-4 w-4" />
+                    Search Articles
                   </Link>
-                  <Link
-                    to="/admin/auth"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex-1 text-center py-2.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg"
-                  >
-                    Admin Portal
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/writer/auth"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex-1 text-center py-2.5 text-xs font-bold bg-muted text-foreground hover:bg-muted/80 rounded-lg border border-border"
+                    >
+                      Writer CMS
+                    </Link>
+                    <Link
+                      to="/admin/auth"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex-1 text-center py-2.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg"
+                    >
+                      Admin Portal
+                    </Link>
+                  </div>
                 </div>
               </nav>
             </motion.div>
