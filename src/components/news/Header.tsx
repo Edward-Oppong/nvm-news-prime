@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronDown, Sun, Moon, Bell, Check, Loader2, Mail, Search } from 'lucide-react';
+import { Menu, X, ChevronDown, Sun, Moon, Bell, Check, Loader2, Mail, Search, LogOut, LayoutDashboard, PenLine } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { TopMastheadBar } from './TopMastheadBar';
 import nvmLogo from '@/assets/nvm-logo.png';
@@ -9,6 +9,7 @@ import { subscribeUser } from '@/lib/subscriptionService';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/useAuth';
 
 const categories = [
   { name: 'General', href: '/category/general' },
@@ -22,6 +23,7 @@ const categories = [
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAdmin, isWriter, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -156,6 +158,32 @@ export function Header() {
                 <Search className="h-5 w-5" />
               </motion.button>
 
+              {/* Admin / Writer portal shortcut — only shown when signed in */}
+              {user && isAdmin && (
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link
+                    to="/admin"
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors"
+                    title="Admin Dashboard"
+                  >
+                    <LayoutDashboard className="h-3.5 w-3.5" />
+                    Admin
+                  </Link>
+                </motion.div>
+              )}
+              {user && isWriter && !isAdmin && (
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link
+                    to="/writer"
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                    title="Writer Portal"
+                  >
+                    <PenLine className="h-3.5 w-3.5" />
+                    My Stories
+                  </Link>
+                </motion.div>
+              )}
+
               <Button
                 onClick={() => setShowSubscribeModal(true)}
                 size="sm"
@@ -184,6 +212,19 @@ export function Header() {
                   )}
                 </AnimatePresence>
               </motion.button>
+
+              {/* Signed-in user avatar with sign-out */}
+              {user && (
+                <motion.button
+                  onClick={async () => { await signOut(); navigate('/'); }}
+                  className="w-9 h-9 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/20 transition-colors"
+                  title={`Signed in as ${user.email}\nClick to sign out`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {user.email?.charAt(0).toUpperCase()}
+                </motion.button>
+              )}
             </div>
           </div>
         </div>
@@ -237,22 +278,39 @@ export function Header() {
                     <Search className="h-4 w-4" />
                     Search Articles
                   </Link>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to="/writer/auth"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex-1 text-center py-2.5 text-xs font-bold bg-muted text-foreground hover:bg-muted/80 rounded-lg border border-border"
-                    >
-                      Writer CMS
-                    </Link>
-                    <Link
-                      to="/admin/auth"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex-1 text-center py-2.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg"
-                    >
-                      Admin Portal
-                    </Link>
-                  </div>
+
+                  {/* Portal links — only shown to signed-in users */}
+                  {user && (
+                    <div className="flex items-center gap-2">
+                      {isWriter && !isAdmin && (
+                        <Link
+                          to="/writer"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 rounded-lg border border-primary/20 transition-colors"
+                        >
+                          <PenLine className="h-3.5 w-3.5" />
+                          My Stories
+                        </Link>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 rounded-lg border border-rose-500/20 transition-colors"
+                        >
+                          <LayoutDashboard className="h-3.5 w-3.5" />
+                          Admin Panel
+                        </Link>
+                      )}
+                      <button
+                        onClick={async () => { await signOut(); setIsMobileMenuOpen(false); navigate('/'); }}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold bg-muted text-muted-foreground hover:bg-muted/80 rounded-lg border border-border transition-colors"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
                 </div>
               </nav>
             </motion.div>

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { CloudSun, ShieldCheck } from 'lucide-react';
+import { CloudSun, ShieldCheck, PenLine, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useWeather } from '@/hooks/useWeather';
+import { useAuth } from '@/hooks/useAuth';
 
 export function TopMastheadBar() {
   const [currentWeatherIndex, setCurrentWeatherIndex] = useState(0);
   const { cities, loading } = useWeather();
+  const { user, isAdmin, isWriter } = useAuth();
 
   const formattedDate = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
@@ -59,26 +61,42 @@ export function TopMastheadBar() {
           </div>
         </div>
 
-        {/* Right: Writer CMS & Admin Portal links */}
+        {/* Right: Trust badge + conditional Writer CMS & Admin Portal links */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-1 text-[11px] text-accent font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-accent font-medium">
             <ShieldCheck className="h-3.5 w-3.5" />
             <span>Independent &amp; Fact-Checked</span>
           </div>
 
-          <Link
-            to="/writer/auth"
-            className="text-[10px] uppercase font-bold tracking-wider text-background/80 hover:text-accent transition-colors underline underline-offset-2"
-          >
-            Writer CMS
-          </Link>
-          <span className="text-background/30">•</span>
-          <Link
-            to="/admin/auth"
-            className="text-[10px] uppercase font-bold tracking-wider text-background/60 hover:text-accent transition-colors"
-          >
-            Admin
-          </Link>
+          {/* Only shown if user is authenticated */}
+          {user && (
+            <>
+              {isWriter && !isAdmin && (
+                <>
+                  <span className="text-background/30">•</span>
+                  <Link
+                    to="/writer"
+                    className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-background/90 hover:text-accent transition-colors underline underline-offset-2"
+                  >
+                    <PenLine className="h-3 w-3" />
+                    My Stories
+                  </Link>
+                </>
+              )}
+              {isAdmin && (
+                <>
+                  <span className="text-background/30">•</span>
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-background/90 hover:text-accent transition-colors"
+                  >
+                    <LayoutDashboard className="h-3 w-3" />
+                    Admin Panel
+                  </Link>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
