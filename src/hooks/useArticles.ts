@@ -179,30 +179,45 @@ export function useFeaturedArticle() {
   });
 }
 
-// Fetch articles by category
+// Fetch articles by category — with double fallback for slug-based matching
 export function useArticlesByCategory(categorySlug: string) {
   return useQuery({
     queryKey: ['articles', 'category', categorySlug],
     queryFn: async () => {
-      // First get the category ID
-      const { data: category, error: catError } = await supabase
+      // Primary: try category_id join lookup
+      const { data: category } = await supabase
         .from('categories')
         .select('id')
         .eq('slug', categorySlug)
         .maybeSingle();
 
-      if (catError) throw catError;
-      if (!category) return [];
+      if (category?.id) {
+        const data = await fetchArticlesQuery((selectStr) =>
+          supabase
+            .from('articles')
+            .select(selectStr)
+            .eq('published', true)
+            .eq('category_id', category.id)
+            .order('published_at', { ascending: false, nullsFirst: false })
+        );
+        const results = (data as DBArticle[] || []).map(transformArticle);
+        // If we got results, return them
+        if (results.length > 0) return results;
+      }
 
-      const data = await fetchArticlesQuery((selectStr) =>
+      // Fallback: fetch all published articles and filter by category slug client-side
+      // This handles cases where category_id FK is null or slug mismatches
+      const allData = await fetchArticlesQuery((selectStr) =>
         supabase
           .from('articles')
           .select(selectStr)
           .eq('published', true)
-          .eq('category_id', category.id)
           .order('published_at', { ascending: false, nullsFirst: false })
       );
-      return (data as DBArticle[] || []).map(transformArticle);
+      const allArticles = (allData as DBArticle[] || []).map(transformArticle);
+      return allArticles.filter(
+        (a) => a.category.toLowerCase() === categorySlug.toLowerCase()
+      );
     },
     enabled: !!categorySlug,
   });
@@ -228,19 +243,29 @@ export function useArticle(id: string) {
 }
 
 // Fetch related articles (same category, excluding current)
-export function useRelatedArticles(articleId: string, category: Category) {
+export function useRelatedArticles(articleId: string, category: string) {
   return useQuery({
     queryKey: ['related-articles', articleId, category],
     queryFn: async () => {
-      // Get category ID
-      const { data: cat, error: catError } = await supabase
+      const { data: cat } = await supabase
         .from('categories')
         .select('id')
         .eq('slug', category)
         .maybeSingle();
 
-      if (catError) throw catError;
-      if (!cat) return [];
+      if (!cat?.id) {
+        // Fallback: return most recent excluding current article
+        const data = await fetchArticlesQuery((selectStr) =>
+          supabase
+            .from('articles')
+            .select(selectStr)
+            .eq('published', true)
+            .neq('id', articleId)
+            .order('published_at', { ascending: false })
+            .limit(3)
+        );
+        return (data as DBArticle[] || []).map(transformArticle);
+      }
 
       const data = await fetchArticlesQuery((selectStr) =>
         supabase
@@ -252,7 +277,21 @@ export function useRelatedArticles(articleId: string, category: Category) {
           .order('published_at', { ascending: false })
           .limit(3)
       );
-      return (data as DBArticle[] || []).map(transformArticle);
+      const results = (data as DBArticle[] || []).map(transformArticle);
+      // Fallback if same-category returns empty
+      if (results.length === 0) {
+        const fallback = await fetchArticlesQuery((selectStr) =>
+          supabase
+            .from('articles')
+            .select(selectStr)
+            .eq('published', true)
+            .neq('id', articleId)
+            .order('published_at', { ascending: false })
+            .limit(3)
+        );
+        return (fallback as DBArticle[] || []).map(transformArticle);
+      }
+      return results;
     },
     enabled: !!articleId && !!category,
   });
@@ -296,20 +335,111 @@ export function useArticleBySlug(slug: string) {
   });
 }
 
-// Fetch trending articles (most recent from various categories)
+// ─── Smart Trending Algorithm ───────────────────────────────────────────────
+// Scores articles using engagement velocity, recency decay, category diversity,
+// and editorial bonuses for breaking/featured articles.
+function computeTrendScore(article: Article): number {
+  const now = Date.now();
+  const publishedAt = article.date ? new Date(article.date).getTime() : now;
+  const ageMs = Math.max(now - publishedAt, 1);
+  const hoursOld = ageMs / (1000 * 60 * 60);
+
+  // Only articles from last 48 hours are eligible
+  if (hoursOld > 48) return 0;
+
+  const viewCount = article.viewCount || 0;
+
+  // ViewVelocity: views per hour since publish (higher = trending faster)
+  const viewVelocity = viewCount / Math.max(hoursOld, 0.5);
+
+  // Recency bonus: articles less than 6 hours old get a strong boost
+  const recencyBonus = hoursOld < 6 ? (6 - hoursOld) * 8 : 0;
+
+  // Decay penalty: older articles get progressively penalised
+  const decayPenalty = hoursOld * 1.5;
+
+  // Editorial bonuses
+  const breakingBonus = article.breaking ? 20 : 0;
+  const featuredBonus = article.featured ? 10 : 0;
+
+  const score =
+    viewVelocity * 3 +
+    viewCount * 0.5 +
+    recencyBonus +
+    breakingBonus +
+    featuredBonus -
+    decayPenalty;
+
+  return Math.max(score, 0);
+}
+
+function diversifyByCategory(articles: Article[], limit: number, maxPerCategory = 2): Article[] {
+  const categoryCounts: Record<string, number> = {};
+  const result: Article[] = [];
+
+  for (const article of articles) {
+    const cat = article.category;
+    const count = categoryCounts[cat] || 0;
+    if (count < maxPerCategory) {
+      result.push(article);
+      categoryCounts[cat] = count + 1;
+    }
+    if (result.length >= limit) break;
+  }
+
+  // If we didn't get enough diverse articles, fill remaining slots with any article
+  if (result.length < limit) {
+    for (const article of articles) {
+      if (!result.find((r) => r.id === article.id)) {
+        result.push(article);
+      }
+      if (result.length >= limit) break;
+    }
+  }
+
+  return result;
+}
+
 export function useTrendingArticles(limit = 5) {
   return useQuery({
     queryKey: ['trending-articles', limit],
     queryFn: async () => {
+      // Fetch a broader pool: last 48h of published articles (up to 40)
+      // to give the algorithm enough candidates
+      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
       const data = await fetchArticlesQuery((selectStr) =>
         supabase
           .from('articles')
           .select(selectStr)
           .eq('published', true)
-          .order('published_at', { ascending: false })
-          .limit(limit)
+          .gte('published_at', cutoff)
+          .order('view_count', { ascending: false })
+          .limit(40)
       );
-      return (data as DBArticle[] || []).map(transformArticle);
+
+      const candidates = (data as DBArticle[] || []).map(transformArticle);
+
+      // If no recent articles, fall back to latest regardless of age
+      if (candidates.length === 0) {
+        const fallback = await fetchArticlesQuery((selectStr) =>
+          supabase
+            .from('articles')
+            .select(selectStr)
+            .eq('published', true)
+            .order('published_at', { ascending: false })
+            .limit(limit)
+        );
+        return (fallback as DBArticle[] || []).map(transformArticle);
+      }
+
+      // Score & sort
+      const scored = candidates
+        .map((article) => ({ article, score: computeTrendScore(article) }))
+        .sort((a, b) => b.score - a.score)
+        .map(({ article }) => article);
+
+      // Apply category diversity (max 2 per category) then trim to limit
+      return diversifyByCategory(scored, limit, 2);
     },
   });
 }
