@@ -1,9 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2, Eye, EyeOff, Search, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Search, Loader2, ArrowUpDown, Filter, CheckCircle2, FileEdit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
@@ -43,11 +50,16 @@ function formatViews(n: number): string {
   return `${n}`;
 }
 
+type StatusFilter = 'all' | 'published' | 'draft';
+type SortOption = 'newest' | 'oldest' | 'views' | 'title_asc' | 'title_desc' | 'status_published' | 'status_draft';
+
 export default function ArticlesList() {
   const { user } = useAuth();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -182,32 +194,70 @@ export default function ArticlesList() {
     setDeleteId(null);
   };
 
-  const filteredArticles = articles.filter(a => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    // Search title
-    if (a.title.toLowerCase().includes(q)) return true;
-    // Search byline people
-    if (a.authors?.name?.toLowerCase().includes(q)) return true;
-    if (a.writer_name?.toLowerCase().includes(q)) return true;
-    if (a.author_name?.toLowerCase().includes(q)) return true;
-    if (a.publisher_name?.toLowerCase().includes(q)) return true;
-    if (a.reviewed_by_name?.toLowerCase().includes(q)) return true;
-    // Search excerpt & content (strip HTML)
-    if (a.excerpt?.toLowerCase().includes(q)) return true;
-    if (a.content) {
-      const plain = a.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
-      if (plain.toLowerCase().includes(q)) return true;
-    }
-    return false;
-  });
+  const counts = useMemo(() => {
+    const published = articles.filter(a => a.published).length;
+    const draft = articles.filter(a => !a.published).length;
+    return { all: articles.length, published, draft };
+  }, [articles]);
+
+  const filteredArticles = useMemo(() => {
+    return articles
+      .filter((a) => {
+        // Status filter
+        if (statusFilter === 'published' && !a.published) return false;
+        if (statusFilter === 'draft' && a.published) return false;
+
+        // Search query
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.toLowerCase();
+        if (a.title.toLowerCase().includes(q)) return true;
+        if (a.authors?.name?.toLowerCase().includes(q)) return true;
+        if (a.writer_name?.toLowerCase().includes(q)) return true;
+        if (a.author_name?.toLowerCase().includes(q)) return true;
+        if (a.publisher_name?.toLowerCase().includes(q)) return true;
+        if (a.reviewed_by_name?.toLowerCase().includes(q)) return true;
+        if (a.excerpt?.toLowerCase().includes(q)) return true;
+        if (a.content) {
+          const plain = a.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+          if (plain.toLowerCase().includes(q)) return true;
+        }
+        return false;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'oldest':
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          case 'views':
+            return (b.view_count || 0) - (a.view_count || 0);
+          case 'title_asc':
+            return a.title.localeCompare(b.title);
+          case 'title_desc':
+            return b.title.localeCompare(a.title);
+          case 'status_published':
+            if (a.published === b.published) {
+              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }
+            return a.published ? -1 : 1;
+          case 'status_draft':
+            if (a.published === b.published) {
+              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }
+            return !a.published ? -1 : 1;
+          case 'newest':
+          default:
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+      });
+  }, [articles, statusFilter, searchQuery, sortBy]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-headline">Articles</h1>
-          <p className="text-muted-foreground mt-1 text-sm">{articles.length} total articles</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {articles.length} total articles • {counts.published} published • {counts.draft} drafts
+          </p>
         </div>
         <Link to="/admin/articles/new">
           <Button className="w-full sm:w-auto">
@@ -217,15 +267,91 @@ export default function ArticlesList() {
         </Link>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search articles..."
-          className="pl-10"
-        />
+      {/* Filter Tabs, Search & Sort Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        {/* Status Filter Tabs */}
+        <div className="inline-flex p-1 bg-muted/60 rounded-xl border border-border/60 self-start">
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+              statusFilter === 'all'
+                ? 'bg-card text-headline shadow-sm border border-border/50'
+                : 'text-muted-foreground hover:text-headline'
+            }`}
+          >
+            <span>All Articles</span>
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+              statusFilter === 'all' ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-muted-foreground'
+            }`}>
+              {counts.all}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('published')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+              statusFilter === 'published'
+                ? 'bg-card text-emerald-600 dark:text-emerald-400 shadow-sm border border-border/50'
+                : 'text-muted-foreground hover:text-headline'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+            <span>Published</span>
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+              statusFilter === 'published' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold' : 'bg-muted text-muted-foreground'
+            }`}>
+              {counts.published}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('draft')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+              statusFilter === 'draft'
+                ? 'bg-card text-amber-600 dark:text-amber-400 shadow-sm border border-border/50'
+                : 'text-muted-foreground hover:text-headline'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+            <span>Drafts / Unpublished</span>
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+              statusFilter === 'draft' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold' : 'bg-muted text-muted-foreground'
+            }`}>
+              {counts.draft}
+            </span>
+          </button>
+        </div>
+
+        {/* Search & Sort Options */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search title, author, byline..."
+              className="pl-9 h-9 text-xs"
+            />
+          </div>
+
+          <div className="w-full sm:w-52 shrink-0">
+            <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
+              <SelectTrigger className="h-9 text-xs">
+                <ArrowUpDown className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                <SelectValue placeholder="Sort articles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="views">Most Viewed</SelectItem>
+                <SelectItem value="title_asc">Title (A to Z)</SelectItem>
+                <SelectItem value="title_desc">Title (Z to A)</SelectItem>
+                <SelectItem value="status_published">Published First</SelectItem>
+                <SelectItem value="status_draft">Drafts First</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {/* Articles Table */}
@@ -235,8 +361,29 @@ export default function ArticlesList() {
             <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
           </div>
         ) : filteredArticles.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-muted-foreground">No articles found</p>
+          <div className="p-12 text-center space-y-3">
+            <p className="text-muted-foreground font-medium">
+              {searchQuery
+                ? `No articles match "${searchQuery}"`
+                : statusFilter === 'published'
+                ? 'No published articles found'
+                : statusFilter === 'draft'
+                ? 'No drafts or unpublished articles found'
+                : 'No articles found'}
+            </p>
+            {(searchQuery || statusFilter !== 'all') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('all');
+                }}
+                className="text-xs"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
