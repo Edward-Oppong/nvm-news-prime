@@ -1,13 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye, ShieldCheck, CheckCircle2, User, BookOpen } from 'lucide-react';
+import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye, ShieldCheck, CheckCircle2, User, BookOpen, Bookmark, MessageCircle, Send, Sparkles } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
 import { CategoryBadge } from '@/components/news/CategoryBadge';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { VideoPlayer } from '@/components/news/VideoPlayer';
+import { ArticleAudioPlayer } from '@/components/news/ArticleAudioPlayer';
+import { SEOHead } from '@/components/seo/SEOHead';
+import { useBookmarks } from '@/hooks/useBookmarks';
 import { useArticleBySlug, useRelatedArticles } from '@/hooks/useArticles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -18,6 +21,49 @@ function formatViews(count: number): string {
   if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
   if (count >= 1_000) return `${(count / 1_000).toFixed(1)}k`;
   return `${count}`;
+}
+
+/** Incognito / Author Avatar with custom silhouette fallback */
+function IncognitoAvatar({
+  src,
+  alt,
+  name,
+  className = 'w-11 h-11',
+}: {
+  src?: string | null;
+  alt?: string;
+  name?: string;
+  className?: string;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  if (src && !imgError) {
+    return (
+      <img
+        src={src}
+        alt={alt || name || 'Author'}
+        onError={() => setImgError(true)}
+        className={`${className} rounded-full object-cover border-2 border-border/80 shadow-sm shrink-0`}
+      />
+    );
+  }
+
+  // Incognito Avatar Silhouette
+  return (
+    <div
+      className={`${className} rounded-full bg-slate-900 dark:bg-slate-800 text-slate-200 flex items-center justify-center border-2 border-slate-700/60 shadow-inner shrink-0 overflow-hidden select-none`}
+      title={name ? `${name} (Incognito)` : 'Incognito Author'}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-3/5 h-3/5 text-slate-300"
+      >
+        <path d="M12 2C9.5 2 7.4 3.5 6.8 5.6C5 6 3 7.2 3 9.5C3 10.3 3.4 11 4 11.5L20 11.5C20.6 11 21 10.3 21 9.5C21 7.2 19 6 17.2 5.6C16.6 3.5 14.5 2 12 2ZM8 7C8 5.9 9.8 5 12 5C14.2 5 16 5.9 16 7L8 7Z" />
+        <path d="M4 13.5C4 12.7 4.7 12 5.5 12L18.5 12C19.3 12 20 12.7 20 13.5C20 14.3 19.3 15 18.5 15L15.8 15C15.4 16.7 13.8 18 12 18C10.2 18 8.6 16.7 8.2 15L5.5 15C4.7 15 4 14.3 4 13.5ZM6.5 16.5C5.1 16.5 4 17.6 4 19C4 20.4 5.1 21.5 6.5 21.5C7.9 21.5 9 20.4 9 19C9 17.6 7.9 16.5 6.5 16.5ZM17.5 16.5C16.1 16.5 15 17.6 15 19C15 20.4 16.1 21.5 17.5 21.5C18.9 21.5 20 20.4 20 19C20 17.6 18.9 16.5 17.5 16.5Z" />
+      </svg>
+    </div>
+  );
 }
 
 export default function ArticlePage() {
@@ -64,7 +110,14 @@ export default function ArticlePage() {
     });
   }, [article?.id, article?.viewCount]);
 
+  const { isBookmarked, toggleBookmark } = useBookmarks();
+
   const getArticleUrl = useCallback(() => window.location.href, []);
+
+  const shareOnWhatsApp = () => {
+    const text = encodeURIComponent(`📰 *${article?.title || 'NVM News'}*\n\nRead the full story on NVM News:\n${getArticleUrl()}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
 
   const shareOnTwitter = () => {
     const url = encodeURIComponent(getArticleUrl());
@@ -184,6 +237,18 @@ export default function ArticlePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Dynamic SEO & Google News Structured Data */}
+      <SEOHead
+        title={article.title}
+        description={article.excerpt || `${article.title} - Read the full breaking story on NVM News.`}
+        image={article.image}
+        type="article"
+        author={article.authorName || article.author || 'NVM News'}
+        publisher={article.publisherName || 'NVM News Network'}
+        publishedTime={article.date}
+        section={article.categoryLabel}
+      />
+
       {/* Reading progress bar */}
       <div
         className="progress-bar"
@@ -235,150 +300,98 @@ export default function ArticlePage() {
               <CategoryBadge label={article.categoryLabel} />
             </div>
 
-            <h1 className={`${article.titleFontSize || 'text-4xl'} font-serif font-bold text-headline leading-tight mb-6`}>{article.title}</h1>
+            <h1 className={`${article.titleFontSize || 'text-4xl'} font-serif font-bold text-headline leading-tight mb-4`}>{article.title}</h1>
 
-            {/* Author & Credits Meta Card — three-tier hierarchy: Writer → Author → Publisher */}
-            <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-2xl bg-card border border-border/80 mb-6 shadow-sm">
-              {/* Top row: byline people */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-
-                {/* WRITER */}
-                {article.writerName ? (
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 text-sm font-bold">
-                      {article.writerName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">✍️ Writer</span>
-                      <p className="font-semibold text-headline text-sm leading-snug">{article.writerName}</p>
-                    </div>
-                  </div>
-                ) : (
-                  /* Fallback: show the linked author profile if no separate writer name */
-                  <div className="flex items-center gap-3">
-                    {article.authorAvatar ? (
-                      <img
-                        src={article.authorAvatar}
-                        alt={article.author}
-                        className="w-11 h-11 rounded-full object-cover border-2 border-primary/30 shadow-sm"
-                      />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
-                        {article.author.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Written By</span>
-                      <h4 className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.author}</h4>
-                      {article.authorRole && (
-                        <p className="text-xs text-muted-foreground font-medium">{article.authorRole}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* AUTHOR (byline credit) */}
-                {article.authorName && (
-                  <div className="flex items-center gap-2.5 border-l border-divider pl-5">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 text-sm font-bold">
-                      {article.authorName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">📝 Author</span>
-                      <p className="font-semibold text-headline text-sm leading-snug">{article.authorName}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* PUBLISHER */}
-                {article.publisherName && (
-                  <div className="flex items-center gap-2.5 border-l border-divider pl-5">
-                    <div className="w-9 h-9 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20 text-sm font-bold">
-                      {article.publisherName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">🏢 Publisher</span>
-                      <p className="font-semibold text-headline text-sm leading-snug">{article.publisherName}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Reviewed & Published By — existing logic */}
-                {article.reviewedBy && (
-                  <div className="flex items-center gap-3 border-l border-divider pl-5">
-                    {article.reviewedByAvatar ? (
-                      <img
-                        src={article.reviewedByAvatar}
-                        alt={article.reviewedBy}
-                        className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/30 shadow-sm"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-sm">
-                        <ShieldCheck className="h-5 w-5" />
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="h-3 w-3" /> Reviewed &amp; Published By
-                      </span>
-                      <h4 className="font-semibold text-headline text-sm leading-snug">{article.reviewedBy}</h4>
-                      <p className="text-[11px] text-muted-foreground">{article.reviewedByRole || 'Editorial Administrator'}</p>
-                    </div>
-                  </div>
-                )}
+            {/* Top metadata strip: date, read time, views */}
+            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-6 pb-1">
+              <div>
+                <span className="font-semibold text-headline">{article.date}</span>
+                <span className="inline-flex items-center gap-1 ml-3">
+                  <Clock className="h-3.5 w-3.5" /> {article.readTime}
+                </span>
               </div>
-
-              {/* Bottom row: date, read time, views */}
-              <div className="flex items-center gap-4 text-xs text-muted-foreground border-t border-divider pt-3">
-                <div>
-                  <span className="block font-semibold text-headline">{article.date}</span>
-                  <span className="flex items-center gap-1 mt-0.5">
-                    <Clock className="h-3.5 w-3.5" /> {article.readTime}
-                  </span>
-                </div>
-                {/* View Count */}
-                <div className="flex items-center gap-1.5 border-l border-divider pl-4">
-                  <Eye className="h-3.5 w-3.5 text-primary/70" />
-                  <span className="font-semibold text-headline">{formatViews(displayViewCount)}</span>
-                  <span className="text-muted-foreground">views</span>
-                </div>
+              <div className="flex items-center gap-1.5 border-l border-divider pl-4">
+                <Eye className="h-3.5 w-3.5 text-primary/70" />
+                <span className="font-semibold text-headline">{formatViews(displayViewCount)}</span>
+                <span>views</span>
               </div>
             </div>
 
-            {/* Share buttons */}
-            <div className="flex items-center justify-between py-4 mb-8 border-y border-divider">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-headline mr-2">Share Story:</span>
+            {/* Share & Bookmark Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 py-3 px-4 mb-6 rounded-xl bg-muted/40 border border-border/60">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">Share:</span>
+                {/* WhatsApp */}
+                <button
+                  onClick={shareOnWhatsApp}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all text-xs font-semibold"
+                  title="Share on WhatsApp"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span>WhatsApp</span>
+                </button>
+                {/* Twitter / X */}
                 <button
                   onClick={shareOnTwitter}
-                  className="w-9 h-9 rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2] flex items-center justify-center hover:bg-[#1DA1F2] hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-lg bg-[#1DA1F2]/10 text-[#1DA1F2] flex items-center justify-center hover:bg-[#1DA1F2] hover:text-white transition-colors"
                   aria-label="Share on Twitter"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <Twitter className="h-3.5 w-3.5" />
                 </button>
+                {/* Facebook */}
                 <button
                   onClick={shareOnFacebook}
-                  className="w-9 h-9 rounded-full bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-lg bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center hover:bg-[#1877F2] hover:text-white transition-colors"
                   aria-label="Share on Facebook"
                 >
-                  <Facebook className="h-4 w-4" />
+                  <Facebook className="h-3.5 w-3.5" />
                 </button>
+                {/* LinkedIn */}
                 <button
                   onClick={shareOnLinkedIn}
-                  className="w-9 h-9 rounded-full bg-[#0A66C2]/10 text-[#0A66C2] flex items-center justify-center hover:bg-[#0A66C2] hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-lg bg-[#0A66C2]/10 text-[#0A66C2] flex items-center justify-center hover:bg-[#0A66C2] hover:text-white transition-colors"
                   aria-label="Share on LinkedIn"
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <Linkedin className="h-3.5 w-3.5" />
                 </button>
+                {/* Copy Link */}
                 <button
                   onClick={copyLink}
-                  className="w-9 h-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
-                  aria-label="Copy link"
+                  className="w-8 h-8 rounded-lg bg-muted text-muted-foreground flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
+                  title="Copy link"
                 >
-                  {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                 </button>
               </div>
+
+              {/* Bookmark for offline */}
+              <button
+                onClick={() => toggleBookmark({
+                  id: article.id,
+                  slug: article.slug,
+                  title: article.title,
+                  image: article.image,
+                  categoryLabel: article.categoryLabel,
+                  date: article.date,
+                })}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                  isBookmarked(article.id)
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-background text-muted-foreground hover:text-headline border-border/80'
+                }`}
+                title={isBookmarked(article.id) ? 'Saved' : 'Save Story'}
+              >
+                <Bookmark className={`h-3.5 w-3.5 ${isBookmarked(article.id) ? 'fill-current' : ''}`} />
+                <span>{isBookmarked(article.id) ? 'Saved' : 'Save Story'}</span>
+              </button>
             </div>
+
+            {/* AI Audio Story Reader */}
+            <ArticleAudioPlayer
+              title={article.title}
+              contentHtml={article.content}
+              excerpt={article.excerpt}
+            />
 
             {/* Article body */}
             {articleContent ? (
@@ -399,77 +412,119 @@ export default function ArticlePage() {
               <p className="text-muted-foreground italic">{article.excerpt}</p>
             )}
 
-            {/* Article Credits & Publishing Details Footer */}
-            <div className="mt-12 pt-8 border-t border-divider">
-              <div className="p-6 md:p-8 rounded-2xl bg-card border border-border/80 shadow-sm space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-2 border-b border-border/60 pb-4">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-primary" />
-                    <h3 className="font-serif text-lg font-bold text-headline">Publication &amp; Byline Credits</h3>
-                  </div>
-                  <span className="text-xs text-muted-foreground">Published on {article.date}</span>
-                </div>
+            {/* Author & Credits Meta Card — placed below article content */}
+            <div className="mt-10 pt-6 border-t border-divider">
+              <div className="flex flex-col gap-4 p-5 sm:p-6 rounded-2xl bg-card border border-border/80 shadow-sm">
+                {/* Top row: byline people */}
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* WRITER */}
-                  <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/60">
-                    <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 font-bold text-base shrink-0">
-                      ✍️
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-0.5">
-                        Writer
-                      </span>
-                      <p className="font-semibold text-headline text-sm sm:text-base truncate">
-                        {article.writerName || article.author || 'NVM Editorial Team'}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">Written &amp; compiled story</p>
+                  <div className="flex items-center gap-3">
+                    <IncognitoAvatar
+                      src={article.authorAvatar}
+                      alt={article.writerName || article.author}
+                      name={article.writerName || article.author}
+                      className="w-11 h-11"
+                    />
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">✍️ Writer</span>
+                      <p className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.writerName || article.author}</p>
+                      {article.authorRole && !article.writerName && (
+                        <p className="text-xs text-muted-foreground font-medium">{article.authorRole}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* AUTHOR */}
-                  <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/60">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 font-bold text-base shrink-0">
-                      📝
+                  {/* AUTHOR (byline credit) */}
+                  {article.authorName && (
+                    <div className="flex items-center gap-3 border-l border-divider pl-5">
+                      <IncognitoAvatar
+                        src={article.authorAvatar}
+                        alt={article.authorName || article.author}
+                        name={article.authorName || article.author}
+                        className="w-11 h-11"
+                      />
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">📝 Author</span>
+                        <p className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.authorName}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block mb-0.5">
-                        Author
-                      </span>
-                      <p className="font-semibold text-headline text-sm sm:text-base truncate">
-                        {article.authorName || article.author || 'Staff Journalist'}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">Credited original author</p>
-                    </div>
-                  </div>
+                  )}
 
                   {/* PUBLISHER */}
-                  <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/60">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20 font-bold text-base shrink-0">
-                      🏢
+                  {article.publisherName && (
+                    <div className="flex items-center gap-3 border-l border-divider pl-5">
+                      <IncognitoAvatar
+                        src="/nvm-logo.png"
+                        alt={article.publisherName}
+                        name={article.publisherName}
+                        className="w-11 h-11"
+                      />
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block">🏢 Publisher</span>
+                        <p className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.publisherName}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-0.5">
-                        Publisher
-                      </span>
-                      <p className="font-semibold text-headline text-sm sm:text-base truncate">
-                        {article.publisherName || 'NVM News'}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">Publishing organization</p>
+                  )}
+
+                  {/* Reviewed & Published By */}
+                  {article.reviewedBy && (
+                    <div className="flex items-center gap-3 border-l border-divider pl-5">
+                      <IncognitoAvatar
+                        src={article.reviewedByAvatar}
+                        alt={article.reviewedBy}
+                        name={article.reviewedBy}
+                        className="w-11 h-11"
+                      />
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" /> Reviewed &amp; Published By
+                        </span>
+                        <h4 className="font-semibold text-headline text-sm sm:text-base leading-snug">{article.reviewedBy}</h4>
+                        <p className="text-[11px] text-muted-foreground">{article.reviewedByRole || 'Editorial Administrator'}</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Additional Editorial info if reviewed */}
-                {article.reviewedBy && (
-                  <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <span>
-                      <strong>Editorial Verification:</strong> Reviewed and verified for publication standards by <strong>{article.reviewedBy}</strong>{article.reviewedAt ? ` on ${article.reviewedAt}` : ''}.
+                {/* Bottom row: date, read time, views */}
+                <div className="flex items-center gap-4 text-xs text-muted-foreground border-t border-divider pt-3">
+                  <div>
+                    <span className="block font-semibold text-headline">Published on {article.date}</span>
+                    <span className="flex items-center gap-1 mt-0.5">
+                      <Clock className="h-3.5 w-3.5" /> {article.readTime}
                     </span>
                   </div>
-                )}
+                  {/* View Count */}
+                  <div className="flex items-center gap-1.5 border-l border-divider pl-4">
+                    <Eye className="h-3.5 w-3.5 text-primary/70" />
+                    <span className="font-semibold text-headline">{formatViews(displayViewCount)}</span>
+                    <span className="text-muted-foreground">views</span>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* WhatsApp Community & Alerts Banner */}
+            <div className="mt-6 p-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                  <MessageCircle className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-base text-white">Join NVM News on WhatsApp</h4>
+                  <p className="text-xs text-white/80">Get instant breaking Ghana news alerts directly on your phone.</p>
+                </div>
+              </div>
+              <a
+                href="https://whatsapp.com/channel/0029Va..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-emerald-800 hover:bg-white/90 transition-all font-bold text-xs shadow shrink-0"
+              >
+                <span>Join Channel</span>
+                <Send className="h-3.5 w-3.5" />
+              </a>
             </div>
           </motion.div>
         </article>

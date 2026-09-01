@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2, Eye, EyeOff, Search, Loader2, ArrowUpDown, Filter, CheckCircle2, FileEdit } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Search, Loader2, ArrowUpDown, Filter, CheckCircle2, FileEdit, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -259,12 +259,23 @@ export default function ArticlesList() {
             {articles.length} total articles • {counts.published} published • {counts.draft} drafts
           </p>
         </div>
-        <Link to="/admin/articles/new">
-          <Button className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            New Article
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={fetchArticles}
+            disabled={loading}
+            className="flex-1 sm:flex-initial"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
-        </Link>
+          <Link to="/admin/articles/new" className="flex-1 sm:flex-initial">
+            <Button className="w-full">
+              <Plus className="h-4 w-4 mr-2" />
+              New Article
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filter Tabs, Search & Sort Bar */}

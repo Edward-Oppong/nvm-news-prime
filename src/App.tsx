@@ -44,14 +44,14 @@ const WriterProfile = lazy(() => import("./pages/writer/WriterProfile"));
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { WriterLayout } from "./components/writer/WriterLayout";
 
-// Optimized QueryClient with smart caching to eliminate redundant Supabase fetches
+// Ultra-fast responsive QueryClient with instant refresh & caching
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes stale time
-      gcTime: 15 * 60 * 1000,    // 15 minutes garbage collection
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+      staleTime: 10 * 1000, // 10 seconds fresh time for lightning-fast live refreshes
+      gcTime: 5 * 60 * 1000,     // 5 minutes garbage collection
+      refetchOnWindowFocus: true, // Instantly update when returning to tab
+      refetchOnReconnect: true,
       retry: 1,
     },
   },

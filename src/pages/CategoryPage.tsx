@@ -12,6 +12,7 @@ import { Category } from '@/types/news';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { SEOHead } from '@/components/seo/SEOHead';
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
@@ -72,6 +73,12 @@ export default function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead
+        title={`${config.name} News`}
+        description={description || `Latest ${config.name} news, updates and analysis from NVM News.`}
+        image={bannerSrc}
+        section={config.name}
+      />
       <Header />
 
       <main>

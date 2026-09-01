@@ -15,6 +15,7 @@ export function TopMastheadBar() {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC',
   }).format(new Date());
 
   useEffect(() => {

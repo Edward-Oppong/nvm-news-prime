@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
+import { BookmarksDrawer } from './BookmarksDrawer';
 
 const categories = [
   { name: 'General', href: '/category/general' },
@@ -146,6 +147,9 @@ export function Header() {
 
             {/* Right side actions */}
             <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Saved Stories Bookmark Tray */}
+              <BookmarksDrawer />
+
               {/* Search button */}
               <motion.button
                 onClick={() => navigate('/search')}

@@ -34,6 +34,24 @@ interface DBArticle {
   reviewer?: { name: string; avatar_url: string | null } | null;
 }
 
+// Format date safely in UTC / Ghana standard time
+function formatArticleDate(dateStr?: string | null): string {
+  if (!dateStr) return 'Just now';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Recently';
+
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(d);
+  } catch {
+    return 'Recently';
+  }
+}
+
 // Transform database article to frontend Article type
 function transformArticle(dbArticle: DBArticle): Article {
   const publishDate = dbArticle.published_at || dbArticle.created_at;
@@ -65,8 +83,8 @@ function transformArticle(dbArticle: DBArticle): Article {
     reviewedBy: dbArticle.published ? reviewerName : undefined,
     reviewedByRole: dbArticle.published ? reviewerRole : undefined,
     reviewedByAvatar: dbArticle.published ? reviewerAvatar : undefined,
-    reviewedAt: dbArticle.reviewed_at ? format(new Date(dbArticle.reviewed_at), 'MMMM d, yyyy') : undefined,
-    date: format(new Date(publishDate), 'MMMM d, yyyy'),
+    reviewedAt: dbArticle.reviewed_at ? formatArticleDate(dbArticle.reviewed_at) : undefined,
+    date: formatArticleDate(publishDate),
     readTime: dbArticle.read_time || '5 min read',
     image: dbArticle.image_url || '/placeholder.svg',
     featured: dbArticle.featured || false,
