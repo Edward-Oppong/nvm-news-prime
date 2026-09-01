@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, ArrowUpRight, Eye } from 'lucide-react';
+import { Clock, ArrowUpRight, Eye, User } from 'lucide-react';
 import { Article } from '@/types/news';
 import { CategoryBadge } from './CategoryBadge';
 import { useState } from 'react';
-import { getAuthorByName } from '@/data/mockAuthors';
 
 interface ArticleCardProps {
   article: Article;
@@ -12,13 +11,75 @@ interface ArticleCardProps {
   index?: number;
 }
 
-export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleCardProps) {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+/** Avatar with blur-up loading and incognito silhouette fallback */
+function AuthorAvatar({ src, alt, className = 'w-6 h-6' }: { src?: string | null; alt?: string; className?: string }) {
+  const [err, setErr] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  const ImageSkeleton = () => (
-    <div className="absolute inset-0 bg-muted/40 skeleton-shimmer" />
+  if (src && !err) {
+    return (
+      <div className={`${className} rounded-full overflow-hidden bg-muted/40 relative shrink-0`}>
+        {/* Blur placeholder until loaded */}
+        {!loaded && (
+          <div className="absolute inset-0 bg-muted/60 animate-pulse rounded-full" />
+        )}
+        <img
+          src={src}
+          alt={alt || 'Author'}
+          onError={() => setErr(true)}
+          onLoad={() => setLoaded(true)}
+          className={`w-full h-full object-cover rounded-full border border-border/50 transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        />
+      </div>
+    );
+  }
+
+  // Incognito silhouette
+  return (
+    <div className={`${className} rounded-full bg-slate-800 flex items-center justify-center border border-slate-700/50 shrink-0`} title={alt}>
+      <User className="w-3/5 h-3/5 text-slate-400" strokeWidth={1.5} />
+    </div>
   );
+}
+
+/** Lazy image with blur-up shimmer and smooth fade-in */
+function LazyImage({
+  src,
+  alt,
+  className = '',
+  scale = 1,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  scale?: number;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <>
+      {/* Shimmer placeholder */}
+      {!loaded && (
+        <div className="absolute inset-0 bg-gradient-to-r from-muted/50 via-muted/80 to-muted/50 animate-pulse" />
+      )}
+      <motion.img
+        src={error ? '/placeholder.svg' : src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => { setError(true); setLoaded(true); }}
+        animate={{ scale, opacity: loaded ? 1 : 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className={`w-full h-full object-cover ${className}`}
+      />
+    </>
+  );
+}
+
+export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
 
   if (variant === 'horizontal') {
     return (
@@ -31,16 +92,11 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseLeave={() => setIsHovered(false)}
       >
         <Link to={`/article/${article.slug}`} className="flex-shrink-0 relative overflow-hidden rounded-lg">
-          <div className="w-24 h-24 md:w-28 md:h-24 rounded-lg overflow-hidden bg-background">
-            {!isImageLoaded && <ImageSkeleton />}
-            <motion.img
+          <div className="w-24 h-24 md:w-28 md:h-24 rounded-lg overflow-hidden bg-muted/30 relative">
+            <LazyImage
               src={article.image}
               alt={article.title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setIsImageLoaded(true)}
-              animate={{ scale: isHovered ? 1.08 : 1 }}
-              transition={{ duration: 0.4 }}
-              loading="lazy"
+              scale={isHovered ? 1.08 : 1}
             />
           </div>
         </Link>
@@ -74,17 +130,8 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseLeave={() => setIsHovered(false)}
       >
         <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
-          <div className="aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-background shadow-sm group-hover:shadow-md transition-shadow duration-300">
-            {!isImageLoaded && <ImageSkeleton />}
-            <motion.img
-              src={article.image}
-              alt={article.title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setIsImageLoaded(true)}
-              animate={{ scale: isHovered ? 1.05 : 1 }}
-              transition={{ duration: 0.5 }}
-              loading="lazy"
-            />
+          <div className="aspect-[16/9] rounded-lg overflow-hidden mb-3 bg-muted/30 shadow-sm group-hover:shadow-md transition-shadow duration-300 relative">
+            <LazyImage src={article.image} alt={article.title} scale={isHovered ? 1.05 : 1} />
           </div>
         </Link>
         <h3 className="font-serif text-sm md:text-base font-medium line-clamp-2 mb-1 transition-colors group-hover:text-primary leading-snug">
@@ -106,17 +153,8 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseLeave={() => setIsHovered(false)}
       >
         <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
-          <div className="aspect-[16/10] rounded-xl overflow-hidden mb-3 bg-background shadow-sm group-hover:shadow-lg transition-shadow duration-300">
-            {!isImageLoaded && <ImageSkeleton />}
-            <motion.img
-              src={article.image}
-              alt={article.title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setIsImageLoaded(true)}
-              animate={{ scale: isHovered ? 1.05 : 1 }}
-              transition={{ duration: 0.5 }}
-              loading="lazy"
-            />
+          <div className="aspect-[16/10] rounded-xl overflow-hidden mb-3 bg-muted/30 shadow-sm group-hover:shadow-lg transition-shadow duration-300 relative">
+            <LazyImage src={article.image} alt={article.title} scale={isHovered ? 1.05 : 1} />
           </div>
         </Link>
         <CategoryBadge label={article.categoryLabel} className="mb-2" />
@@ -139,17 +177,8 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         onMouseLeave={() => setIsHovered(false)}
       >
         <Link to={`/article/${article.slug}`} className="relative block overflow-hidden">
-          <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-3 bg-background shadow-card group-hover:shadow-lg transition-all duration-500">
-            {!isImageLoaded && <ImageSkeleton />}
-            <motion.img
-              src={article.image}
-              alt={article.title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setIsImageLoaded(true)}
-              animate={{ scale: isHovered ? 1.03 : 1 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-              loading="lazy"
-            />
+          <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-3 bg-muted/30 shadow-card group-hover:shadow-lg transition-all duration-500 relative">
+            <LazyImage src={article.image} alt={article.title} scale={isHovered ? 1.03 : 1} />
           </div>
         </Link>
         <div className="flex items-center gap-2 mb-2">
@@ -161,11 +190,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
         <p className="text-muted-foreground line-clamp-2 mb-3 text-sm flex-1">{article.excerpt}</p>
         <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-2 border-t border-divider/60">
           <Link to={`/author/${encodeURIComponent(article.author)}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-            <img
-              src={article.authorAvatar || getAuthorByName(article.author).avatar}
-              alt={article.author}
-              className="w-6 h-6 rounded-full object-cover border border-border"
-            />
+            <AuthorAvatar src={article.authorAvatar} alt={article.author} className="w-6 h-6" />
             <span className="font-semibold text-foreground hover:underline">{article.author}</span>
           </Link>
           <span className="flex items-center gap-1">
@@ -177,9 +202,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
     );
   }
 
-  // Medium (default - used in Latest News & Category pages)
-  const authorData = getAuthorByName(article.author);
-
+  // Medium (default — used in Latest News & Category pages)
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -190,17 +213,8 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/article/${article.slug}`} className="relative block overflow-hidden rounded-xl mb-3.5">
-        <div className="aspect-[16/10] rounded-xl overflow-hidden bg-background">
-          {!isImageLoaded && <ImageSkeleton />}
-          <motion.img
-            src={article.image}
-            alt={article.title}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setIsImageLoaded(true)}
-            animate={{ scale: isHovered ? 1.05 : 1 }}
-            transition={{ duration: 0.4 }}
-            loading="lazy"
-          />
+        <div className="aspect-[16/10] rounded-xl overflow-hidden bg-muted/30 relative">
+          <LazyImage src={article.image} alt={article.title} scale={isHovered ? 1.05 : 1} />
         </div>
         <div className="absolute top-3 left-3">
           <CategoryBadge label={article.categoryLabel} className="!bg-black/55 !text-white backdrop-blur-sm border-0" />
@@ -218,11 +232,7 @@ export function ArticleCard({ article, variant = 'medium', index = 0 }: ArticleC
 
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-divider/60 mt-auto">
           <Link to={`/author/${encodeURIComponent(article.author)}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-            <img
-              src={article.authorAvatar || authorData.avatar}
-              alt={article.author}
-              className="w-5 h-5 rounded-full object-cover"
-            />
+            <AuthorAvatar src={article.authorAvatar} alt={article.author} className="w-5 h-5" />
             <span className="font-medium text-foreground text-xs hover:underline">{article.author}</span>
           </Link>
 
