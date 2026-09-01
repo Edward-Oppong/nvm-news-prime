@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye, ShieldCheck, CheckCircle2, User } from 'lucide-react';
+import { ArrowLeft, Twitter, Facebook, Linkedin, Clock, Copy, Check, MapPin, Newspaper, Eye, ShieldCheck, CheckCircle2, User, BookOpen } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { Header } from '@/components/news/Header';
 import { Footer } from '@/components/news/Footer';
@@ -398,6 +398,79 @@ export default function ArticlePage() {
             ) : (
               <p className="text-muted-foreground italic">{article.excerpt}</p>
             )}
+
+            {/* Article Credits & Publishing Details Footer */}
+            <div className="mt-12 pt-8 border-t border-divider">
+              <div className="p-6 md:p-8 rounded-2xl bg-card border border-border/80 shadow-sm space-y-6">
+                <div className="flex items-center justify-between flex-wrap gap-2 border-b border-border/60 pb-4">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    <h3 className="font-serif text-lg font-bold text-headline">Publication &amp; Byline Credits</h3>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Published on {article.date}</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* WRITER */}
+                  <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/60">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 font-bold text-base shrink-0">
+                      ✍️
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-0.5">
+                        Writer
+                      </span>
+                      <p className="font-semibold text-headline text-sm sm:text-base truncate">
+                        {article.writerName || article.author || 'NVM Editorial Team'}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Written &amp; compiled story</p>
+                    </div>
+                  </div>
+
+                  {/* AUTHOR */}
+                  <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/60">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 font-bold text-base shrink-0">
+                      📝
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block mb-0.5">
+                        Author
+                      </span>
+                      <p className="font-semibold text-headline text-sm sm:text-base truncate">
+                        {article.authorName || article.author || 'Staff Journalist'}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Credited original author</p>
+                    </div>
+                  </div>
+
+                  {/* PUBLISHER */}
+                  <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/40 border border-border/60">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20 font-bold text-base shrink-0">
+                      🏢
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-0.5">
+                        Publisher
+                      </span>
+                      <p className="font-semibold text-headline text-sm sm:text-base truncate">
+                        {article.publisherName || 'NVM News'}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Publishing organization</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Editorial info if reviewed */}
+                {article.reviewedBy && (
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>
+                      <strong>Editorial Verification:</strong> Reviewed and verified for publication standards by <strong>{article.reviewedBy}</strong>{article.reviewedAt ? ` on ${article.reviewedAt}` : ''}.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </motion.div>
         </article>
 

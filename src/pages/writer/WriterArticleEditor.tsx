@@ -17,6 +17,7 @@ import {
 import { MediaUpload, type VideoItem } from '@/components/admin/MediaUpload';
 import { ImageUploader } from '@/components/common/ImageUploader';
 import { supabase } from '@/integrations/supabase/client';
+import { safeInsertArticle, safeUpdateArticle } from '@/lib/supabaseArticles';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -217,21 +218,12 @@ export default function WriterArticleEditor() {
       let articleId = id;
 
       if (isEditing) {
-        const { error } = await supabase
-          .from('articles')
-          .update(articleData)
-          .eq('id', id);
-
+        const { error } = await safeUpdateArticle(id!, articleData);
         if (error) throw error;
       } else {
-        const { data, error } = await supabase
-          .from('articles')
-          .insert([articleData])
-          .select()
-          .single();
-
+        const { data, error } = await safeInsertArticle(articleData);
         if (error) throw error;
-        articleId = data.id;
+        articleId = data?.id;
       }
 
       // Sync attached videos

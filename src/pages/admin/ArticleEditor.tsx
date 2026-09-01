@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { MediaUpload, type VideoItem } from '@/components/admin/MediaUpload';
 import { supabase } from '@/integrations/supabase/client';
+import { safeInsertArticle, safeUpdateArticle } from '@/lib/supabaseArticles';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -247,22 +248,7 @@ export default function ArticleEditor() {
     };
 
     if (isEditing) {
-      let { error } = await supabase
-        .from('articles')
-        .update(articleData as any)
-        .eq('id', id);
-
-      // Graceful fallback if database schema is missing status or audio_url columns
-      if (error && (error.code === 'PGRST204' || error.message.includes('column') || error.message.includes('schema'))) {
-        const fallbackData = { ...articleData };
-        delete (fallbackData as any).status;
-        delete (fallbackData as any).audio_url;
-        const fallbackRes = await supabase
-          .from('articles')
-          .update(fallbackData as any)
-          .eq('id', id);
-        error = fallbackRes.error;
-      }
+      const { error } = await safeUpdateArticle(id!, articleData);
 
       if (error) {
         toast.error(error.message);
@@ -278,25 +264,7 @@ export default function ArticleEditor() {
         navigate('/admin/articles');
       }
     } else {
-      let { data: inserted, error } = await supabase
-        .from('articles')
-        .insert(articleData as any)
-        .select('id')
-        .single();
-
-      // Graceful fallback if database schema is missing status or audio_url columns
-      if (error && (error.code === 'PGRST204' || error.message.includes('column') || error.message.includes('schema'))) {
-        const fallbackData = { ...articleData };
-        delete (fallbackData as any).status;
-        delete (fallbackData as any).audio_url;
-        const fallbackRes = await supabase
-          .from('articles')
-          .insert(fallbackData as any)
-          .select('id')
-          .single();
-        inserted = fallbackRes.data;
-        error = fallbackRes.error;
-      }
+      const { data: inserted, error } = await safeInsertArticle(articleData);
 
       if (error) {
         if (error.code === '23505') {
